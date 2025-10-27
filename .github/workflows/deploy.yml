@@ -35,3 +35,8 @@ jobs:
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./dist/
         server-dir: /public_html/
+
+        - name: 🐛 Debug FTP Connection
+  run: |
+    echo "Testing FTP connection..."
+    lftp -e "open ${{ secrets.FTP_SERVER }}; login ${{ secrets.FTP_USERNAME }} ${{ secrets.FTP_PASSWORD }}; ls; quit"
