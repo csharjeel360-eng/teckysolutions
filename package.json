@@ -1,14 +1,20 @@
 {
   "name": "teckysolutions",
+  "homepage": "https://teckysolutions.com/",
+
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+      "build": "GENERATE_SOURCEMAP=false react-scripts build",
+    "build:dev": "react-scripts build"
+    
+     
   },
+
+  
+
   "dependencies": {
     "@tailwindcss/vite": "^4.1.16",
     "react": "^19.1.1",
