@@ -1,42 +1,26 @@
- name: 🚀 Deploy React App to Hostinger
+name: Deploy React App
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-    
     steps:
-    - name: 📥 Checkout repository
-      uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
-    - name: ⚙️ Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-        cache: 'npm'
-        
-    - name: 📦 Install dependencies
-      run: npm ci
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          
+      - run: npm install
+      - run: npm run build
       
-    - name: 🏗️ Build React app (Vite)
-      run: npm run build
-      
-    - name: 📁 Verify build files
-      run: ls -la dist/
-      
-    - name: 🚀 Deploy to Hostinger
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-      with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./dist/
-        server-dir: /public_html/
-
-        - name: 🐛 Debug FTP Connection
-  run: |
-    echo "Testing FTP connection..."
-    lftp -e "open ${{ secrets.FTP_SERVER }}; login ${{ secrets.FTP_USERNAME }} ${{ secrets.FTP_PASSWORD }}; ls; quit"
+      - uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./dist/
+          server-dir: /public_html/
