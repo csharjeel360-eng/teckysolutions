@@ -1,15 +1,16 @@
-{
+ {
   "name": "teckysolutions",
   "homepage": "https://teckysolutions.com/",
-
-    
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "build": "GENERATE_SOURCEMAP=false react-scripts build",
-    "build:dev": "react-scripts build"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "deploy": "vite build"
   },
-
-
-
   "dependencies": {
     "@tailwindcss/vite": "^4.1.16",
     "react": "^19.1.1",
@@ -28,5 +29,4 @@
     "globals": "^16.4.0",
     "vite": "^7.1.7"
   }
-
 }
