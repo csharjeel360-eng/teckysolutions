@@ -1,0 +1,44 @@
+/* components/Blogs/BlogDetail.module.css */
+.blogContent {
+  line-height: 1.7;
+  color: #374151;
+  font-size: 1.125rem;
+}
+
+.blogContent h1,
+.blogContent h2,
+.blogContent h3 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: #111827;
+  font-weight: bold;
+}
+
+.blogContent h1 {
+  font-size: 2.25rem;
+}
+
+.blogContent h2 {
+  font-size: 1.875rem;
+}
+
+.blogContent h3 {
+  font-size: 1.5rem;
+}
+
+.blogContent p {
+  margin-bottom: 1.5rem;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.contentImage {
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.contentImage img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
