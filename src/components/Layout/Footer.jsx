@@ -18,7 +18,7 @@ const Footer = () => {
               <div>
                 <span className="text-2xl font-bold">TrendyBreeze</span>
                 <p className="text-gray-400 text-sm mt-1">
-                  Your trusted online shopping destination
+                  Your  trusted online shopping destination
                 </p>
               </div>
             </div>
