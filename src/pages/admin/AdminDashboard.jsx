@@ -734,7 +734,7 @@ const AdminDashboard = () => {
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">
           {/* Quick Actions - Responsive Grid */}
           <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
-            <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
+            <h2 className="text-lg font-semibold mb-4">Quicks Actions</h2>
             <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
               <button 
                 onClick={() => openCategoryModal()} 
