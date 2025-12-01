@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Gradient background matching navbar -->
+  <defs>
+    <linearGradient id="navbarGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed" /> <!-- Purple top -->
+      <stop offset="100%" stop-color="#f97316" /> <!-- Orange bottom -->
+    </linearGradient>
+  </defs>
+  
+  <!-- Rounded rectangle with gradient -->
+  <rect x="2" y="2" width="60" height="60" rx="12" fill="url(#navbarGradient)" stroke="white" stroke-width="2"/>
+  
+  <!-- TB Text with shadow for better visibility -->
+  <text x="32" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" font-weight="bold" fill="white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
+    TB
+  </text>
+</svg>

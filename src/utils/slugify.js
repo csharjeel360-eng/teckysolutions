@@ -31,7 +31,7 @@ export const extractIdFromSlug = (slug) => {
 
 // Set page title with domain
 export const setPageTitle = (pageName) => {
-  const domain = 'Affiliate Shop'; // Change to your domain/brand name
+  const domain = 'TrendyBreeze'; // Change to your domain/brand name
   if (pageName) {
     document.title = `${pageName} - ${domain}`;
   } else {
