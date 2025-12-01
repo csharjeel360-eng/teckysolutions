@@ -19,12 +19,8 @@ jobs:
       
       - uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          # Accept multiple common secret names as fallbacks to avoid missing-input errors
-          server: ${{ secrets.FTP_SERVER || secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USER || secrets.FTP_USERNAME || secrets.FTP_LOGIN }}
-          password: ${{ secrets.FTP_PASSWORD || secrets.FTP_PASS || secrets.FTP_PWD }}
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./dist/
           server-dir: /public_html/
-          # FTPS security mode accepted by this action: 'loose' or 'strict'
-          security: loose
-          timeout: 600000
