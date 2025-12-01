@@ -31,7 +31,9 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftps
-          local-dir: ./dist       # change to ./build if CRA
+          local-dir: ./dist/      # must end with '/' (change to ./build/ if CRA)
           server-dir: /public_html/
           timeout: 600000         # prevents timeout (10 minutes)
-          passive: true           # required for Hostinger
+          # 'passive' is not a supported input for this action version.
+          # For FTPS settings use the 'security' input. Try 'explicit' or 'implicit' if needed:
+          security: explicit
