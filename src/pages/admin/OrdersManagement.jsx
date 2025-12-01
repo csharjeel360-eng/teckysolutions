@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
- import AdminSidebar from '../../components/Admins/AdminSidebar';
+
 import DataTable from '../../components/Admins/DataTable';
  import Button from '../../components/UI/Button';
 import Modal from '../../components/UI/Modal';
@@ -233,13 +233,10 @@ const OrdersManagement = () => {
     }
   ];
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) return <div className="flex-1 flex items-center justify-center"><LoadingSpinner /></div>;
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <AdminSidebar />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-white shadow-sm">
           <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
             <h1 className="text-2xl font-semibold text-gray-900">Order Management</h1>

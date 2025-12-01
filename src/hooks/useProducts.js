@@ -1,50 +1,13 @@
 // hooks/useProducts.js
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import productService from '../services/productService';
 import { debounce } from '../utils/helpers';
 
 export const useProducts = (initialFilters = {}) => {
-    // CRUD actions
-    const createProduct = async (formData) => {
-      setLoading(true);
-      try {
-        const result = await productService.create(formData);
-        return result;
-      } catch (error) {
-        setError(error.message || 'Failed to create product');
-        return { success: false, error: error.message };
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const updateProduct = async (id, formData) => {
-      setLoading(true);
-      try {
-        const result = await productService.update(id, formData);
-        return result;
-      } catch (error) {
-        setError(error.message || 'Failed to update product');
-        return { success: false, error: error.message };
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const deleteProduct = async (id) => {
-      setLoading(true);
-      try {
-        const result = await productService.delete(id);
-        return result;
-      } catch (error) {
-        setError(error.message || 'Failed to delete product');
-        return { success: false, error: error.message };
-      } finally {
-        setLoading(false);
-      }
-    };
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true); // Track first load
+  const previousDataRef = useRef([]); // Keep previous data to prevent flickering
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
     page: 1,
@@ -76,7 +39,10 @@ export const useProducts = (initialFilters = {}) => {
 
   const fetchProducts = useCallback(async (customFilters = {}) => {
     try {
-      setLoading(true);
+      // Only show loading spinner on initial load; for updates, keep showing previous data
+      if (isInitialLoad) {
+        setLoading(true);
+      }
       setError(null);
       
       const mergedFilters = { ...filters, ...customFilters };
@@ -103,6 +69,7 @@ export const useProducts = (initialFilters = {}) => {
       
       if (result.success) {
         setProducts(result.products);
+        previousDataRef.current = result.products; // Save for flickering prevention
         
         setPagination({
           page: result.pagination.page || result.pagination.currentPage || 1,
@@ -116,11 +83,17 @@ export const useProducts = (initialFilters = {}) => {
       }
     } catch (err) {
       setError(err.message || 'Failed to fetch products');
-      setProducts([]);
+      // Keep showing previous data on error instead of clearing
+      if (previousDataRef.current.length === 0) {
+        setProducts([]);
+      }
     } finally {
-      setLoading(false);
+      if (isInitialLoad) {
+        setLoading(false);
+        setIsInitialLoad(false);
+      }
     }
-  }, [filters]);
+  }, [filters, isInitialLoad]);
 
   // Fetch products when filters change
   useEffect(() => {
@@ -223,7 +196,7 @@ export const useProducts = (initialFilters = {}) => {
 
   const addReview = useCallback(async (productId, reviewData) => {
     try {
-      setLoading(true);
+      // Don't set loading here - ProductDetail component handles with isSubmittingReview state
       const result = await productService.addReview(productId, reviewData);
       
       if (result.success) {
@@ -244,8 +217,6 @@ export const useProducts = (initialFilters = {}) => {
       const errorMessage = error.message || 'Failed to add review';
       console.error('Error adding review:', error);
       return { success: false, error: errorMessage };
-    } finally {
-      setLoading(false);
     }
   }, []);
 
@@ -257,10 +228,63 @@ export const useProducts = (initialFilters = {}) => {
     return Math.round(average * 10) / 10;
   };
 
+  // CRUD Actions
+  const createProduct = useCallback(async (formData) => {
+    try {
+      setLoading(true);
+      const result = await productService.create(formData);
+      if (result.success) {
+        setProducts(prev => [result.data, ...prev]);
+      }
+      return result;
+    } catch (error) {
+      const msg = error.message || 'Failed to create product';
+      setError(msg);
+      return { success: false, error: msg };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const updateProduct = useCallback(async (id, formData) => {
+    try {
+      setLoading(true);
+      const result = await productService.update(id, formData);
+      if (result.success) {
+        setProducts(prev => prev.map(p => p._id === id ? result.data : p));
+      }
+      return result;
+    } catch (error) {
+      const msg = error.message || 'Failed to update product';
+      setError(msg);
+      return { success: false, error: msg };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const deleteProduct = useCallback(async (id) => {
+    try {
+      setLoading(true);
+      const result = await productService.delete(id);
+      if (result.success) {
+        setProducts(prev => prev.filter(p => p._id !== id));
+      }
+      return result;
+    } catch (error) {
+      const msg = error.message || 'Failed to delete product';
+      setError(msg);
+      return { success: false, error: msg };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   return {
     // State
     products,
     loading,
+    isInitialLoad,
     error,
     filters,
     pagination,
@@ -282,6 +306,8 @@ export const useProducts = (initialFilters = {}) => {
     recordBuyClick,
     recordView,
     addReview,
+    
+    // CRUD Actions
     createProduct,
     updateProduct,
     deleteProduct,

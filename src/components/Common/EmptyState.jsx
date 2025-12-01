@@ -8,6 +8,7 @@ const EmptyState = ({
   message = "Try adjusting your search or filter to find what you're looking for.",
   actionText = "Browse Products",
   onAction,
+  action, // optional JSX action (e.g., <Link><Button/></Link>)
   size = 'medium'
 }) => {
   const getIcon = () => {
@@ -65,15 +66,19 @@ const EmptyState = ({
         {message}
       </p>
 
-      {/* Action Button */}
-      {actionText && onAction && (
-        <Button
-          onClick={onAction}
-          variant="primary"
-          size={size === 'large' ? 'large' : 'medium'}
-        >
-          {actionText}
-        </Button>
+      {/* Action Button or custom action JSX */}
+      {action ? (
+        action
+      ) : (
+        actionText && onAction && (
+          <Button
+            onClick={onAction}
+            variant="primary"
+            size={size === 'large' ? 'large' : 'medium'}
+          >
+            {actionText}
+          </Button>
+        )
       )}
 
       {/* Additional Help */}

@@ -13,6 +13,7 @@ import CategoryGrid from '../../components/Categories/CategoryGrid';
 import BlogGrid from '../../components/Blogs/BlogGrid';
 import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 import Button from '../../components/UI/Button';
+import { setPageTitle } from '../../utils/slugify';
 
 const Home = () => {
   // Hooks for data fetching
@@ -77,6 +78,9 @@ const Home = () => {
 
   // Handle errors from hooks
   useEffect(() => {
+    // Set home page title
+    setPageTitle('Home');
+    
     const errors = [];
     if (bannersError) errors.push(`Banners: ${bannersError}`);
     if (productsError) errors.push(`Products: ${productsError}`);

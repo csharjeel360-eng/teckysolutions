@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Edit, Trash2, Eye, Plus, Tag, Search, Download, RefreshCw } from 'lucide-react';
 
-import AdminSidebar from '../../components/Admins/AdminSidebar';
+
 import DataTable from '../../components/Admins/DataTable';
 import ImageUpload from '../../components/Admins/ImageUpload';
 import Button from '../../components/UI/Button';
@@ -494,20 +494,14 @@ const CategoryManagement = () => {
 
   if (loading) {
     return (
-      <div className="flex h-screen bg-gray-100">
-        <AdminSidebar />
-        <div className="flex-1 flex items-center justify-center">
-          <LoadingSpinner size="large" text="Loading categories..." />
-        </div>
+      <div className="flex-1 flex items-center justify-center">
+        <LoadingSpinner size="large" text="Loading categories..." />
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <AdminSidebar />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-white shadow-sm">
           <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
@@ -618,7 +612,6 @@ const CategoryManagement = () => {
             </div>
           )}
         </main>
-      </div>
 
       {/* Category Modal - Same structure as AdminDashboard */}
       <Modal 

@@ -1,7 +1,48 @@
 // services/api.js
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'https://e-commerce-server-two-snowy.vercel.app/api';
+
+// 🚀 Request deduplication & caching for performance optimization
+const requestCache = new Map(); // { key: { data, timestamp } }
+const inFlightRequests = new Map(); // { key: promise } - for deduplication
+const CACHE_TTL = 30000; // 30 seconds (adjust per endpoint)
+
+// Cache key generator
+const getCacheKey = (method, url, params) => {
+  const paramStr = params ? JSON.stringify(params) : '';
+  return `${method}:${url}:${paramStr}`;
+};
+
+// Check if cached data is still fresh
+const isCacheFresh = (timestamp, ttl = CACHE_TTL) => {
+  return Date.now() - timestamp < ttl;
+};
+
+// Retrieve from cache
+const getFromCache = (key) => {
+  const cached = requestCache.get(key);
+  if (cached && isCacheFresh(cached.timestamp)) {
+    return cached.data;
+  }
+  requestCache.delete(key);
+  return null;
+};
+
+// Store in cache
+const setInCache = (key, data) => {
+  requestCache.set(key, { data, timestamp: Date.now() });
+};
+
+// 🚀 In-flight request deduplication
+const getOrCreateRequest = (key, requestFn) => {
+  if (inFlightRequests.has(key)) {
+    return inFlightRequests.get(key);
+  }
+  const promise = requestFn().finally(() => inFlightRequests.delete(key));
+  inFlightRequests.set(key, promise);
+  return promise;
+};
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -31,31 +72,32 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
-    if (DEBUG) {
-      console.error('❌ Request Interceptor Error:', error);
-    }
+    console.error('❌ Request Interceptor Error:', error);
     return Promise.reject(error);
   }
 );
 
-// Response interceptor with debug
+// Response interceptor with caching & deduplication
 api.interceptors.response.use(
   (response) => {
-    // Response debug logging removed
+    // Don't cache admin or auth requests - they need fresh data
+    const url = response.config.url;
+    const isAdminRoute = url.includes('/admin/') || url.includes('/auth/');
+    
+    // Cache GET requests for performance (but NOT admin/auth routes)
+    if (response.config.method === 'get' && response.status === 200 && !isAdminRoute) {
+      const cacheKey = getCacheKey(response.config.method, response.config.url, response.config.params);
+      setInCache(cacheKey, response);
+    }
     return response;
   },
   (error) => {
-    // Don't log 404 errors - they're often expected (e.g., image deletion attempts)
-    if (DEBUG && error.response?.status !== 404) {
-      console.error('❌ API Error:', {
-        status: error.response?.status,
-        url: error.config?.url,
-        message: error.message,
-        response: error.response?.data,
-      });
+    // Don't log 404 errors - they're often expected
+    if (error.response?.status !== 404) {
+      console.error('❌ API Error:', error.response?.status, error.config?.url);
     }
     
-    // Only redirect to login on 401 if we have a token (user was logged in but session expired)
+    // Only redirect to login on 401 if we have a token
     if (error.response?.status === 401 && localStorage.getItem('token')) {
       localStorage.removeItem('token');
       window.location.href = '/login';
@@ -64,27 +106,59 @@ api.interceptors.response.use(
   }
 );
 
+// 🚀 Optimized GET wrapper with cache & deduplication
+const cachedGet = (url, params = {}) => {
+  // Don't cache admin or auth routes - they need fresh data every time
+  const isAdminRoute = url.includes('/admin/') || url.includes('/auth/');
+  
+  if (isAdminRoute) {
+    // For admin routes, skip cache and go directly to API
+    return api.get(url, { params });
+  }
+  
+  const cacheKey = getCacheKey('get', url, params);
+  
+  // Check cache first
+  const cached = getFromCache(cacheKey);
+  if (cached) {
+    return Promise.resolve(cached);
+  }
+  
+  // Use in-flight deduplication for identical requests
+  return getOrCreateRequest(cacheKey, () => 
+    api.get(url, { params })
+  );
+};
+
 // BLOGS API
 export const blogsAPI = {
-  getAll: (params = {}) => api.get('/blogs', { params }),
-  getBySlug: (slug) => api.get(`/blogs/${slug}`),
-  getById: (id) => api.get(`/blogs/id/${id}`),
+  getAll: (params = {}) => cachedGet('/blogs', params),
+  getBySlug: (slug) => cachedGet(`/blogs/${slug}`),
+  getById: (id) => cachedGet(`/blogs/id/${id}`),
   create: (blogData) => {
+    // Only clear blog-related cache, not all cache
+    for (let key of requestCache.keys()) {
+      if (key.includes('/blogs')) {
+        requestCache.delete(key);
+      }
+    }
     if (blogData instanceof FormData) {
       return api.post('/blogs', blogData);
     }
     return api.post('/blogs', blogData);
   },
   update: (id, blogData) => {
+    // Only clear blog-related cache
+    for (let key of requestCache.keys()) {
+      if (key.includes('/blogs')) {
+        requestCache.delete(key);
+      }
+    }
     if (blogData instanceof FormData) {
-      // For FormData, check if there are any files
       const hasFiles = Array.from(blogData.entries()).some(([key, value]) => 
         value instanceof File || value instanceof Blob
       );
-        // Debug logs removed
-      
       if (!hasFiles) {
-        // Convert FormData to plain object and send as JSON
         const dataObj = {};
         for (let [key, value] of blogData.entries()) {
           if (dataObj[key]) {
@@ -96,9 +170,6 @@ export const blogsAPI = {
             dataObj[key] = value;
           }
         }
-        // Sending blog update as JSON (no files detected)
-        
-        // Use Fetch API directly with explicit JSON serialization to bypass any axios issues
         const token = localStorage.getItem('token');
         const fetchOptions = {
           method: 'PUT',
@@ -108,9 +179,6 @@ export const blogsAPI = {
           },
           body: JSON.stringify(dataObj)
         };
-        
-        // Fetch options prepared
-        
         return fetch(`${API_BASE_URL}/blogs/${id}`, fetchOptions)
           .then(response => {
             if (!response.ok) {
@@ -121,97 +189,254 @@ export const blogsAPI = {
             return response.json();
           })
           .catch(error => {
-            if (DEBUG) {
-              console.error('Fetch error:', error);
-            }
             throw error;
           });
       }
-      
       return api.put(`/blogs/${id}`, blogData);
     }
     return api.put(`/blogs/${id}`, blogData);
   },
-  delete: (id) => api.delete(`/blogs/${id}`),
-  deleteContentImage: (blogId, publicId) => api.delete(`/blogs/${blogId}/content-images/${publicId}`),
-  like: (id) => api.post(`/blogs/${id}/like`),
-  addComment: (id, comment) => api.post(`/blogs/${id}/comments`, { comment }),
-  getPopular: () => api.get('/blogs/featured/popular'),
-  getFeatured: () => api.get('/blogs/featured/featured')
+  delete: (id) => {
+    // Only clear blog-related cache
+    for (let key of requestCache.keys()) {
+      if (key.includes('/blogs')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.delete(`/blogs/${id}`);
+  },
+  deleteContentImage: (blogId, publicId) => {
+    // Only clear blog-related cache
+    for (let key of requestCache.keys()) {
+      if (key.includes('/blogs')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.delete(`/blogs/${blogId}/content-images/${publicId}`);
+  },
+  like: (id) => {
+    // Only clear blog-related cache
+    for (let key of requestCache.keys()) {
+      if (key.includes('/blogs')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.post(`/blogs/${id}/like`);
+  },
+  addComment: (id, comment) => {
+    // Only clear blog-related cache
+    for (let key of requestCache.keys()) {
+      if (key.includes('/blogs')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.post(`/blogs/${id}/comments`, { comment });
+  },
+  getPopular: () => cachedGet('/blogs/featured/popular'),
+  getFeatured: () => cachedGet('/blogs/featured/featured')
 };
 
 // CATEGORIES API
 export const categoriesAPI = {
-  getAll: () => api.get('/categories'),
-  getById: (id) => api.get(`/categories/${id}`),
-  create: (categoryData) => api.post('/categories', categoryData),
-  update: (id, categoryData) => api.put(`/categories/${id}`, categoryData),
-  delete: (id) => api.delete(`/categories/${id}`),
+  getAll: () => cachedGet('/categories'),
+  getById: (id) => cachedGet(`/categories/${id}`),
+  create: (categoryData) => {
+    // Only clear category-related cache
+    for (let key of requestCache.keys()) {
+      if (key.includes('/categories') || key.includes('/products')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.post('/categories', categoryData);
+  },
+  update: (id, categoryData) => {
+    // Only clear category-related cache
+    for (let key of requestCache.keys()) {
+      if (key.includes('/categories') || key.includes('/products')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.put(`/categories/${id}`, categoryData);
+  },
+  delete: (id) => {
+    // Only clear category-related cache
+    for (let key of requestCache.keys()) {
+      if (key.includes('/categories') || key.includes('/products')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.delete(`/categories/${id}`);
+  },
 };
 
 // PRODUCTS API - FIXED DUPLICATE getReviews
 export const productsAPI = {
   // Basic CRUD
-  getAll: (params = {}) => api.get('/products', { params }),
-  getById: (id) => api.get(`/products/${id}`),
-  getBySlug: (slug) => api.get(`/products/slug/${slug}`),
-  create: (productData) => api.post('/products', productData),
-  update: (id, productData) => api.put(`/products/${id}`, productData),
-  delete: (id) => api.delete(`/products/${id}`),
+  getAll: (params = {}) => cachedGet('/products', params),
+  getById: (id) => cachedGet(`/products/${id}`),
+  getBySlug: (slug) => cachedGet(`/products/slug/${slug}`),
+  create: (productData) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/products') || key.includes('/categories')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.post('/products', productData);
+  },
+  update: (id, productData) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/products') || key.includes('/categories')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.put(`/products/${id}`, productData);
+  },
+  delete: (id) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/products') || key.includes('/categories')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.delete(`/products/${id}`);
+  },
   
   // Images Management
-  deleteImage: (productId, imageId) => api.delete(`/products/${productId}/images/${imageId}`),
-  uploadImages: (id, formData) => api.post(`/products/${id}/images`, formData),
+  deleteImage: (productId, imageId) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes(`/products/${productId}`)) {
+        requestCache.delete(key);
+      }
+    }
+    return api.delete(`/products/${productId}/images/${imageId}`);
+  },
+  uploadImages: (id, formData) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes(`/products/${id}`)) {
+        requestCache.delete(key);
+      }
+    }
+    return api.post(`/products/${id}/images`, formData);
+  },
   
   // Analytics & Tracking
   recordBuyClick: (id) => api.post(`/products/${id}/buy-click`),
   recordView: (id) => api.post(`/products/${id}/view`),
-  getAnalytics: (id) => api.get(`/products/${id}/analytics`),
+  getAnalytics: (id) => cachedGet(`/products/${id}/analytics`),
   
   // Reviews System
-  addReview: (id, review) => api.post(`/products/${id}/reviews`, review),
-  getReviews: (id) => api.get(`/products/${id}/reviews`),
+  addReview: (id, review) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes(`/products/${id}`)) {
+        requestCache.delete(key);
+      }
+    }
+    return api.post(`/products/${id}/reviews`, review);
+  },
+  getReviews: (id) => cachedGet(`/products/${id}/reviews`),
   
   // Search & Filtering
-  search: (params = {}) => api.get('/products/search', { params }),
-  getByCategory: (categoryId, params = {}) => api.get(`/products/category/${categoryId}`, { params }),
-  getByTag: (tag, params = {}) => api.get(`/products/tag/${tag}`, { params }),
-  getRelated: (id) => api.get(`/products/${id}/related`),
-  getFeatured: (params = {}) => api.get('/products/featured', { params }),
-  getPopular: (params = {}) => api.get('/products/popular', { params }),
+  search: (params = {}) => cachedGet('/products/search', params),
+  getByCategory: (categoryId, params = {}) => cachedGet(`/products/category/${categoryId}`, params),
+  getByTag: (tag, params = {}) => cachedGet(`/products/tag/${tag}`, params),
+  getRelated: (id) => cachedGet(`/products/${id}/related`),
+  getFeatured: (params = {}) => cachedGet('/products/featured', params),
+  getPopular: (params = {}) => cachedGet('/products/popular', params),
   
   // Management
-  updateStock: (id, stock) => api.patch(`/products/${id}/stock`, { stock }),
-  toggleFeatured: (id) => api.patch(`/products/${id}/featured`),
+  updateStock: (id, stock) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes(`/products/${id}`) || key.includes('/products')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.patch(`/products/${id}/stock`, { stock });
+  },
+  toggleFeatured: (id) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/products')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.patch(`/products/${id}/featured`);
+  },
   
   // Bulk Operations
-  bulkUpdate: (products) => api.patch('/products/bulk-update', { products }),
-  bulkDelete: (ids) => api.post('/products/bulk-delete', { ids }),
+  bulkUpdate: (products) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/products')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.patch('/products/bulk-update', { products });
+  },
+  bulkDelete: (ids) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/products')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.post('/products/bulk-delete', { ids });
+  },
   
   // Import/Export
   exportProducts: (params = {}) => api.get('/products/export', { 
     params, 
     responseType: 'blob' 
   }),
-  importProducts: (formData) => api.post('/products/import', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }),
+  importProducts: (formData) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/products')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.post('/products/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
   
   // Statistics
-  getStatistics: () => api.get('/products/statistics'),
-  getCategoriesWithCounts: () => api.get('/products/categories/counts'),
+  getStatistics: () => cachedGet('/products/statistics'),
+  getCategoriesWithCounts: () => cachedGet('/products/categories/counts'),
 };
 
 // BANNERS API
 export const bannersAPI = {
-  getAll: () => api.get('/banners'),
-  getById: (id) => api.get(`/banners/${id}`),
-  getByPosition: (position) => api.get(`/banners/position/${position}`),
-  getHomepage: () => api.get('/banners/homepage'),
-  create: (bannerData) => api.post('/banners', bannerData),
-  update: (id, bannerData) => api.put(`/banners/${id}`, bannerData),
-  delete: (id) => api.delete(`/banners/${id}`),
-  toggle: (id) => api.patch(`/banners/${id}/toggle`)
+  getAll: () => cachedGet('/banners'),
+  getById: (id) => cachedGet(`/banners/${id}`),
+  getByPosition: (position) => cachedGet(`/banners/position/${position}`),
+  getHomepage: () => cachedGet('/banners/homepage'),
+  create: (bannerData) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/banners')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.post('/banners', bannerData);
+  },
+  update: (id, bannerData) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/banners')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.put(`/banners/${id}`, bannerData);
+  },
+  delete: (id) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/banners')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.delete(`/banners/${id}`);
+  },
+  toggle: (id) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/banners')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.patch(`/banners/${id}/toggle`);
+  }
 };
 
 // AUTH API - UPDATED WITH GOOGLE AUTH AND FIREBASE INTEGRATION
@@ -311,61 +536,133 @@ export const adminAPI = {
 // CART API - UPDATED WITH EXTERNAL PRODUCTS SUPPORT
 export const cartAPI = {
   // Basic Cart Operations
-  getCart: () => api.get('/cart').catch(error => apiUtils ? apiUtils.handleError(error) : Promise.reject(error)),
-  addToCart: (productId, quantity = 1) => api.post('/cart/items', { productId, quantity }),
-  updateCartItem: (productId, quantity) => api.put(`/cart/items/${productId}`, { quantity }),
-  removeFromCart: (productId) => api.delete(`/cart/items/${productId}`),
-  clearCart: () => api.delete('/cart'),
-  getCartCount: () => api.get('/cart/count'),
+  getCart: () => cachedGet('/cart').catch(error => apiUtils ? apiUtils.handleError(error) : Promise.reject(error)),
+  addToCart: (productId, quantity = 1) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/cart')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.post('/cart/items', { productId, quantity });
+  },
+  updateCartItem: (productId, quantity) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/cart')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.put(`/cart/items/${productId}`, { quantity });
+  },
+  removeFromCart: (productId) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/cart')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.delete(`/cart/items/${productId}`);
+  },
+  clearCart: () => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/cart')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.delete('/cart');
+  },
+  getCartCount: () => cachedGet('/cart/count'),
   
   // Coupon Operations
-  applyCoupon: (couponCode) => api.post('/cart/coupon', { couponCode }),
-  removeCoupon: () => api.delete('/cart/coupon'),
+  applyCoupon: (couponCode) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/cart')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.post('/cart/coupon', { couponCode });
+  },
+  removeCoupon: () => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/cart')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.delete('/cart/coupon');
+  },
   
   // ✅ ADDED: External Products Operations
-  // Guarded: avoid repeated 404s by remembering if backend supports this endpoint.
   getExternalProducts: () => {
     try {
       const supported = localStorage.getItem('externalProductsSupported');
       if (supported === 'false') {
-        // Return a resolved response shaped like the real API (empty result)
         return Promise.resolve({ data: { data: { externalProducts: [], count: 0 } } });
       }
-
-      return api.get('/cart/external-products').catch(err => {
+      return cachedGet('/cart/external-products').catch(err => {
         if (err.response?.status === 404) {
-          // Remember that backend doesn't support this endpoint to avoid future 404s
           try { localStorage.setItem('externalProductsSupported', 'false'); } catch(e) {}
           return Promise.resolve({ data: { data: { externalProducts: [], count: 0 } } });
         }
         return Promise.reject(err);
       });
     } catch (e) {
-      // Fallback to the direct request if localStorage access fails
-      return api.get('/cart/external-products');
+      return cachedGet('/cart/external-products');
     }
   },
   
   // ✅ ADDED: Bulk External Products Operations
-  buyAllExternalProducts: () => api.post('/cart/buy-all-external'),
+  buyAllExternalProducts: () => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/cart')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.post('/cart/buy-all-external');
+  },
   
   // ✅ ADDED: Individual External Product Purchase
-  buyExternalProduct: (productId) => api.post(`/cart/items/${productId}/buy-external`),
+  buyExternalProduct: (productId) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/cart')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.post(`/cart/items/${productId}/buy-external`);
+  },
   
   // ✅ ADDED: Cart Analytics
-  getCartAnalytics: () => api.get('/cart/analytics'),
+  getCartAnalytics: () => cachedGet('/cart/analytics'),
   
-  // ✅ ADDED: Save for Later (if implemented)
-  moveToSaveForLater: (productId) => api.post(`/cart/items/${productId}/save-later`),
-  getSavedItems: () => api.get('/cart/saved-items'),
-  moveToCart: (productId) => api.post(`/cart/saved-items/${productId}/move-to-cart`),
+  // ✅ ADDED: Save for Later
+  moveToSaveForLater: (productId) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/cart')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.post(`/cart/items/${productId}/save-later`);
+  },
+  getSavedItems: () => cachedGet('/cart/saved-items'),
+  moveToCart: (productId) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/cart')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.post(`/cart/saved-items/${productId}/move-to-cart`);
+  },
   
   // ✅ ADDED: Cart Sharing
-  shareCart: (email) => api.post('/cart/share', { email }),
-  getSharedCart: (shareToken) => api.get(`/cart/shared/${shareToken}`),
+  shareCart: (email) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/cart')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.post('/cart/share', { email });
+  },
+  getSharedCart: (shareToken) => cachedGet(`/cart/shared/${shareToken}`),
   
   // ✅ ADDED: Cart Recommendations
-  getRecommendations: () => api.get('/cart/recommendations')
+  getRecommendations: () => cachedGet('/cart/recommendations')
 };
 
 // ORDERS API

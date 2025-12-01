@@ -8,6 +8,7 @@ import CategorySidebar from '../../components/Categories/CategorySidebar';
 import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 import EmptyState from '../../components/Common/EmptyState';
 import { X, Search, Filter } from 'lucide-react';
+import { setPageTitle } from '../../utils/slugify';
 
 const Products = () => {
   const { id: categoryId } = useParams();
@@ -34,6 +35,16 @@ const Products = () => {
 
   // Initialize when categoryId or search params change
   useEffect(() => {
+    // Set page title
+    if (categoryId && categories.length > 0) {
+      const category = categories.find(c => c._id === categoryId);
+      setPageTitle(category?.name || 'Products');
+    } else if (searchTerm) {
+      setPageTitle(`Search: ${searchTerm}`);
+    } else {
+      setPageTitle('Products');
+    }
+
     if (categoryId) {
       setCategory(categoryId);
     }
@@ -45,7 +56,7 @@ const Products = () => {
       setSearch('');
       setLocalFilters(prev => ({ ...prev, search: '' }));
     }
-  }, [categoryId, searchTerm, setCategory, setSearch]);
+  }, [categoryId, searchTerm, setCategory, setSearch, categories]);
 
   // Filter products by category and search
   const filteredProducts = React.useMemo(() => {

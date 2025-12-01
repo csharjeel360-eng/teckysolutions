@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import useBanners from '../../hooks/useBanners';
-import AdminSidebar from '../../components/Admins/AdminSidebar';
+
 import DataTable from '../../components/Admins/DataTable';
 import ImageUpload from '../../components/Admins/ImageUpload';
 import Button from '../../components/UI/Button';
@@ -501,20 +501,14 @@ const BannerManagement = () => {
 
   if (loading) {
     return (
-      <div className="flex h-screen bg-gray-100">
-        <AdminSidebar />
-        <div className="flex-1 flex items-center justify-center">
-          <LoadingSpinner size="large" text="Loading banners..." />
-        </div>
+      <div className="flex-1 flex items-center justify-center">
+        <LoadingSpinner size="large" text="Loading banners..." />
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <AdminSidebar />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-white shadow-sm">
           <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
@@ -653,15 +647,14 @@ const BannerManagement = () => {
             </div>
           )}
         </main>
-      </div>
-
-      {/* Add/Edit Banner Modal */}
-      <Modal
-        isOpen={showModal}
-        onClose={closeModal}
-        title={editingBanner ? 'Edit Banner' : 'Add New Banner'}
-        size="large"
-      >
+        
+        {/* Add/Edit Banner Modal */}
+        <Modal
+          isOpen={showModal}
+          onClose={closeModal}
+          title={editingBanner ? 'Edit Banner' : 'Add New Banner'}
+          size="large"
+        >
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -794,15 +787,15 @@ const BannerManagement = () => {
             </Button>
           </div>
         </form>
-      </Modal>
+        </Modal>
 
-      {/* View Banner Modal */}
-      <Modal
-        isOpen={viewModal.open}
-        onClose={closeModal}
-        title="Banner Details"
-        size="medium"
-      >
+        {/* View Banner Modal */}
+        <Modal
+          isOpen={viewModal.open}
+          onClose={closeModal}
+          title="Banner Details"
+          size="medium"
+        >
         {viewModal.banner && (
           <div className="space-y-4">
             <div className="flex justify-center">
@@ -896,15 +889,15 @@ const BannerManagement = () => {
             </div>
           </div>
         )}
-      </Modal>
+        </Modal>
 
-      {/* Delete Confirmation Modal */}
-      <Modal
-        isOpen={deleteModal.open}
-        onClose={closeModal}
-        title="Delete Banner"
-        size="small"
-      >
+        {/* Delete Confirmation Modal */}
+        <Modal
+          isOpen={deleteModal.open}
+          onClose={closeModal}
+          title="Delete Banner"
+          size="small"
+        >
         <div className="space-y-4">
           <div className="flex items-center space-x-3">
             <img 
@@ -943,7 +936,7 @@ const BannerManagement = () => {
             </Button>
           </div>
         </div>
-      </Modal>
+        </Modal>
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Heart, Star, ShoppingCart } from 'lucide-react';
+import { createSlug } from '../../utils/slugify';
 
 const ProductCard = ({ 
   product, 
@@ -81,7 +82,7 @@ const ProductCard = ({
   if (layout === 'list') {
     return (
       <Link 
-        to={`/products/${_id}`}
+        to={`/product/${createSlug(_id, title)}`}
         className="block bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-lg transition-all duration-300 hover:border-[#2563eb]/20"
       >
         <div className="flex gap-4">
@@ -146,7 +147,7 @@ const ProductCard = ({
 
   return (
     <Link 
-      to={`/products/${_id}`}
+      to={`/product/${createSlug(_id, title)}`}
       className={`block bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 hover:border-[#2563eb]/20 group ${sizeConfig.container}`}
     >
       <div className="relative">

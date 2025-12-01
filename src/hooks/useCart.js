@@ -89,7 +89,7 @@ export const useCart = () => {
 
   const addToCart = useCallback(async (product, quantity = 1) => {
     try {
-      setLoading(true);
+      // Don't set loading here - ProductDetail component handles with isAddingToCart state
       const response = await CartService.addToCart(product._id, quantity);
       
       if (response.success) {
@@ -114,14 +114,12 @@ export const useCart = () => {
       const errorMessage = err.message || 'Failed to add to cart';
       setError(errorMessage);
       throw new Error(errorMessage);
-    } finally {
-      setLoading(false);
     }
   }, [fetchExternalProducts]);
 
   const updateQuantity = useCallback(async (productId, quantity) => {
     try {
-      setLoading(true);
+      // Don't set loading here - keep UI responsive during quantity updates
       const response = await CartService.updateCartItem(productId, quantity);
       
       if (response.success) {
@@ -149,14 +147,12 @@ export const useCart = () => {
       const errorMessage = err.message || 'Failed to update quantity';
       setError(errorMessage);
       throw new Error(errorMessage);
-    } finally {
-      setLoading(false);
     }
   }, [fetchExternalProducts]);
 
   const removeFromCart = useCallback(async (productId) => {
     try {
-      setLoading(true);
+      // Don't set loading here - keep UI responsive during item removal
       
       // ✅ ADDED: Check if product is external before removal
       const itemToRemove = cart?.items?.find(item => 
@@ -188,14 +184,12 @@ export const useCart = () => {
       const errorMessage = err.message || 'Failed to remove from cart';
       setError(errorMessage);
       throw new Error(errorMessage);
-    } finally {
-      setLoading(false);
     }
   }, [cart, fetchExternalProducts]);
 
   const clearCart = useCallback(async () => {
     try {
-      setLoading(true);
+      // Don't set loading here - keep UI responsive during cart clearing
       const response = await CartService.clearCart();
       
       if (response.success) {
@@ -214,8 +208,6 @@ export const useCart = () => {
       const errorMessage = err.message || 'Failed to clear cart';
       setError(errorMessage);
       throw new Error(errorMessage);
-    } finally {
-      setLoading(false);
     }
   }, []);
 

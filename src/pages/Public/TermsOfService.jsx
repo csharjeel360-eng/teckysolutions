@@ -206,7 +206,7 @@ const TermsOfService = () => {
 
           {/* Navigation */}
           <div className="border-t border-gray-200 pt-8 mt-8 flex justify-between">
-            <Link to="/privacy" className="text-[#2563eb] hover:text-[#1e40af] font-medium">
+            <Link to="/privacy-policy" className="text-[#2563eb] hover:text-[#1e40af] font-medium">
               ← Privacy Policy
             </Link>
             <Link to="/" className="text-[#2563eb] hover:text-[#1e40af] font-medium">

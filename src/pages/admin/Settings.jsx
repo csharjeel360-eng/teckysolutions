@@ -1,5 +1,5 @@
 import React from 'react';
-import AdminSidebar from '../../components/Admins/AdminSidebar';
+
 import Button from '../../components/UI/Button';
 import Input from '../../components/UI/Input';
 import Notification from '../../components/UI/Notification';
@@ -26,10 +26,8 @@ const Settings = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <AdminSidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white shadow-sm">
+    <div className="flex-1 flex flex-col overflow-hidden">
+      <header className="bg-white shadow-sm">
           <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
             <h1 className="text-2xl font-semibold text-gray-900">Settings</h1>
           </div>
@@ -116,7 +114,6 @@ const Settings = () => {
           </div>
         </main>
       </div>
-    </div>
   );
 };
 

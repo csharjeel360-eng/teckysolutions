@@ -1,9 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import BlogService from '../services/blogService';
 
 const useBlogs = (initialFilters = {}) => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const previousDataRef = useRef([]); // Prevent flickering
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
     search: '',
@@ -42,7 +44,9 @@ const useBlogs = (initialFilters = {}) => {
 
   const fetchBlogs = useCallback(async () => {
     try {
-      setLoading(true);
+      if (isInitialLoad) {
+        setLoading(true);
+      }
       setError(null);
       
       // Fetching blogs with filters
@@ -52,18 +56,28 @@ const useBlogs = (initialFilters = {}) => {
         const blogsData = result.blogs || result.data || [];
         const normalizedBlogs = blogsData.map(normalizeBlogData).filter(blog => blog !== null);
         setBlogs(normalizedBlogs);
+        previousDataRef.current = normalizedBlogs; // Save for flickering prevention
       } else {
         setError(result.error);
-        setBlogs([]);
+        // Keep showing previous data on error
+        if (previousDataRef.current.length === 0) {
+          setBlogs([]);
+        }
       }
     } catch (err) {
       console.error('❌ useBlogs: Fetch error:', err);
       setError('Failed to fetch blogs');
-      setBlogs([]);
+      // Keep showing previous data instead of clearing
+      if (previousDataRef.current.length === 0) {
+        setBlogs([]);
+      }
     } finally {
-      setLoading(false);
+      if (isInitialLoad) {
+        setLoading(false);
+        setIsInitialLoad(false);
+      }
     }
-  }, [filters, normalizeBlogData]);
+  }, [filters, normalizeBlogData, isInitialLoad]);
 
   useEffect(() => {
     fetchBlogs();
@@ -189,6 +203,7 @@ const useBlogs = (initialFilters = {}) => {
   return {
     blogs,
     loading,
+    isInitialLoad,
     error,
     filters,
     fetchBlogs,

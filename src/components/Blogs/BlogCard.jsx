@@ -101,7 +101,7 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
           ${className}
         `}
       >
-        <Link to={isDraft ? '#' : `/blogs/${safeSlug}`} className="block">
+        <Link to={isDraft ? '#' : `/blog/${safeSlug}`} className="block">
           {/* Blog Image */}
           <div className="relative overflow-hidden bg-gray-100">
             <img
@@ -154,7 +154,7 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
               {title}
             </h3>
           ) : (
-            <Link to={`/blogs/${safeSlug}`}>
+            <Link to={`/blog/${safeSlug}`}>
               <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-[#2563eb] transition-colors duration-200">
                 {title}
               </h3>
@@ -222,7 +222,7 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
             {/* Read More Link */}
             {!isDraft && (
               <Link 
-                to={`/blogs/${safeSlug}`}
+                to={`/blog/${safeSlug}`}
                 className="text-[#2563eb] hover:text-[#1e40af] text-xs font-medium transition-colors"
               >
                 Read →

@@ -10,10 +10,13 @@ import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 import Notification from '../../components/Common/Notification';
 import LoginModal from '../../components/Auth/LoginModal';
 import { Star, Edit3, User, Calendar, CheckCircle, ShoppingCart, ExternalLink, X } from 'lucide-react';
+import { extractIdFromSlug, setPageTitle, createSlug } from '../../utils/slugify';
+import productService from '../../services/productService';
 
 const ProductDetail = () => {
-  const { id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
+  const productId = extractIdFromSlug(slug);
   const { getProductById, recordBuyClick, recordView, addReview, loading: productsLoading } = useProducts();
   const { addToCart, cartItems } = useCart();
   const { user, isAuthenticated, login } = useAuth();
@@ -24,6 +27,10 @@ const ProductDetail = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [notification, setNotification] = useState({ show: false, message: '', type: '' });
+  
+  // Action-specific loading states (don't block page)
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isBuyingNow, setIsBuyingNow] = useState(false);
   
   // Login modal states
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -38,14 +45,8 @@ const ProductDetail = () => {
   const [hoverRating, setHoverRating] = useState(0);
 
   useEffect(() => {
-    // Guard against invalid route like /products/cart which would treat "cart" as a product id
-    if (id === 'cart') {
-      navigate('/cart', { replace: true });
-      return;
-    }
-
-    // If id looks invalid (e.g., empty), redirect to products list
-    if (!id) {
+    // Guard against invalid route
+    if (!slug) {
       navigate('/products', { replace: true });
       return;
     }
@@ -54,18 +55,38 @@ const ProductDetail = () => {
       try {
         setLoading(true);
         setError('');
-        const result = await getProductById(id);
-        
-        if (result.success) {
-          setProduct(result.data);
-          
-          try {
-            await recordView(id);
-          } catch (viewError) {
-            // View recording failed (ignored)
+
+        // If we have an extracted id, try fetching by id first
+        if (productId) {
+          let result = await getProductById(productId);
+
+          if (result && result.success && result.data) {
+            setProduct(result.data);
+            setPageTitle(result.data.title);
+
+            try {
+              await recordView(result.data._id || productId);
+            } catch (viewError) {
+              // View recording failed (ignored)
+            }
+            return;
           }
-        } else {
-          setError(result.error || 'Product not found');
+        }
+
+        // Fallback: try fetching by slug via productService
+        try {
+          const slugResult = await productService.getBySlug(slug);
+          if (slugResult && slugResult.success && slugResult.data) {
+            setProduct(slugResult.data);
+            setPageTitle(slugResult.data.title);
+            try {
+              await recordView(slugResult.data._id);
+            } catch (viewError) {}
+          } else {
+            setError((slugResult && slugResult.error) || 'Product not found');
+          }
+        } catch (fallbackErr) {
+          setError('Product not found');
         }
       } catch (err) {
         setError('Failed to fetch product');
@@ -75,10 +96,8 @@ const ProductDetail = () => {
       }
     };
 
-    if (id) {
-      fetchProduct();
-    }
-  }, [id, getProductById, recordView]);
+    fetchProduct();
+  }, [slug, getProductById, recordView]);
 
   // Handle authentication required actions
   const requireAuth = (action) => {
@@ -124,7 +143,7 @@ const ProductDetail = () => {
 
   const executeAddToCart = async () => {
     try {
-      setLoading(true);
+      setIsAddingToCart(true);
       
       // Check if product is already in cart
       const productExists = cartItems?.some(item => item.product?._id === product._id);
@@ -134,7 +153,7 @@ const ProductDetail = () => {
           message: 'This product is already in your cart!',
           type: 'warning'
         });
-        setLoading(false);
+        setIsAddingToCart(false);
         return;
       }
       
@@ -149,7 +168,7 @@ const ProductDetail = () => {
         });
         
         try {
-          await recordBuyClick(id);
+          await recordBuyClick(product?._id || productId);
         } catch (clickError) {
           // Buy click recording failed (ignored)
         }
@@ -164,7 +183,7 @@ const ProductDetail = () => {
         type: 'error'
       });
     } finally {
-      setLoading(false);
+      setIsAddingToCart(false);
     }
   };
 
@@ -175,7 +194,7 @@ const ProductDetail = () => {
     // For external links, no login required
     if (hasExternalLink) {
       try {
-        await recordBuyClick(id);
+        await recordBuyClick(product?._id || productId);
       } catch (clickError) {
         // Buy click recording failed (ignored)
       }
@@ -199,7 +218,7 @@ const ProductDetail = () => {
 
   const executeBuyNow = async () => {
     try {
-      setLoading(true);
+      setIsBuyingNow(true);
       const result = await addToCart(product, quantity);
       
       // CartService returns the data directly, not a success object
@@ -211,7 +230,7 @@ const ProductDetail = () => {
         });
         
         try {
-          await recordBuyClick(id);
+          await recordBuyClick(product?._id || productId);
         } catch (clickError) {
           // Buy click recording failed (ignored)
         }
@@ -231,7 +250,7 @@ const ProductDetail = () => {
         type: 'error'
       });
     } finally {
-      setLoading(false);
+      setIsBuyingNow(false);
     }
   };
 
@@ -282,7 +301,7 @@ const ProductDetail = () => {
 
       // Submitting review data
 
-      const result = await addReview(id, reviewData);
+      const result = await addReview(product?._id || productId, reviewData);
       
       if (result.success) {
         const newReview = {
@@ -427,7 +446,7 @@ const ProductDetail = () => {
           setShowLoginModal(false);
           setPendingAction(null);
         }}
-        redirectPath={`/products/${id}`}
+        redirectPath={`/product/${slug}`}
       />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -565,23 +584,37 @@ const ProductDetail = () => {
                     variant="primary"
                     size="large"
                     onClick={handleAddToCart}
-                    disabled={!product.stock || product.stock === 0}
+                    disabled={!product.stock || product.stock === 0 || isAddingToCart}
                     className="flex-1 flex items-center justify-center gap-2"
                   >
-                    <ShoppingCart className="w-5 h-5" />
-                    {(!product.stock || product.stock === 0) ? 'Out of Stock' : 'Add to Cart'}
+                    {isAddingToCart ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Adding...
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingCart className="w-5 h-5" />
+                        {(!product.stock || product.stock === 0) ? 'Out of Stock' : 'Add to Cart'}
+                      </>
+                    )}
                   </Button>
                   
                   <Button
                     variant="secondary"
                     size="large"
                     onClick={handleBuyNow}
-                    disabled={!product.stock || product.stock === 0}
+                    disabled={!product.stock || product.stock === 0 || isBuyingNow}
                     className={`flex-1 flex items-center justify-center gap-2 ${
                       hasExternalLink ? 'bg-green-600 hover:bg-green-700 text-white' : ''
                     }`}
                   >
-                    {hasExternalLink ? (
+                    {isBuyingNow ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Processing...
+                      </>
+                    ) : hasExternalLink ? (
                       <><ExternalLink className="w-5 h-5" />Buy on External Store</>
                     ) : (
                       'Buy Now'

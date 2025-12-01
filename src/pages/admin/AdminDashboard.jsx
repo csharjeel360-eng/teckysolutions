@@ -10,7 +10,7 @@ import useProducts from '../../hooks/useProducts';
 import useCategories from '../../hooks/useCategories';
 import useBlogs from '../../hooks/useBlogs';
 import useBanners from '../../hooks/useBanners';
-import AdminSidebar from '../../components/Admins/AdminSidebar';
+
 import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 import Modal from '../../components/UI/Modal';
 import Button from '../../components/UI/Button';
@@ -699,20 +699,14 @@ const AdminDashboard = () => {
 
   if (productsLoading || categoriesLoading || blogsLoading || bannersLoading) {
     return (
-      <div className="flex h-screen bg-gray-100">
-        <AdminSidebar />
-        <div className="flex-1 flex items-center justify-center">
-          <LoadingSpinner size="large" text="Loading dashboard..." />
-        </div>
+      <div className="flex-1 flex items-center justify-center">
+        <LoadingSpinner size="large" text="Loading dashboard..." />
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <AdminSidebar />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-white shadow-sm">
           <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -1032,7 +1026,6 @@ const AdminDashboard = () => {
             )}
           </div>
         </main>
-      </div>
 
       {/* Category Modal */}
       <Modal 

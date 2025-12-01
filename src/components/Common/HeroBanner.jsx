@@ -74,20 +74,17 @@ const HeroBanner = ({
               className="w-full h-full object-cover"
             />
             
-            {/* Dark Overlay for Better Text Readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
-            
             {/* Banner Content - Bottom Aligned */}
             <div className="absolute inset-0 flex items-end">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-6 sm:pb-8 md:pb-12">
                 <div className="max-w-3xl">
                   {/* Title - Small Text */}
-                  <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2 leading-tight drop-shadow-lg">
+                  <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2 leading-tight">
                     {banner.title}
                   </h1>
                   
                   {/* Subtitle - Very Small Text */}
-                  <p className="text-xs sm:text-sm md:text-base text-white opacity-95 line-clamp-2 drop-shadow-md">
+                  <p className="text-xs sm:text-sm md:text-base text-white opacity-95 line-clamp-2">
                     {banner.subtitle}
                   </p>
                 </div>

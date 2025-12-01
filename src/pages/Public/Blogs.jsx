@@ -6,6 +6,7 @@ import Pagination from '../../components/UI/Pagination';
 import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 import EmptyState from '../../components/Common/EmptyState';
 import { FileText, Search, RefreshCw } from 'lucide-react';
+import { setPageTitle } from '../../utils/slugify';
 
 const Blogs = () => {
   const { 
@@ -23,6 +24,8 @@ const Blogs = () => {
 
   // Handle search with debounce
   useEffect(() => {
+    setPageTitle('Blogs');
+    
     const timeoutId = setTimeout(() => {
       setSearch(searchTerm);
     }, 500);

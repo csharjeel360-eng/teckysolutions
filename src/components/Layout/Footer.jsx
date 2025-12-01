@@ -13,10 +13,10 @@ const Footer = () => {
           <div className="lg:col-span-2">
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-10 h-10 bg-gradient-to-r from-[#2563eb] to-[#f97316] rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">S</span>
+                <span className="text-white font-bold text-lg">TB</span>
               </div>
               <div>
-                <span className="text-2xl font-bold">ShopHub</span>
+                <span className="text-2xl font-bold">TrendyBreeze</span>
                 <p className="text-gray-400 text-sm mt-1">
                   Your trusted online shopping destination
                 </p>
@@ -102,7 +102,7 @@ const Footer = () => {
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-gray-400 text-sm text-center sm:text-left">
-              © {currentYear} ShopHub. All rights reserved.
+              © {currentYear} TrendyBreeze. All rights reserved.
             </p>
             <div className="flex space-x-6">
               <Link

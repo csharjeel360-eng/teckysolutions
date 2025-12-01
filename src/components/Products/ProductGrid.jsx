@@ -1,13 +1,17 @@
 // components/Products/ProductGrid.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { createSlug } from '../../utils/slugify';
+import SkeletonProductCard from '../UI/SkeletonProductCard';
 
 const ProductGrid = ({ 
   products, 
   columns = 4, 
   layout = 'grid',
   showDescription = true,
-  className = ''
+  className = '',
+  isLoading = false,
+  isInitialLoad = false
 }) => {
   const gridClasses = {
     2: 'grid-cols-2',
@@ -16,6 +20,17 @@ const ProductGrid = ({
     5: 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5',
     6: 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6'
   };
+
+  // Show skeleton only on initial load; for updates, keep showing previous products
+  if (isInitialLoad && products.length === 0) {
+    return (
+      <div className={`grid ${gridClasses[columns] || gridClasses[4]} gap-4 ${className}`}>
+        {[...Array(12)].map((_, idx) => (
+          <SkeletonProductCard key={idx} />
+        ))}
+      </div>
+    );
+  }
 
   // ✅ FIXED: Handle product click with proper navigation
   const handleProductClick = (productId, e) => {
@@ -28,7 +43,7 @@ const ProductGrid = ({
       {products.map((product) => (
         <Link
           key={product._id}
-          to={`/products/${product._id}`}
+          to={`/product/${createSlug(product._id, product.title)}`}
           className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 group block"
           onClick={(e) => handleProductClick(product._id, e)}
         >

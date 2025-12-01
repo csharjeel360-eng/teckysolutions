@@ -165,7 +165,7 @@ const PrivacyPolicy = () => {
             <Link to="/" className="text-[#2563eb] hover:text-[#1e40af] font-medium">
               ← Back to Home
             </Link>
-            <Link to="/terms" className="text-[#2563eb] hover:text-[#1e40af] font-medium">
+            <Link to="/terms-of-service" className="text-[#2563eb] hover:text-[#1e40af] font-medium">
               Terms of Service →
             </Link>
           </div>

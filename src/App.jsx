@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
 import Navbar from './components/Layout/Navbar';
 import Footer from './components/Layout/Footer';
+import ScrollToTop from './components/Common/ScrollToTop';
 
 // Public Pages
 import Home from './pages/Public/Home';
@@ -35,6 +36,7 @@ import UserManagement from './pages/admin/UserManagement';
 import BlogManagement from './pages/admin/BlogManagement';
 import BlogEditor from './pages/admin/BlogEditor';
 import Settings from './pages/admin/Settings';
+import AdminLayout from './components/Admins/AdminLayout';
 
 // Protected Route Component
 import ProtectedRoute from './components/Common/ProtectedRoute';
@@ -48,6 +50,7 @@ function App() {
       <AppProvider>
         <Router>
           <div className="App min-h-screen bg-gray-50 flex flex-col">
+            <ScrollToTop />
             <Navbar />
             <main className="flex-1">
               <Routes>
@@ -56,10 +59,10 @@ function App() {
                 <Route path="/categories" element={<Categories />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/products/cart" element={<Cart />} />
-                <Route path="/products/:id" element={<ProductDetail />} />
+                <Route path="/product/:slug" element={<ProductDetail />} />
                 <Route path="/category/:id/products" element={<Products />} />
                 <Route path="/blogs" element={<Blogs />} />
-                <Route path="/blogs/:slug" element={<BlogDetail />} />
+                <Route path="/blog/:slug" element={<BlogDetail />} />
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/unauthorized" element={<Unauthorized />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
@@ -86,80 +89,23 @@ function App() {
                 <Route path="/admin/login" element={<AdminLogin />} />
                 {/* Development-only admin creation page (remove/protect in production) */}
                 <Route path="/admin/create" element={<CreateAdmin />} />
-                
-                {/* Admin Protected Routes */}
-                <Route 
-                  path="/admin/dashboard" 
-                  element={
-                    <ProtectedRoute requireAdmin={true}>
-                      <AdminDashboard />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin/categories" 
-                  element={
-                    <ProtectedRoute requireAdmin={true}>
-                      <CategoryManagement />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin/products" 
-                  element={
-                    <ProtectedRoute requireAdmin={true}>
-                      <ProductManagement />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin/blogs" 
-                  element={
-                    <ProtectedRoute requireAdmin={true}>
-                      <BlogManagement />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin/blogs/new" 
-                  element={
-                    <ProtectedRoute requireAdmin={true}>
-                      <BlogEditor />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin/blogs/edit/:id" 
-                  element={
-                    <ProtectedRoute requireAdmin={true}>
-                      <BlogEditor />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin/banners" 
-                  element={
-                    <ProtectedRoute requireAdmin={true}>
-                      <BannerManagement />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin/users" 
-                  element={
-                    <ProtectedRoute requireAdmin={true}>
-                      <UserManagement />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin/settings" 
-                  element={
-                    <ProtectedRoute requireAdmin={true}>
-                      <Settings />
-                    </ProtectedRoute>
-                  } 
-                />
+
+                {/* Admin Protected Routes - AdminLayout handles auth checks internally */}
+                <Route
+                  path="/admin/*"
+                  element={<AdminLayout />}
+                >
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="dashboard" element={<AdminDashboard />} />
+                  <Route path="categories" element={<CategoryManagement />} />
+                  <Route path="products" element={<ProductManagement />} />
+                  <Route path="blogs" element={<BlogManagement />} />
+                  <Route path="blogs/new" element={<BlogEditor />} />
+                  <Route path="blogs/edit/:id" element={<BlogEditor />} />
+                  <Route path="banners" element={<BannerManagement />} />
+                  <Route path="users" element={<UserManagement />} />
+                  <Route path="settings" element={<Settings />} />
+                </Route>
                 
                 {/* ===== DEBUG/TEST ROUTES ===== */}
                 <Route path="/test-firebase" element={<TestFirebase />} />

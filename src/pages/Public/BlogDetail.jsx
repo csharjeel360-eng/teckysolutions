@@ -6,6 +6,7 @@ import BlogComments from '../../components/Blogs/BlogComments';
 import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 import Notification from '../../components/Common/Notification';
 import { Clock, Heart, Eye, MessageCircle, Share2, ArrowLeft, Calendar, User } from 'lucide-react';
+import { setPageTitle } from '../../utils/slugify';
 
 const BlogDetail = () => {
   const { slug } = useParams();
@@ -38,6 +39,8 @@ const BlogDetail = () => {
           }
           
           setBlog(blogData);
+          // Set page title with blog title
+          setPageTitle(blogData.title);
           
           if (user && blogData.likes) {
             const userLiked = Array.isArray(blogData.likes) 

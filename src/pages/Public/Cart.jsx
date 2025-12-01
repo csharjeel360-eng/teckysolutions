@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../hooks/useCart';
 import Button from '../../components/UI/Button';
 import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 import EmptyState from '../../components/Common/EmptyState';
 import { Trash2, Plus, Minus, ExternalLink, ShoppingBag, ArrowLeft } from 'lucide-react';
+import { setPageTitle, createSlug } from '../../utils/slugify';
 
 const Cart = () => {
   const { 
@@ -22,6 +23,11 @@ const Cart = () => {
     externalProductsCount,
     hasExternalProducts
   } = useCart();
+
+  // Set page title
+  useEffect(() => {
+    setPageTitle('Shopping Cart');
+  }, []);
 
   const handleBuyNow = async (item) => {
     try {
@@ -131,7 +137,7 @@ const Cart = () => {
                     <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                       {/* Product Image */}
                       <Link 
-                        to={`/products/${item.product._id}`}
+                        to={`/product/${createSlug(item.product._id, item.product.title)}`}
                         className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-lg overflow-hidden"
                       >
                         <img
@@ -145,7 +151,7 @@ const Cart = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
                           <Link
-                            to={`/products/${item.product._id}`}
+                            to={`/product/${createSlug(item.product._id, item.product.title)}`}
                             className="text-lg sm:text-xl font-semibold text-gray-900 hover:text-[#2563eb] line-clamp-2"
                           >
                             {item.product.title || item.productTitle}
