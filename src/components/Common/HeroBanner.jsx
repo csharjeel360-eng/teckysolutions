@@ -41,7 +41,7 @@ const HeroBanner = ({
   if (banners.length === 0) {
     return (
       <div className="relative w-full bg-gradient-to-r from-[#2563eb] to-[#f97316] text-white">
-        <div className="aspect-[16/6] min-h-[300px] flex items-center justify-center">
+        <div className="w-full aspect-[16/9] sm:aspect-[16/6] min-h-[180px] sm:min-h-[300px] flex items-center justify-center">
           <div className="max-w-6xl mx-auto px-4 text-center">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
               Welcome to ShopHub
@@ -58,32 +58,37 @@ const HeroBanner = ({
   return (
     <div className="relative overflow-hidden w-full">
       {/* Banner Slides */}
-      <div className="relative w-full aspect-[16/6] min-h-[300px] sm:min-h-[400px] md:min-h-[500px]">
+      <div className="relative w-full aspect-[16/9] sm:aspect-[16/6] min-h-[180px] sm:min-h-[400px] md:min-h-[500px]">
         {banners.map((banner, index) => (
           <div
             key={banner._id}
-            className={`absolute inset-0 transition-opacity duration-500 cursor-pointer ${
-              index === currentSlide ? 'opacity-100' : 'opacity-0'
+            role="group"
+            aria-roledescription="slide"
+            aria-hidden={index === currentSlide ? 'false' : 'true'}
+            onClick={() => index === currentSlide && handleBannerClick(banner)}
+            className={`absolute inset-0 transition-opacity duration-500 ${
+              index === currentSlide ? 'opacity-100 z-0 cursor-pointer' : 'opacity-0 pointer-events-none -z-10'
             }`}
-            onClick={() => handleBannerClick(banner)}
           >
-            {/* Full-width Background Image */}
+            {/* Full-width Background Image - lazy loaded for performance */}
             <img
               src={banner.image?.url || '/api/placeholder/1920/720'}
-              alt={banner.title}
-              className="w-full h-full object-cover"
+              alt={banner.title || 'Banner image'}
+              className="w-full h-full object-contain sm:object-cover object-center max-w-full max-h-full"
+              loading="lazy"
+              decoding="async"
             />
-            
+
             {/* Banner Content - Bottom Aligned */}
             <div className="absolute inset-0 flex items-end">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-6 sm:pb-8 md:pb-12">
                 <div className="max-w-3xl">
-                  {/* Title - Small Text */}
-                  <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2 leading-tight">
+                  {/* Title - compact, stylish */}
+                  <h1 className="text-sm sm:text-base md:text-lg font-semibold text-white mb-1 tracking-wide drop-shadow-md uppercase">
                     {banner.title}
                   </h1>
-                  
-                  {/* Subtitle - Very Small Text */}
+
+                  {/* Subtitle - compact */}
                   <p className="text-xs sm:text-sm md:text-base text-white opacity-95 line-clamp-2">
                     {banner.subtitle}
                   </p>
