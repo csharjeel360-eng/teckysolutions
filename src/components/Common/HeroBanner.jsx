@@ -13,6 +13,7 @@ const HeroBanner = ({
   const [currentSlide, setCurrentSlide] = React.useState(0);
   const containerRef = React.useRef(null);
   const [containerHeight, setContainerHeight] = React.useState(null);
+  const [loadedMap, setLoadedMap] = React.useState({});
 
   React.useEffect(() => {
     if (!autoPlay || banners.length <= 1) return;
@@ -118,26 +119,20 @@ const HeroBanner = ({
                   <img
                     src={banner.image?.url || '/api/placeholder/1920/720'}
                     alt={banner.title || 'Banner image'}
-                    className="w-full h-auto object-contain"
+                    className="w-full h-auto object-contain transition-opacity duration-700"
+                    style={{ opacity: loadedMap[banner._id] ? 1 : 0 }}
+                    onLoad={() => setLoadedMap(prev => ({ ...prev, [banner._id]: true }))}
                     onClick={() => handleBannerClick(banner)}
                   />
 
-                  {/* Bottom gradient for better contrast */}
-                  <div className="absolute left-0 right-0 bottom-0 h-1/3 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
-
-                  {/* Content overlay inside slide - centered at bottom */}
-                  <div className="absolute left-0 right-0 bottom-0 flex items-end">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-3 sm:pb-6 md:pb-8 text-center">
-                      <div className="max-w-3xl mx-auto">
+                  {/* Title overlay at top - visible immediately */}
+                  <div className="absolute left-0 right-0 top-0 flex justify-center items-start pointer-events-none">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-3 sm:pt-4">
+                      <div className="max-w-3xl mx-auto text-center">
                         {typeof banner.title === 'string' && !/^https?:\/\//i.test(banner.title) && (
-                          <h1 className="text-sm sm:text-base md:text-lg font-semibold text-white mb-1 tracking-wide drop-shadow-md uppercase">
+                          <h1 className="text-sm sm:text-base md:text-lg font-semibold text-white tracking-wide drop-shadow-md uppercase">
                             {banner.title}
                           </h1>
-                        )}
-                        {typeof banner.subtitle === 'string' && !/^https?:\/\//i.test(banner.subtitle) && (
-                          <p className="text-xs sm:text-sm md:text-base text-white opacity-95 line-clamp-2">
-                            {banner.subtitle}
-                          </p>
                         )}
                       </div>
                     </div>
@@ -162,25 +157,19 @@ const HeroBanner = ({
               <img
                 src={banner.image?.url || '/api/placeholder/1920/720'}
                 alt={banner.title || 'Banner image'}
-                className="w-full h-auto object-contain"
+                className="w-full h-auto object-contain transition-opacity duration-700"
+                style={{ opacity: loadedMap[banner._id] ? 1 : 0 }}
+                onLoad={() => setLoadedMap(prev => ({ ...prev, [banner._id]: true }))}
               />
 
-              {/* Bottom gradient for better contrast */}
-              <div className="absolute left-0 right-0 bottom-0 h-1/3 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
-
-              {/* Content overlay - centered at bottom */}
-              <div className="absolute left-0 right-0 bottom-0 flex items-end">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-3 sm:pb-6 md:pb-8 text-center">
-                  <div className="max-w-3xl mx-auto">
+              {/* Title overlay at top - visible immediately */}
+              <div className="absolute left-0 right-0 top-0   flex justify-center items-start pointer-events-none">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-3 sm:pt-4">
+                  <div className="max-w-3xl mx-auto text-center">
                     {typeof banner.title === 'string' && !/^https?:\/\//i.test(banner.title) && (
-                      <h1 className="text-sm sm:text-base md:text-lg font-semibold text-white mb-1 tracking-wide drop-shadow-md uppercase">
+                      <h1 className="text-sm sm:text-base md:text-lg font-semibold text-black tracking-wide drop-shadow-md uppercase">
                         {banner.title}
                       </h1>
-                    )}
-                    {typeof banner.subtitle === 'string' && !/^https?:\/\//i.test(banner.subtitle) && (
-                      <p className="text-xs sm:text-sm md:text-base text-white opacity-95 line-clamp-2">
-                        {banner.subtitle}
-                      </p>
                     )}
                   </div>
                 </div>
@@ -226,8 +215,8 @@ const HeroBanner = ({
       )}
 
       {/* Click Hint */}
-      <div className="absolute top-3 right-3 z-10">
-        <div className="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
+      <div className="absolute top-1 right-4 z-10">
+        <div className="bg-black/40 text-white text-[10px] px-1 py-0.5 rounded-md backdrop-blur-sm">
           Click to explore
         </div>
       </div>
