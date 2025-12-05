@@ -247,7 +247,8 @@ const Home = () => {
           <div className="container mx-auto px-3 sm:px-4">
             <HeroBanner 
               banners={middleBanners}
-              autoPlay={false}
+              autoPlay={true}
+              interval={5000}
               showArrows={false}
               showDots={true}
               className="h-[200px] sm:h-[250px] md:h-[300px] lg:h-[350px] xl:h-[400px] rounded-lg overflow-hidden"
@@ -334,7 +335,8 @@ const Home = () => {
           <div className="container mx-auto px-3 sm:px-4">
             <HeroBanner 
               banners={bottomBanners}
-              autoPlay={false}
+              autoPlay={true}
+              interval={5000}
               showArrows={false}
               className="h-[150px] sm:h-[200px] md:h-[250px] lg:h-[300px] rounded-lg overflow-hidden"
             />
