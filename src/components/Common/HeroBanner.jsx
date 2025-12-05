@@ -70,28 +70,31 @@ const HeroBanner = ({
               index === currentSlide ? 'opacity-100 z-0 cursor-pointer' : 'opacity-0 pointer-events-none -z-10'
             }`}
           >
-            {/* Full-width Background Image - lazy loaded for performance */}
-            <img
-              src={banner.image?.url || '/api/placeholder/1920/720'}
-              alt={banner.title || 'Banner image'}
-              className="w-full h-full object-contain sm:object-cover object-center max-w-full max-h-full"
-              loading="lazy"
-              decoding="async"
+            {/* Background div - use bg-contain so the full image is visible for all sizes */}
+            <div
+              role="img"
+              aria-label={banner.title || 'Banner image'}
+              style={{ backgroundImage: `url(${banner.image?.url || '/api/placeholder/1920/720'})` }}
+              className="w-full h-full bg-center bg-no-repeat bg-contain sm:bg-cover"
             />
 
             {/* Banner Content - Bottom Aligned */}
             <div className="absolute inset-0 flex items-end">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-6 sm:pb-8 md:pb-12">
-                <div className="max-w-3xl">
-                  {/* Title - compact, stylish */}
-                  <h1 className="text-sm sm:text-base md:text-lg font-semibold text-white mb-1 tracking-wide drop-shadow-md uppercase">
-                    {banner.title}
-                  </h1>
+              <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 w-full pb-3 sm:pb-6 md:pb-8">
+                <div className="max-w-3xl px-4 sm:px-0">
+                  {/* Title - compact, stylish (skip if value is a URL) */}
+                  {typeof banner.title === 'string' && !/^https?:\/\//i.test(banner.title) && (
+                    <h1 className="text-sm sm:text-base md:text-lg font-semibold text-white mb-1 tracking-wide drop-shadow-md uppercase">
+                      {banner.title}
+                    </h1>
+                  )}
 
-                  {/* Subtitle - compact */}
-                  <p className="text-xs sm:text-sm md:text-base text-white opacity-95 line-clamp-2">
-                    {banner.subtitle}
-                  </p>
+                  {/* Subtitle - compact (skip if value is a URL) */}
+                  {typeof banner.subtitle === 'string' && !/^https?:\/\//i.test(banner.subtitle) && (
+                    <p className="text-xs sm:text-sm md:text-base text-white opacity-95 line-clamp-2">
+                      {banner.subtitle}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
 import DataTable from '../../components/Admins/DataTable';
- import Button from '../../components/UI/Button';
+import Button from '../../components/UI/Button';
 import Modal from '../../components/UI/Modal';
 import Input from '../../components/UI/Input';
-import LoadingSpinner  from '../../components/Layout/LoadingSpinner';
+import LoadingSpinner from '../../components/Layout/LoadingSpinner';
+import Notification from '../../components/UI/Notification';
 
 // Mock data - replace with actual API calls
 const mockOrders = [
@@ -317,15 +318,14 @@ const OrdersManagement = () => {
             </div>
           </div>
 
-          <DataTable
-            data={filteredOrders}
-            columns={columns}
-            searchable
-            searchFields={['orderNumber', 'user.name', 'user.email']}
-            itemsPerPage={10}
-          />
-        </main>
-      </div>
+        <DataTable
+          data={filteredOrders}
+          columns={columns}
+          searchable
+          searchFields={['orderNumber', 'user.name', 'user.email']}
+          itemsPerPage={10}
+        />
+      </main>
 
       {/* Order Details Modal */}
       <Modal
