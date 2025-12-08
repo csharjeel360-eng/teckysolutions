@@ -49,10 +49,14 @@ const BlogContent = ({ content, processedContent, contentImages = [] }) => {
       }
 
       if (looksLikeHtml) {
+        // Process color tags in HTML content
+        let processedHtml = decoded;
+        processedHtml = processedHtml.replace(/\{color:(#[0-9A-Fa-f]{6}|[a-zA-Z]+)\}(.*?)\{\/color\}/g, '<span style="color: $1 !important;">$2</span>');
+        
         return (
           <div 
             className="blog-content"
-            dangerouslySetInnerHTML={{ __html: decoded }} 
+            dangerouslySetInnerHTML={{ __html: processedHtml }} 
           />
         );
       }

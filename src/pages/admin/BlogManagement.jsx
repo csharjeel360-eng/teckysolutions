@@ -8,6 +8,7 @@ import Modal from '../../components/UI/Modal';
 import Button from '../../components/UI/Button';
 import Input from '../../components/UI/Input';
 import LoadingSpinner from '../../components/Layout/LoadingSpinner';
+import RichTextEditor from '../../components/Admins/RichTextEditor';
 import useNotification from '../../hooks/useNotification';
 import { blogsAPI } from '../../services/api';
 
@@ -22,6 +23,7 @@ const BlogManagement = () => {
   // Modal states - same as AdminDashboard
   const [deleteModal, setDeleteModal] = useState({ open: false, type: '', item: null });
   const [viewModal, setViewModal] = useState({ open: false, item: null });
+  const [editorModal, setEditorModal] = useState({ open: false, item: null, content: '' });
   
   // Filter and sort states
   const [searchTerm, setSearchTerm] = useState('');
@@ -88,6 +90,59 @@ const BlogManagement = () => {
   const closeModals = () => {
     setViewModal({ open: false, item: null });
     setDeleteModal({ open: false, type: '', item: null });
+    setEditorModal({ open: false, item: null, content: '' });
+  };
+
+  // Open editor modal
+  const openEditorModal = (blog) => {
+    setEditorModal({ 
+      open: true, 
+      item: blog, 
+      content: blog.content || '' 
+    });
+  };
+
+  // Handle editor content change
+  const handleEditorChange = (newContent) => {
+    setEditorModal(prev => ({
+      ...prev,
+      content: newContent
+    }));
+  };
+
+  // Save editor changes
+  const handleSaveEditor = async () => {
+    if (!editorModal.item) return;
+
+    try {
+      setSubmitting(true);
+      await blogsAPI.update(editorModal.item._id, {
+        content: editorModal.content
+      });
+      
+      // Update the blogs state
+      setBlogs(blogs.map(blog => 
+        blog._id === editorModal.item._id 
+          ? { ...blog, content: editorModal.content }
+          : blog
+      ));
+
+      addNotification({
+        type: 'success',
+        title: 'Success',
+        message: 'Blog content updated successfully'
+      });
+      closeModals();
+    } catch (error) {
+      console.error('Error saving blog:', error);
+      addNotification({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to save blog content'
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Delete operation - same pattern as AdminDashboard
@@ -419,6 +474,14 @@ const BlogManagement = () => {
               title="View Details"
             >
               <Eye className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="small"
+              onClick={() => openEditorModal(item)}
+              title="Edit Content"
+            >
+              <FileText className="w-4 h-4" />
             </Button>
             <Link to={`/admin/blogs/edit/${item._id}`}>
               <Button
@@ -799,6 +862,65 @@ const BlogManagement = () => {
             </Button>
           </div>
         </div>
+      </Modal>
+
+      {/* Blog Content Editor Modal */}
+      <Modal
+        isOpen={editorModal.open}
+        onClose={() => setEditorModal({ open: false, item: null, content: '' })}
+        title={`Edit Content: ${editorModal.item?.title || 'Blog Post'}`}
+        size="large"
+      >
+        {editorModal.item && (
+          <div className="space-y-4">
+            <div className="mb-4">
+              <div className="flex items-center space-x-3 pb-4 border-b">
+                <img 
+                  src={getImageUrl(editorModal.item)} 
+                  alt={editorModal.item.title || 'Blog Post'}
+                  className="w-12 h-12 rounded object-cover border"
+                />
+                <div>
+                  <p className="font-semibold text-gray-900">
+                    {editorModal.item.title || 'Untitled Blog Post'}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    by {getAuthorName(editorModal.item)}
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Blog Content
+              </label>
+              <RichTextEditor
+                value={editorModal.content}
+                onChange={handleEditorChange}
+                placeholder="Edit your blog content here..."
+              />
+            </div>
+
+            <div className="flex justify-end space-x-3 pt-4 border-t">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setEditorModal({ open: false, item: null, content: '' })}
+                disabled={submitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleSaveEditor}
+                disabled={submitting}
+              >
+                {submitting ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );

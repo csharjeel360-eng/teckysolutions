@@ -221,6 +221,9 @@ const BlogEditor = ({ blog = null, onSave, categories = [] }) => {
     
     let html = markdown;
 
+    // Color tags - must come FIRST before other formatting
+    html = html.replace(/\{color:(#[0-9A-Fa-f]{6}|[a-zA-Z]+)\}(.*?)\{\/color\}/g, '<span style="color: $1;">$2</span>');
+
     // Headers
     html = html.replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold mt-8 mb-4 text-gray-900">$1</h1>');
     html = html.replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold mt-6 mb-3 text-gray-900">$1</h2>');
@@ -243,6 +246,7 @@ const BlogEditor = ({ blog = null, onSave, categories = [] }) => {
     const lines = html.split('\n');
     const processedLines = [];
     let inList = false;
+    let emptyLineCount = 0;
 
     lines.forEach((line, index) => {
       const trimmedLine = line.trim();
@@ -254,6 +258,7 @@ const BlogEditor = ({ blog = null, onSave, categories = [] }) => {
         }
         const itemContent = trimmedLine.substring(2);
         processedLines.push(`<li class="text-gray-700">${itemContent}</li>`);
+        emptyLineCount = 0;
       } else {
         if (inList) {
           processedLines.push('</ul>');
@@ -267,6 +272,13 @@ const BlogEditor = ({ blog = null, onSave, categories = [] }) => {
           } else {
             processedLines.push(`<p class="my-4 leading-relaxed text-gray-700">${trimmedLine}</p>`);
           }
+          emptyLineCount = 0;
+        } else {
+          // Add empty line spacing (but limit consecutive empty lines to 1)
+          if (emptyLineCount === 0) {
+            processedLines.push('<br class="my-2" />');
+          }
+          emptyLineCount++;
         }
       }
     });
@@ -585,7 +597,7 @@ const BlogEditor = ({ blog = null, onSave, categories = [] }) => {
               {previewMode ? (
                 <div className="border border-gray-300 rounded-lg p-6 bg-white min-h-[500px]">
                   <div 
-                    className="prose prose-lg max-w-none"
+                    className="prose prose-lg max-w-none whitespace-pre-wrap break-words"
                     dangerouslySetInnerHTML={{ __html: generatePreviewContent() }}
                   />
                   {!content.trim() && (

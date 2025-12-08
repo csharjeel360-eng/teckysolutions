@@ -4,67 +4,19 @@ import { ArrowRight } from 'lucide-react';
 const HeroBanner = ({ 
   banners = [],
   autoPlay = true,
-  interval = 5000,
-  // mode: 'fade' (default) or 'slide'
-  mode = 'fade',
-  // if true, pick a random next slide each interval
-  random = false
+  interval = 5000 
 }) => {
   const [currentSlide, setCurrentSlide] = React.useState(0);
-  const containerRef = React.useRef(null);
-  const [containerHeight, setContainerHeight] = React.useState(null);
-  const [loadedMap, setLoadedMap] = React.useState({});
 
   React.useEffect(() => {
     if (!autoPlay || banners.length <= 1) return;
 
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => {
-        if (random) {
-          // pick a different random index
-          let next = prev;
-          if (banners.length <= 1) return prev;
-          while (next === prev) {
-            next = Math.floor(Math.random() * banners.length);
-          }
-          return next;
-        }
-
-        // sequential
-        return (prev + 1) % banners.length;
-      });
+      setCurrentSlide((prev) => (prev + 1) % banners.length);
     }, interval);
 
     return () => clearInterval(timer);
-  }, [banners.length, autoPlay, interval, random]);
-
-  // Compute container height based on current image aspect ratio so full image is visible
-  const computeHeightForIndex = (index) => {
-    const banner = banners[index];
-    if (!banner || !banner.image?.url || !containerRef.current) return;
-    const img = new Image();
-    img.src = banner.image.url;
-    img.onload = () => {
-      const containerWidth = containerRef.current.clientWidth || window.innerWidth;
-      if (img.naturalWidth && img.naturalHeight && containerWidth) {
-        const h = Math.ceil((containerWidth * img.naturalHeight) / img.naturalWidth);
-        setContainerHeight(h);
-      }
-    };
-    img.onerror = () => {
-      // fallback: clear explicit height
-      setContainerHeight(null);
-    };
-  };
-
-  React.useEffect(() => {
-    // compute on mount and when currentSlide changes
-    computeHeightForIndex(currentSlide);
-
-    const onResize = () => computeHeightForIndex(currentSlide);
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, [currentSlide, banners]);
+  }, [banners.length, autoPlay, interval]);
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % banners.length);
@@ -106,77 +58,45 @@ const HeroBanner = ({
   return (
     <div className="relative overflow-hidden w-full">
       {/* Banner Slides */}
-      <div ref={containerRef} style={containerHeight ? { height: containerHeight + 'px' } : {}} className="relative w-full overflow-hidden">
-        {mode === 'slide' ? (
-          // Slide mode: render slides in a horizontal row and translate
+      <div className="relative w-full aspect-[16/9] sm:aspect-[16/6] min-h-[180px] sm:min-h-[400px] md:min-h-[500px]">
+        {banners.map((banner, index) => (
           <div
-            className="flex h-full transition-transform duration-700 ease-in-out"
-            style={{ width: `${banners.length * 100}%`, transform: `translateX(-${(currentSlide * 100) / banners.length}%)` }}
+            key={banner._id}
+            role="group"
+            aria-roledescription="slide"
+            aria-hidden={index === currentSlide ? 'false' : 'true'}
+            onClick={() => index === currentSlide && handleBannerClick(banner)}
+            className={`absolute inset-0 transition-opacity duration-500 ${
+              index === currentSlide ? 'opacity-100 z-0 cursor-pointer' : 'opacity-0 pointer-events-none -z-10'
+            }`}
           >
-            {banners.map((banner) => (
-              <div key={banner._id} className="w-full" style={{ width: `${100 / banners.length}%` }}>
-                <div className="relative w-full h-full">
-                  <img
-                    src={banner.image?.url || '/api/placeholder/1920/720'}
-                    alt={banner.title || 'Banner image'}
-                    className="w-full h-auto object-contain transition-opacity duration-700"
-                    style={{ opacity: loadedMap[banner._id] ? 1 : 0 }}
-                    onLoad={() => setLoadedMap(prev => ({ ...prev, [banner._id]: true }))}
-                    onClick={() => handleBannerClick(banner)}
-                  />
+            {/* Full-width Background Image - lazy loaded for performance */}
+            <img
+              src={banner.image?.url || '/api/placeholder/1920/720'}
+              alt={banner.title || 'Banner image'}
+              className="w-full h-full object-contain sm:object-cover object-center max-w-full max-h-full"
+              loading="lazy"
+              decoding="async"
+            />
 
-                  {/* Title overlay at top - visible immediately */}
-                  <div className="absolute left-0 right-0 top-0 flex justify-center items-start pointer-events-none">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-3 sm:pt-4">
-                      <div className="max-w-3xl mx-auto text-center">
-                        {typeof banner.title === 'string' && !/^https?:\/\//i.test(banner.title) && (
-                          <h1 className="text-sm sm:text-base md:text-lg font-semibold text-white tracking-wide drop-shadow-md uppercase">
-                            {banner.title}
-                          </h1>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          // Fade mode (default): absolute stacked slides with opacity transitions
-          banners.map((banner, index) => (
-            <div
-              key={banner._id}
-              role="group"
-              aria-roledescription="slide"
-              aria-hidden={index === currentSlide ? 'false' : 'true'}
-              onClick={() => index === currentSlide && handleBannerClick(banner)}
-              className={`absolute inset-0 transition-opacity duration-500 ${
-                index === currentSlide ? 'opacity-100 z-0 cursor-pointer' : 'opacity-0 pointer-events-none -z-10'
-              }`}
-            >
-              <img
-                src={banner.image?.url || '/api/placeholder/1920/720'}
-                alt={banner.title || 'Banner image'}
-                className="w-full h-auto object-contain transition-opacity duration-700"
-                style={{ opacity: loadedMap[banner._id] ? 1 : 0 }}
-                onLoad={() => setLoadedMap(prev => ({ ...prev, [banner._id]: true }))}
-              />
+            {/* Banner Content - Bottom Aligned */}
+            <div className="absolute inset-0 flex items-end">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-6 sm:pb-8 md:pb-12">
+                <div className="max-w-3xl">
+                  {/* Title - compact, stylish */}
+                  <h1 className="text-sm sm:text-base md:text-lg font-semibold text-white mb-1 tracking-wide drop-shadow-md uppercase">
+                    {banner.title}
+                  </h1>
 
-              {/* Title overlay at top - visible immediately */}
-              <div className="absolute left-0 right-0 top-0   flex justify-center items-start pointer-events-none">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-3 sm:pt-4">
-                  <div className="max-w-3xl mx-auto text-center">
-                    {typeof banner.title === 'string' && !/^https?:\/\//i.test(banner.title) && (
-                      <h1 className="text-sm sm:text-base md:text-lg font-semibold text-black tracking-wide drop-shadow-md uppercase">
-                        {banner.title}
-                      </h1>
-                    )}
-                  </div>
+                  {/* Subtitle - compact */}
+                  <p className="text-xs sm:text-sm md:text-base text-white opacity-95 line-clamp-2">
+                    {banner.subtitle}
+                  </p>
                 </div>
               </div>
             </div>
-          ))
-        )}
+          </div>
+        ))}
       </div>
 
       {/* Navigation Arrows */}
@@ -215,8 +135,8 @@ const HeroBanner = ({
       )}
 
       {/* Click Hint */}
-      <div className="absolute top-1 right-4 z-10">
-        <div className="bg-black/40 text-white text-[10px] px-1 py-0.5 rounded-md backdrop-blur-sm">
+      <div className="absolute top-3 right-3 z-10">
+        <div className="bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
           Click to explore
         </div>
       </div>

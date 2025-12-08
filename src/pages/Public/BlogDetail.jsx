@@ -77,10 +77,32 @@ const BlogDetail = () => {
     // ✅ PRIORITY: ALWAYS use processedContent from backend
     // This ensures consistent formatting for both created and updated blogs
     if (blog.processedContent && blog.processedContent.trim()) {
+      // Decode HTML entities (handles encoded <, >, &, etc.) then process color tags
+      const decodeEntities = (input) => {
+        if (!input || typeof input !== 'string') return input;
+        let str = input;
+        let prev;
+        do {
+          prev = str;
+          str = str.replace(/&amp;/g, '&')
+                   .replace(/&lt;/g, '<')
+                   .replace(/&gt;/g, '>')
+                   .replace(/&quot;/g, '"')
+                   .replace(/&#39;/g, "'")
+                   .replace(/&nbsp;/g, ' ');
+          str = str.replace(/&#(\d+);/g, (m, code) => String.fromCharCode(parseInt(code, 10)));
+          str = str.replace(/&#x([0-9a-fA-F]+);/g, (m, code) => String.fromCharCode(parseInt(code, 16)));
+        } while (str !== prev);
+        return str;
+      };
+
+      let processedHtml = decodeEntities(blog.processedContent);
+      processedHtml = processedHtml.replace(/\{color:(#[0-9A-Fa-f]{6}|[a-zA-Z]+)\}(.*?)\{\/color\}/g, '<span style="color: $1 !important;">$2</span>');
+
       return (
         <div 
           className="blog-content"
-          dangerouslySetInnerHTML={{ __html: blog.processedContent }} 
+          dangerouslySetInnerHTML={{ __html: processedHtml }} 
         />
       );
     }
@@ -492,6 +514,12 @@ const BlogDetail = () => {
         .blog-content em {
           font-style: italic;
           color: #4b5563;
+        }
+        
+        .blog-content span[style*="color"] {
+          font-weight: inherit !important;
+          font-size: inherit !important;
+          line-height: inherit !important;
         }
         
         .blog-image-container {

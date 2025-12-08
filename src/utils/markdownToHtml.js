@@ -100,13 +100,20 @@ export default function convertMarkdownToHtml(markdown = '', contentImages = [],
       return;
     }
 
-    let processedLine = paragraphText
+    let processedLine = paragraphText;
+    
+    // Process all inline formatting including color tags
+    // Use a more robust approach to handle nested formatting
+    processedLine = processedLine
       .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>')
       .replace(/__(.*?)__/g, '<strong class="font-bold">$1</strong>')
       .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
       .replace(/_(.*?)_/g, '<em class="italic">$1</em>')
       .replace(/`(.*?)`/g, '<code class="bg-gray-100 px-2 py-1 rounded text-sm font-mono border">$1</code>')
       .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">$1</a>');
+    
+    // Process color tags LAST to preserve them through other formatting
+    processedLine = processedLine.replace(/\{color:(#[0-9A-Fa-f]{6}|[a-zA-Z]+)\}(.*?)\{\/color\}/g, '<span style="color: $1 !important;">$2</span>');
 
     const isImageOnly = processedLine.startsWith('<img') || (processedLine.startsWith('<div') && processedLine.includes('<img'));
 
@@ -147,7 +154,9 @@ export default function convertMarkdownToHtml(markdown = '', contentImages = [],
       flushParagraphBuffer();
       if (inList) { processedLines.push('</ul>'); inList = false; }
       const level = headingMatch[1].length;
-      const text = headingMatch[2];
+      let text = headingMatch[2];
+      // Process color tags in headings
+      text = text.replace(/\{color:(#[0-9A-Fa-f]{6}|[a-zA-Z]+)\}(.*?)\{\/color\}/g, '<span style="color: $1;">$2</span>');
       const sizes = ['text-4xl','text-3xl','text-2xl','text-xl','text-lg','text-base'];
       const sizeClass = sizes[Math.min(level-1, sizes.length-1)];
       processedLines.push(`<h${level} class="${sizeClass} font-bold mt-8 mb-4 text-gray-900">${text}</h${level}>`);
@@ -163,7 +172,10 @@ export default function convertMarkdownToHtml(markdown = '', contentImages = [],
         processedLines.push('<ul class="list-disc ml-6 my-4 space-y-2">');
         inList = true;
       }
-      processedLines.push(`<li class="text-gray-700">${unorderedMatch[1]}</li>`);
+      let listContent = unorderedMatch[1];
+      // Process color tags in list items
+      listContent = listContent.replace(/\{color:(#[0-9A-Fa-f]{6}|[a-zA-Z]+)\}(.*?)\{\/color\}/g, '<span style="color: $1;">$2</span>');
+      processedLines.push(`<li class="text-gray-700">${listContent}</li>`);
       continue;
     }
     if (orderedMatch) {

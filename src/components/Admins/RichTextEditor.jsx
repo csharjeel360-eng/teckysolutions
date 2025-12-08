@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Image, Bold, Italic, Link, List, Quote, Code, Heading1, Heading2, X } from 'lucide-react';
+import { Image, Bold, Italic, Link, List, Quote, Code, Heading1, Heading2, X, Palette } from 'lucide-react';
 
 const RichTextEditor = ({ 
   value, 
@@ -11,7 +11,9 @@ const RichTextEditor = ({
 }) => {
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
+  const colorInputRef = useRef(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [selectedColor, setSelectedColor] = useState('#000000');
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -24,7 +26,7 @@ const RichTextEditor = ({
     onChange(e.target.value);
   };
 
-  // Insert text at cursor position
+  // Insert text at cursor position - IMPROVED for inline formatting
   const insertTextAtCursor = (before, after = '', defaultText = '') => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -45,8 +47,16 @@ const RichTextEditor = ({
     
     onChange(newValue);
     
-    // Set cursor position
-    const newCursorPos = start + before.length + textToInsert.length + after.length;
+    // Position cursor: if text was selected, place after the formatted text; otherwise place inside/after the prefix
+    let newCursorPos;
+    if (selectedText) {
+      // Text was selected - place cursor after the closing tag
+      newCursorPos = start + before.length + selectedText.length + after.length;
+    } else {
+      // No text selected - place cursor after the opening tag (inside the formatting)
+      newCursorPos = start + before.length;
+    }
+    
     setTimeout(() => {
       textarea.setSelectionRange(newCursorPos, newCursorPos);
     }, 10);
@@ -231,13 +241,43 @@ const RichTextEditor = ({
     }
   };
 
-  // Formatting functions
+  // Formatting functions - IMPROVED to support inline formatting
+  // Helper: Check if cursor is at the start of a line
+  const isAtLineStart = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return false;
+    const start = textarea.selectionStart;
+    return start === 0 || value[start - 1] === '\n';
+  };
+
   const formatHeading1 = () => {
-    insertTextAtCursor('\n# ', '\n', 'Heading 1');
+    const prefix = isAtLineStart() ? '# ' : '\n# ';
+    insertTextAtCursor(prefix, '', 'Heading 1');
   };
 
   const formatHeading2 = () => {
-    insertTextAtCursor('\n## ', '\n', 'Heading 2');
+    const prefix = isAtLineStart() ? '## ' : '\n## ';
+    insertTextAtCursor(prefix, '', 'Heading 2');
+  };
+
+  const formatHeading3 = () => {
+    const prefix = isAtLineStart() ? '### ' : '\n### ';
+    insertTextAtCursor(prefix, '', 'Heading 3');
+  };
+
+  const formatHeading4 = () => {
+    const prefix = isAtLineStart() ? '#### ' : '\n#### ';
+    insertTextAtCursor(prefix, '', 'Heading 4');
+  };
+
+  const formatHeading5 = () => {
+    const prefix = isAtLineStart() ? '##### ' : '\n##### ';
+    insertTextAtCursor(prefix, '', 'Heading 5');
+  };
+
+  const formatHeading6 = () => {
+    const prefix = isAtLineStart() ? '###### ' : '\n###### ';
+    insertTextAtCursor(prefix, '', 'Heading 6');
   };
 
   const formatBold = () => {
@@ -265,15 +305,68 @@ const RichTextEditor = ({
   };
 
   const formatBulletList = () => {
-    insertTextAtCursor('\n- ', '\n', 'List item');
+    const prefix = isAtLineStart() ? '- ' : '\n- ';
+    insertTextAtCursor(prefix, '', 'List item');
   };
 
   const formatCode = () => {
+    // Code blocks always start on new line
     insertTextAtCursor('\n```\n', '\n```\n', '// Your code here');
   };
 
   const formatQuote = () => {
-    insertTextAtCursor('\n> ', '\n', 'Quote text');
+    const prefix = isAtLineStart() ? '> ' : '\n> ';
+    insertTextAtCursor(prefix, '', 'Quote text');
+  };
+
+  const formatTextColor = () => {
+    colorInputRef.current?.click();
+  };
+
+  const handleColorChange = (e) => {
+    const color = e.target.value;
+    setSelectedColor(color);
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = value.substring(start, end);
+    
+    if (selectedText) {
+      const colorText = selectedText || 'colored text';
+      // Format: {color:#FF0000}text{/color}
+      insertTextAtCursor(`{color:${color}}`, `{/color}`, colorText);
+    } else {
+      alert('Please select text to color it');
+    }
+  };
+
+  // ✅ IMPROVED: Process inline markdown formatting (bold, italic, links, code on same line)
+  const processInlineMarkdown = (text) => {
+    if (!text) return text;
+    
+    let result = text;
+    
+    // IMPORTANT: Process color FIRST before headings so color works inside headings
+    result = result.replace(/\{color:(#[0-9A-Fa-f]{6}|[a-zA-Z]+)\}(.*?)\{\/color\}/g, '<span style="color: $1;">$2</span>');
+    
+    // Then process other inline formats (before headings)
+    result = result.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>');
+    result = result.replace(/\*(.*?)\*/g, '<em class="italic">$1</em>');
+    result = result.replace(/`(.*?)`/g, '<code class="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono border">$1</code>');
+    result = result.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">$1</a>');
+    
+    // Process inline headings AFTER color so they don't interfere with color tags
+    // This allows: "# Title ## Subtitle text {color}text{/color}" all on one line
+    result = result.replace(/###### (.*?)(?=\s#|$)/g, '<h6 class="text-xs font-bold text-gray-900 my-0">$1</h6>');
+    result = result.replace(/##### (.*?)(?=\s#|$)/g, '<h5 class="text-sm font-bold text-gray-900 my-0">$1</h5>');
+    result = result.replace(/#### (.*?)(?=\s#|$)/g, '<h4 class="text-base font-bold text-gray-900 my-0">$1</h4>');
+    result = result.replace(/### (.*?)(?=\s#|$)/g, '<h3 class="text-lg font-bold text-gray-900 my-0">$1</h3>');
+    result = result.replace(/## (.*?)(?=\s#|$)/g, '<h2 class="text-xl font-bold text-gray-900 my-0">$1</h2>');
+    result = result.replace(/# (.*?)(?=\s#|$)/g, '<h1 class="text-2xl font-bold text-gray-900 my-0">$1</h1>');
+    
+    return result;
   };
 
   // ✅ FIXED: IMPROVED markdown to HTML conversion with BETTER image handling
@@ -361,6 +454,40 @@ const RichTextEditor = ({
       }
     });
 
+    // ✅ NEW: Handle headings with color tags inside them (e.g., "## {color:#cf1732}Heading 2{/color}")
+    // IMPORTANT: Do this FIRST before general color processing
+    html = html.replace(/^(#{1,6})\s+\{color:(#[0-9A-Fa-f]{6}|[a-zA-Z]+)\}(.*?)\{\/color\}\s*$/gm, (match, hashes, color, content) => {
+      const level = hashes.length;
+      const sizes = {
+        1: 'text-2xl',
+        2: 'text-xl',
+        3: 'text-lg',
+        4: 'text-base',
+        5: 'text-sm',
+        6: 'text-xs'
+      };
+      const marginTop = {
+        1: 'mt-2',
+        2: 'mt-1',
+        3: 'mt-1',
+        4: 'mt-1',
+        5: 'mt-0',
+        6: 'mt-0'
+      };
+      // Process any formatting inside the heading
+      const processedContent = processInlineMarkdown(content);
+      return `<h${level} class="${sizes[level]} font-bold ${marginTop[level]} mb-0 text-gray-900" style="color: ${color};">${processedContent}</h${level}>`;
+    });
+
+    // ✅ IMPROVED: Process remaining multi-line color tags (not in headings)
+    // This allows color to wrap around other content
+    html = html.replace(/\{color:(#[0-9A-Fa-f]{6}|[a-zA-Z]+)\}(.*?)\{\/color\}/gs, (match, color, content) => {
+      // Process the content inside color tags to convert headings and other formatting
+      const coloredContent = processInlineMarkdown(content);
+      return `<span style="color: ${color};">${coloredContent}</span>`;
+    });
+
+
     // Process the rest of the markdown
     const lines = html.split('\n');
     const processedLines = [];
@@ -376,7 +503,7 @@ const RichTextEditor = ({
       // Handle code blocks
       if (line.startsWith('```')) {
         if (inParagraph && paragraphContent.length > 0) {
-          processedLines.push(`<p class="my-3 leading-relaxed text-gray-700">${paragraphContent.join(' ')}</p>`);
+          processedLines.push(`<p class="my-1 leading-relaxed text-gray-700">${paragraphContent.join(' ')}</p>`);
           paragraphContent = [];
           inParagraph = false;
         }
@@ -405,7 +532,7 @@ const RichTextEditor = ({
       // Handle empty lines
       if (line === '') {
         if (inParagraph && paragraphContent.length > 0) {
-          processedLines.push(`<p class="my-3 leading-relaxed text-gray-700">${paragraphContent.join(' ')}</p>`);
+          processedLines.push(`<p class="my-1 leading-relaxed text-gray-700">${paragraphContent.join(' ')}</p>`);
           paragraphContent = [];
           inParagraph = false;
         }
@@ -415,39 +542,46 @@ const RichTextEditor = ({
         continue;
       }
 
-      // Handle headings
-      if (line.startsWith('# ')) {
+      // Handle headings - only if they are the ONLY content on the line (block-level)
+      // Multiple headings on same line are treated as inline content
+      const headingMatch = line.match(/^(#{1,6}) (.+)$/);
+      const multipleHeadings = (line.match(/#/g) || []).length > 1;
+      
+      if (headingMatch && !multipleHeadings) {
+        // Single heading on its own line - treat as block
         if (inParagraph && paragraphContent.length > 0) {
-          processedLines.push(`<p class="my-3 leading-relaxed text-gray-700">${paragraphContent.join(' ')}</p>`);
+          processedLines.push(`<p class="my-1 leading-relaxed text-gray-700">${paragraphContent.join(' ')}</p>`);
           paragraphContent = [];
           inParagraph = false;
         }
-        processedLines.push(`<h1 class="text-2xl font-bold mt-6 mb-3 text-gray-900">${line.substring(2)}</h1>`);
-        continue;
-      }
-      if (line.startsWith('## ')) {
-        if (inParagraph && paragraphContent.length > 0) {
-          processedLines.push(`<p class="my-3 leading-relaxed text-gray-700">${paragraphContent.join(' ')}</p>`);
-          paragraphContent = [];
-          inParagraph = false;
-        }
-        processedLines.push(`<h2 class="text-xl font-bold mt-5 mb-2 text-gray-900">${line.substring(3)}</h2>`);
-        continue;
-      }
-      if (line.startsWith('### ')) {
-        if (inParagraph && paragraphContent.length > 0) {
-          processedLines.push(`<p class="my-3 leading-relaxed text-gray-700">${paragraphContent.join(' ')}</p>`);
-          paragraphContent = [];
-          inParagraph = false;
-        }
-        processedLines.push(`<h3 class="text-lg font-bold mt-4 mb-2 text-gray-900">${line.substring(4)}</h3>`);
+        const hashes = headingMatch[1];
+        const content = headingMatch[2];
+        const level = hashes.length;
+        const sizes = {
+          1: 'text-2xl',
+          2: 'text-xl',
+          3: 'text-lg',
+          4: 'text-base',
+          5: 'text-sm',
+          6: 'text-xs'
+        };
+        const marginTop = {
+          1: 'mt-2',
+          2: 'mt-1',
+          3: 'mt-1',
+          4: 'mt-0',
+          5: 'mt-0',
+          6: 'mt-0'
+        };
+        
+        processedLines.push(`<h${level} class="${sizes[level]} font-bold ${marginTop[level]} mb-0 text-gray-900">${processInlineMarkdown(content)}</h${level}>`);
         continue;
       }
 
       // Handle bullet lists
       if (line.startsWith('- ')) {
         if (inParagraph && paragraphContent.length > 0) {
-          processedLines.push(`<p class="my-3 leading-relaxed text-gray-700">${paragraphContent.join(' ')}</p>`);
+          processedLines.push(`<p class="my-1 leading-relaxed text-gray-700">${paragraphContent.join(' ')}</p>`);
           paragraphContent = [];
           inParagraph = false;
         }
@@ -463,7 +597,7 @@ const RichTextEditor = ({
       // Handle blockquotes
       if (line.startsWith('> ')) {
         if (inParagraph && paragraphContent.length > 0) {
-          processedLines.push(`<p class="my-3 leading-relaxed text-gray-700">${paragraphContent.join(' ')}</p>`);
+          processedLines.push(`<p class="my-1 leading-relaxed text-gray-700">${paragraphContent.join(' ')}</p>`);
           paragraphContent = [];
           inParagraph = false;
         }
@@ -476,7 +610,7 @@ const RichTextEditor = ({
       
       if (isImageLine) {
         if (inParagraph && paragraphContent.length > 0) {
-          processedLines.push(`<p class="my-3 leading-relaxed text-gray-700">${paragraphContent.join(' ')}</p>`);
+          processedLines.push(`<p class="my-1 leading-relaxed text-gray-700">${paragraphContent.join(' ')}</p>`);
           paragraphContent = [];
           inParagraph = false;
         }
@@ -487,12 +621,8 @@ const RichTextEditor = ({
           inParagraph = true;
         }
 
-        // Process inline formatting for regular text
-        let processedLine = line
-          .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>')
-          .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
-          .replace(/`(.*?)`/g, '<code class="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono border">$1</code>')
-          .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">$1</a>');
+        // Process inline formatting for regular text using processInlineMarkdown
+        let processedLine = processInlineMarkdown(line);
 
         paragraphContent.push(processedLine);
       }
@@ -500,7 +630,7 @@ const RichTextEditor = ({
 
     // Close any open paragraph
     if (inParagraph && paragraphContent.length > 0) {
-      processedLines.push(`<p class="my-3 leading-relaxed text-gray-700">${paragraphContent.join(' ')}</p>`);
+      processedLines.push(`<p class="my-1 leading-relaxed text-gray-700">${paragraphContent.join(' ')}</p>`);
     }
 
     // Close any open list
@@ -521,9 +651,17 @@ const RichTextEditor = ({
         accept="image/*"
         className="hidden"
       />
+      {/* Hidden color input */}
+      <input
+        type="color"
+        ref={colorInputRef}
+        onChange={handleColorChange}
+        className="hidden"
+      />
 
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-1 p-3 bg-gray-50 border-b border-gray-300">
+        {/* Heading buttons - can use multiple on same line */}
         <button
           type="button"
           onClick={formatHeading1}
@@ -540,7 +678,40 @@ const RichTextEditor = ({
         >
           <Heading2 className="w-4 h-4" />
         </button>
+        <button
+          type="button"
+          onClick={formatHeading3}
+          className="p-2 text-gray-600 hover:bg-gray-200 rounded transition-colors text-xs font-bold"
+          title="Heading 3"
+        >
+          H3
+        </button>
+        <button
+          type="button"
+          onClick={formatHeading4}
+          className="p-2 text-gray-600 hover:bg-gray-200 rounded transition-colors text-xs font-bold"
+          title="Heading 4"
+        >
+          H4
+        </button>
+        <button
+          type="button"
+          onClick={formatHeading5}
+          className="p-2 text-gray-600 hover:bg-gray-200 rounded transition-colors text-xs font-bold"
+          title="Heading 5"
+        >
+          H5
+        </button>
+        <button
+          type="button"
+          onClick={formatHeading6}
+          className="p-2 text-gray-600 hover:bg-gray-200 rounded transition-colors text-xs font-bold"
+          title="Heading 6"
+        >
+          H6
+        </button>
         <div className="w-px h-6 bg-gray-300 mx-1"></div>
+        {/* Text formatting */}
         <button
           type="button"
           onClick={formatBold}
@@ -559,6 +730,14 @@ const RichTextEditor = ({
         </button>
         <button
           type="button"
+          onClick={formatTextColor}
+          className="p-2 text-gray-600 hover:bg-gray-200 rounded transition-colors"
+          title="Text Color"
+        >
+          <Palette className="w-4 h-4" />
+        </button>
+        <button
+          type="button"
           onClick={formatLink}
           className="p-2 text-gray-600 hover:bg-gray-200 rounded transition-colors"
           title="Insert Link"
@@ -566,6 +745,7 @@ const RichTextEditor = ({
           <Link className="w-4 h-4" />
         </button>
         <div className="w-px h-6 bg-gray-300 mx-1"></div>
+        {/* Media and blocks */}
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
@@ -612,7 +792,9 @@ const RichTextEditor = ({
           style={{ 
             fontFamily: 'monospace',
             minHeight: '400px',
-            lineHeight: '1.6'
+            lineHeight: '1.6',
+            whiteSpace: 'pre-wrap',
+            wordWrap: 'break-word'
           }}
         />
       </div>
@@ -689,11 +871,13 @@ const RichTextEditor = ({
           </span>
         </div>
         <div 
-          className="p-6 bg-white min-h-[200px] prose prose-sm max-w-none"
+          className="p-6 bg-white min-h-[200px]"
           style={{ 
             minHeight: '200px',
             fontFamily: 'system-ui, -apple-system, sans-serif',
-            lineHeight: '1.6'
+            lineHeight: '1.6',
+            whiteSpace: 'pre-wrap',
+            wordWrap: 'break-word'
           }}
         >
           {value ? (
@@ -701,7 +885,9 @@ const RichTextEditor = ({
               dangerouslySetInnerHTML={{ __html: convertToHTML(value) }}
               style={{
                 wordBreak: 'break-word',
-                overflowWrap: 'break-word'
+                overflowWrap: 'break-word',
+                whiteSpace: 'pre-wrap',
+                color: 'inherit'
               }}
             />
           ) : (

@@ -17,6 +17,8 @@ export const simpleMarkdownToHtml = (markdown) => {
       if (paragraphText) {
         // Process inline formatting within the paragraph
         let processedText = paragraphText
+          // Color tags - must come first to preserve color inside other formatting
+          .replace(/\{color:(#[0-9A-Fa-f]{6}|[a-zA-Z]+)\}(.*?)\{\/color\}/g, '<span style="color: $1;">$2</span>')
           // Bold - must come before italic
           .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
           // Italic
@@ -81,9 +83,15 @@ export const simpleMarkdownToHtml = (markdown) => {
       
       // Process list item content
       let itemContent = line.substring(2)
+        // Color tags first
+        .replace(/\{color:(#[0-9A-Fa-f]{6}|[a-zA-Z]+)\}(.*?)\{\/color\}/g, '<span style="color: $1;">$2</span>')
+        // Bold
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        // Italic
         .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        // Code
         .replace(/`(.*?)`/g, '<code>$1</code>')
+        // Links
         .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
       
       processedLines.push(`<li>${itemContent}</li>`);
