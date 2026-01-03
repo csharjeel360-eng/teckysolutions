@@ -97,7 +97,7 @@ const UserSignup = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+          <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center">
             <span className="text-white font-bold text-xl">T</span>
           </div>
         </div>
@@ -108,7 +108,7 @@ const UserSignup = () => {
           Or{' '}
           <Link
             to="/login"
-            className="font-medium text-blue-600 hover:text-blue-500"
+            className="font-medium text-black hover:text-gray-700"
           >
             sign in to your existing account
           </Link>
@@ -205,16 +205,16 @@ const UserSignup = () => {
                 type="checkbox"
                 checked={userData.acceptTerms}
                 onChange={handleChange}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 text-black focus:ring-black border-gray-300 rounded"
                 required
               />
               <label htmlFor="acceptTerms" className="ml-2 block text-sm text-gray-900">
                 I agree to the{' '}
-                <Link to="/terms-of-service" className="text-blue-600 hover:text-blue-500">
+                <Link to="/terms-of-service" className="text-black hover:text-gray-700">
                   Terms and Conditions
                 </Link>{' '}
                 and{' '}
-                <Link to="/privacy-policy" className="text-blue-600 hover:text-blue-500">
+                <Link to="/privacy-policy" className="text-black hover:text-gray-700">
                   Privacy Policy
                 </Link>
               </label>

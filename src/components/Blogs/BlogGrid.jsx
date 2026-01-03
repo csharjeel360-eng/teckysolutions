@@ -106,28 +106,7 @@ const BlogGrid = ({
         </section>
       )}
 
-      {/* Popular Blogs Carousel */}
-      {showFeaturedSection && popularBlogs.length > 0 && (
-        <section className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-gray-900">Trending Now</h2>
-            <button className="text-blue-600 hover:text-blue-700 font-medium text-sm">
-              View All Trending →
-            </button>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-            {popularBlogs.slice(0, 6).map(blog => (
-              <BlogCard 
-                key={blog?._id} 
-                blog={blog}
-                className="transform hover:scale-105 transition-transform duration-200"
-                onClick={() => handleBlogClick(blog)}
-              />
-            ))}
-          </div>
-        </section>
-      )}
+      {/* Removed Trending Now / Popular Blogs section as requested */}
 
       {/* Main Blogs Grid */}
       <section className="space-y-6">

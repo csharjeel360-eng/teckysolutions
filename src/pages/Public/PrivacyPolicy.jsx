@@ -9,7 +9,7 @@ const PrivacyPolicy = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-gradient-to-r from-[#2563eb] to-[#f97316] rounded-full flex items-center justify-center">
+            <div className="w-16 h-16 bg-gradient-to-r from-[black] to-[black] rounded-full flex items-center justify-center">
               <Shield className="w-8 h-8 text-white" />
             </div>
           </div>
@@ -39,7 +39,7 @@ const PrivacyPolicy = () => {
             
             <div className="space-y-4">
               <div className="flex items-start space-x-3">
-                <User className="w-5 h-5 text-[#2563eb] mt-1 flex-shrink-0" />
+                <User className="w-5 h-5 text-[black] mt-1 flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Personal Information</h3>
                   <ul className="text-gray-700 list-disc list-inside space-y-1">
@@ -52,7 +52,7 @@ const PrivacyPolicy = () => {
               </div>
 
               <div className="flex items-start space-x-3">
-                <Eye className="w-5 h-5 text-[#2563eb] mt-1 flex-shrink-0" />
+                <Eye className="w-5 h-5 text-[black] mt-1 flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Product & Performance Data</h3>
                   <ul className="text-gray-700 list-disc list-inside space-y-1">
@@ -65,7 +65,7 @@ const PrivacyPolicy = () => {
               </div>
 
               <div className="flex items-start space-x-3">
-                <Lock className="w-5 h-5 text-[#2563eb] mt-1 flex-shrink-0" />
+                <Lock className="w-5 h-5 text-[black] mt-1 flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Technical Information</h3>
                   <ul className="text-gray-700 list-disc list-inside space-y-1">
@@ -162,10 +162,10 @@ const PrivacyPolicy = () => {
 
           {/* Navigation */}
           <div className="border-t border-gray-200 pt-8 mt-8 flex justify-between">
-            <Link to="/" className="text-[#2563eb] hover:text-[#1e40af] font-medium">
+            <Link to="/" className="text-[black] hover:text-[gray-800] font-medium">
               ← Back to Home
             </Link>
-            <Link to="/terms-of-service" className="text-[#2563eb] hover:text-[#1e40af] font-medium">
+            <Link to="/terms-of-service" className="text-[black] hover:text-[gray-800] font-medium">
               Terms of Service →
             </Link>
           </div>

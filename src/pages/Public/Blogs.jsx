@@ -72,7 +72,7 @@ const Blogs = () => {
             <p className="text-gray-600 mb-6">{error}</p>
             <button
               onClick={fetchBlogs}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center mx-auto"
+              className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors flex items-center mx-auto"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
               Try Again
@@ -89,8 +89,8 @@ const Blogs = () => {
         {/* Page Header */}
         <div className="text-center mb-12">
           <div className="flex justify-center mb-4">
-            <div className="bg-blue-100 p-3 rounded-full">
-              <FileText className="w-8 h-8 text-blue-600" />
+            <div className="bg-gray-100 p-3 rounded-full">
+              <FileText className="w-8 h-8 text-black" />
             </div>
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Our Blog</h1>
@@ -175,7 +175,7 @@ const Blogs = () => {
                     setSearchTerm('');
                     setSearch('');
                   }}
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                  className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors"
                 >
                   View All Blogs
                 </button>

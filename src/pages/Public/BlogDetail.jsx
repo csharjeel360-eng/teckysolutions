@@ -490,7 +490,7 @@ const BlogDetail = () => {
         }
         
         .blog-content a {
-          color: #2563eb;
+          color: black;
           text-decoration: underline;
           transition: color 0.2s ease;
         }

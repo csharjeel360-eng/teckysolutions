@@ -43,12 +43,7 @@ const HeroBanner = ({
       <div className="relative w-full bg-gradient-to-r from-[#2563eb] to-[#f97316] text-white">
         <div className="w-full aspect-[16/9] sm:aspect-[16/6] min-h-[180px] sm:min-h-[300px] flex items-center justify-center">
           <div className="max-w-6xl mx-auto px-4 text-center">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
-              Welcome to ShopHub
-            </h1>
-            <p className="text-base sm:text-lg md:text-xl mb-6 opacity-90">
-              Discover amazing products at unbelievable prices
-            </p>
+            {/* Title and subtitle intentionally hidden */}
           </div>
         </div>
       </div>
@@ -83,15 +78,7 @@ const HeroBanner = ({
             <div className="absolute inset-0 flex items-end">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-6 sm:pb-8 md:pb-12">
                 <div className="max-w-3xl">
-                  {/* Title - compact, stylish */}
-                  <h1 className="text-sm sm:text-base md:text-lg font-semibold text-white mb-1 tracking-wide drop-shadow-md uppercase">
-                    {banner.title}
-                  </h1>
-
-                  {/* Subtitle - compact */}
-                  <p className="text-xs sm:text-sm md:text-base text-white opacity-95 line-clamp-2">
-                    {banner.subtitle}
-                  </p>
+                  {/* Title and subtitle intentionally hidden */}
                 </div>
               </div>
             </div>

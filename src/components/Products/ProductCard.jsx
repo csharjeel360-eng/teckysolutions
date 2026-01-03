@@ -83,7 +83,7 @@ const ProductCard = ({
     return (
       <Link 
         to={`/product/${createSlug(_id, title)}`}
-        className="block bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-lg transition-all duration-300 hover:border-[#2563eb]/20"
+        className="block bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-lg transition-all duration-300 hover:border-black/20"
       >
         <div className="flex gap-4">
           <div className="flex-shrink-0 relative">
@@ -93,7 +93,7 @@ const ProductCard = ({
               className="w-24 h-24 object-cover rounded-lg"
             />
             {hasDiscount && (
-              <div className="absolute top-2 left-2 bg-[#f97316] text-white px-2 py-1 rounded text-xs font-bold">
+              <div className="absolute top-2 left-2 bg-black text-white px-2 py-1 rounded text-xs font-bold">
                 SALE
               </div>
             )}
@@ -120,7 +120,7 @@ const ProductCard = ({
             </div>
             <div className="flex items-center justify-between mt-3">
               <div className="flex items-center space-x-2">
-                <span className="text-xl font-bold text-[#2563eb]">
+                <span className="text-xl font-bold text-black">
                   ${price?.toFixed(2)}
                 </span>
                 {hasDiscount && (
@@ -132,7 +132,7 @@ const ProductCard = ({
               {showActions && (
                 <button 
                   onClick={handleAddToCart}
-                  className="bg-[#f97316] hover:bg-[#ea580c] text-white rounded-lg font-semibold transition-all duration-300 hover:scale-105 flex items-center space-x-2 px-4 py-2"
+                  className="bg-black hover:bg-gray-800 text-white rounded-lg font-semibold transition-all duration-300 hover:scale-105 flex items-center space-x-2 px-4 py-2"
                 >
                   <ShoppingCart className="w-4 h-4" />
                   <span>Add to Cart</span>
@@ -148,7 +148,7 @@ const ProductCard = ({
   return (
     <Link 
       to={`/product/${createSlug(_id, title)}`}
-      className={`block bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 hover:border-[#2563eb]/20 group ${sizeConfig.container}`}
+      className={`block bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 hover:border-black/20 group ${sizeConfig.container}`}
     >
       <div className="relative">
         <img
@@ -164,19 +164,19 @@ const ProductCard = ({
           </div>
         )}
         {stock > 0 && stock < 10 && (
-          <div className="absolute top-2 left-2 bg-[#f97316] text-white px-2 py-1 rounded text-xs font-bold">
+          <div className="absolute top-2 left-2 bg-black text-white px-2 py-1 rounded text-xs font-bold">
             Low Stock
           </div>
         )}
         {hasDiscount && (
-          <div className="absolute top-2 right-2 bg-[#f97316] text-white px-2 py-1 rounded text-xs font-bold">
+          <div className="absolute top-2 right-2 bg-black text-white px-2 py-1 rounded text-xs font-bold">
             SALE
           </div>
         )}
       </div>
 
       <div className="mt-3">
-        <h3 className={`text-gray-900 line-clamp-2 group-hover:text-[#2563eb] transition-colors ${sizeConfig.title}`}>
+        <h3 className={`text-gray-900 line-clamp-2 group-hover:text-black transition-colors ${sizeConfig.title}`}>
           {title}
         </h3>
 
@@ -194,7 +194,7 @@ const ProductCard = ({
 
         <div className="flex items-center justify-between mt-3">
           <div className="flex items-center space-x-2">
-            <span className={`text-[#2563eb] ${sizeConfig.price}`}>
+            <span className={`text-black ${sizeConfig.price}`}>
               ${price?.toFixed(2)}
             </span>
             {hasDiscount && (
@@ -210,7 +210,7 @@ const ProductCard = ({
         <div className="flex items-center justify-between mt-4">
           <button 
             onClick={handleAddToCart}
-            className={`bg-[#f97316] hover:bg-[#ea580c] text-white rounded-lg font-semibold transition-all duration-300 hover:scale-105 flex items-center space-x-2 ${sizeConfig.button}`}
+            className={`bg-black hover:bg-gray-800 text-white rounded-lg font-semibold transition-all duration-300 hover:scale-105 flex items-center space-x-2 ${sizeConfig.button}`}
           >
             <ShoppingCart className="w-4 h-4" />
             <span>Add to Cart</span>

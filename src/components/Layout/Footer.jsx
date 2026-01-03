@@ -12,14 +12,23 @@ const Footer = () => {
           {/* Company Info */}
           <div className="lg:col-span-2">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-[#2563eb] to-[#f97316] rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">TB</span>
-              </div>
-              <div>
-                <span className="text-2xl font-bold">TrendyBreeze</span>
-                <p className="text-gray-400 text-sm mt-1">
-                  Your  trusted online shopping destination
-                </p>
+              {/* Logo */}
+              <div className="flex items-center space-x-2">
+                <div className="relative">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+                    <div className="w-6 h-6 border-2 border-white rounded transform rotate-45"></div>
+                  </div>
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full"></div>
+                  <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"></div>
+                </div>
+                <div>
+                  <span className="text-2xl font-bold text-white">
+                    Trendy<span className="text-blue-300">Breeze</span>
+                  </span>
+                  <p className="text-gray-400 text-sm mt-1">
+                    Your trusted online shopping destination
+                  </p>
+                </div>
               </div>
             </div>
           </div>

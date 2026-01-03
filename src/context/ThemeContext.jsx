@@ -11,16 +11,13 @@ export const THEMES = {
 
 // Available colors
 export const COLORS = {
-  RED: 'red',
-  BLUE: 'blue',
-  GREEN: 'green',
-  PURPLE: 'purple',
-  ORANGE: 'orange',
+  BLACK: 'black',
+  WHITE: 'white',
 };
 
 const initialState = {
   theme: THEMES.LIGHT,
-  color: COLORS.RED,
+  color: COLORS.BLACK,
   isDark: false,
   sidebarCollapsed: false,
 };

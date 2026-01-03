@@ -24,11 +24,11 @@ const Navbar = () => {
   const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
   const [recentSearches, setRecentSearches] = useState([]);
   const [popularSearches] = useState([
-    'Smartphone',
-    'Laptop',
-    'Headphones',
-    'Watch',
-    'Shoes'
+    'AI Tools',
+    'Software',
+    'Productivity',
+    'Marketing',
+    'Design Tools'
   ]);
   
   const { user, isAuthenticated, logout } = useAuth();
@@ -61,6 +61,7 @@ const Navbar = () => {
     window.addEventListener('cartUpdated', handler);
     return () => window.removeEventListener('cartUpdated', handler);
   }, []);
+  
   const navigate = useNavigate();
   const location = useLocation();
   // Detect if we're on a blog detail page like /blogs/:slug
@@ -172,8 +173,62 @@ const Navbar = () => {
 
   const isAdmin = user?.role === 'admin';
 
+  // Inline SVG Logo for TrendyBreeze
+  const Logo = () => (
+    <svg width="140" height="40" viewBox="0 0 140 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Logo Icon */}
+      <g>
+        <circle cx="20" cy="20" r="12" fill="url(#logoGradient)" />
+        <path 
+          d="M20,10 C22,10 22,12 20,12 C18,12 18,14 20,14 C22,14 22,16 20,16 C18,16 18,18 20,18 C22,18 22,20 20,20 C18,20 18,22 20,22 C22,22 22,24 20,24 C18,24 18,26 20,26 C22,26 22,28 20,28 C18,28 18,30 20,30" 
+          stroke="white" 
+          strokeWidth="2" 
+          strokeLinecap="round"
+          opacity="0.9"
+        />
+        <circle cx="15" cy="15" r="1.5" fill="white" />
+        <circle cx="25" cy="15" r="1.5" fill="white" />
+        <circle cx="15" cy="25" r="1.5" fill="white" />
+        <circle cx="25" cy="25" r="1.5" fill="white" />
+      </g>
+      
+      {/* Gradient Definition */}
+      <defs>
+        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#6366f1" />
+          <stop offset="50%" stopColor="#8b5cf6" />
+          <stop offset="100%" stopColor="#ec4899" />
+        </linearGradient>
+      </defs>
+      
+      {/* Text: TrendyBreeze */}
+      <text x="45" y="25" fontFamily="'Segoe UI', 'Arial', sans-serif" fontSize="24" fontWeight="700" fill="#111827">
+        Trendy
+        <tspan fill="url(#logoGradient)">Breeze</tspan>
+      </text>
+    </svg>
+  );
+
+  // Alternative: Simple text logo for better performance
+  const TextLogo = () => (
+    <div className="flex items-center space-x-2">
+      <div className="relative">
+        {/* Logo Symbol */}
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+          <div className="w-5 h-5 border-2 border-white rounded-sm transform rotate-45"></div>
+        </div>
+        {/* Tech dots */}
+        <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full"></div>
+        <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"></div>
+      </div>
+      <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+        Trendy<span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Breeze</span>
+      </span>
+    </div>
+  );
+
   return (
-    <nav className="bg-white shadow-lg sticky top-0 z-50">
+    <nav className="bg-white shadow-lg sticky top-0 z-50 border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo and Mobile Menu */}
@@ -181,17 +236,18 @@ const Navbar = () => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 text-gray-700 hover:text-[#2563eb] transition-colors rounded-lg hover:bg-gray-100"
+              className="md:hidden p-2 text-gray-700 hover:text-black transition-colors rounded-lg hover:bg-gray-100"
             >
               <Menu className="h-5 w-5" />
             </button>
 
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-[#2563eb] to-[#f97316] rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">TB</span>
-              </div>
-              <span className="text-xl font-bold text-gray-900 hidden sm:block">TrendyBreeze</span>
+            <Link to="/" className="flex items-center">
+              {/* Option 1: SVG Logo */}
+              {/* <Logo /> */}
+              
+              {/* Option 2: Text Logo (Recommended for better performance) */}
+              <TextLogo />
             </Link>
           </div>
 
@@ -199,154 +255,175 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-8 lg:ml-12">
             <Link 
               to="/" 
-              className="flex items-center space-x-2 text-gray-700 hover:text-[#2563eb] transition-colors font-medium"
+              className="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors font-medium group relative"
             >
-              <Home className="h-4 w-4" />
-              <span>Home</span>
+              <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-blue-50 flex items-center justify-center transition-colors">
+                <Home className="h-4 w-4 text-gray-600 group-hover:text-blue-600" />
+              </div>
+              <span className="group-hover:font-semibold">Home</span>
+              <div className="absolute -bottom-1 left-0 w-0 group-hover:w-full h-0.5 bg-blue-600 transition-all duration-300"></div>
             </Link>
+            
             <Link 
               to="/products" 
-              className="flex items-center space-x-2 text-gray-700 hover:text-[#2563eb] transition-colors font-medium"
+              className="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors font-medium group relative"
             >
-              <Package className="h-4 w-4" />
-              <span>Products</span>
+              <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-green-50 flex items-center justify-center transition-colors">
+                <Package className="h-4 w-4 text-gray-600 group-hover:text-green-600" />
+              </div>
+              <span className="group-hover:font-semibold">Products</span>
+              <div className="absolute -bottom-1 left-0 w-0 group-hover:w-full h-0.5 bg-green-600 transition-all duration-300"></div>
             </Link>
+            
             <Link 
               to="/categories" 
-              className="flex items-center space-x-2 text-gray-700 hover:text-[#2563eb] transition-colors font-medium"
+              className="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors font-medium group relative"
             >
-              <FolderOpen className="h-4 w-4" />
-              <span>Categories</span>
+              <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-purple-50 flex items-center justify-center transition-colors">
+                <FolderOpen className="h-4 w-4 text-gray-600 group-hover:text-purple-600" />
+              </div>
+              <span className="group-hover:font-semibold">Categories</span>
+              <div className="absolute -bottom-1 left-0 w-0 group-hover:w-full h-0.5 bg-purple-600 transition-all duration-300"></div>
             </Link>
+            
             <Link 
               to="/blogs" 
-              className="flex items-center space-x-2 text-gray-700 hover:text-[#2563eb] transition-colors font-medium"
+              className="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors font-medium group relative"
             >
-              <BookOpen className="h-4 w-4" />
-              <span>Blogs</span>
+              <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-orange-50 flex items-center justify-center transition-colors">
+                <BookOpen className="h-4 w-4 text-gray-600 group-hover:text-orange-600" />
+              </div>
+              <span className="group-hover:font-semibold">Blogs</span>
+              <div className="absolute -bottom-1 left-0 w-0 group-hover:w-full h-0.5 bg-orange-600 transition-all duration-300"></div>
             </Link>
           </div>
 
           {/* Search Bar (hidden on blog detail pages) */}
           {!isBlogDetail && (
             <div className="hidden md:flex flex-1 max-w-2xl mx-4 lg:mx-8" ref={searchRef}>
-            <form onSubmit={handleSearchSubmit} className="relative w-full">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  onFocus={() => searchQuery.trim() && setShowSearchSuggestions(true)}
-                  placeholder="Search products, brands, and more..."
-                  className="w-full px-4 py-2 pl-10 pr-20 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-transparent text-sm"
-                />
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-                
-                {/* Clear Search Button */}
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={handleClearSearch}
-                    className="absolute right-20 top-2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+              <form onSubmit={handleSearchSubmit} className="relative w-full">
+                <div className="relative group">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    onFocus={() => searchQuery.trim() && setShowSearchSuggestions(true)}
+                    placeholder="Search AI tools, software, blogs..."
+                    className="w-full px-4 py-2.5 pl-12 pr-24 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-gray-50 group-hover:bg-white transition-all duration-300"
+                  />
+                  <Search className="absolute left-4 top-3 h-4 w-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
+                  
+                  {/* Clear Search Button */}
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={handleClearSearch}
+                      className="absolute right-20 top-2.5 p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                  
+                  {/* Search Button */}
+                  <button 
+                    type="submit" 
+                    className="absolute right-2 top-1.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-5 py-1.5 rounded-lg text-sm font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-sm hover:shadow-md"
                   >
-                    <X className="h-4 w-4" />
+                    Search
                   </button>
-                )}
-                
-                {/* Search Button */}
-                <button 
-                  type="submit" 
-                  className="absolute right-2 top-1 bg-[#2563eb] text-white px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-[#1e40af] transition-colors"
-                >
-                  Search
-                </button>
-              </div>
-
-              {/* Search Suggestions */}
-              {showSearchSuggestions && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-96 overflow-y-auto">
-                  {/* Current Search */}
-                  {searchQuery.trim() && (
-                    <div className="p-3 border-b border-gray-100">
-                      <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
-                        Search for "{searchQuery}"
-                      </div>
-                      <button
-                        onClick={() => handleSuggestionClick(searchQuery)}
-                        className="w-full text-left p-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 flex items-center"
-                      >
-                        <Search className="w-4 h-4 mr-3 text-gray-400" />
-                        Search for "{searchQuery}"
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Recent Searches */}
-                  {recentSearches.length > 0 && (
-                    <div className="p-3 border-b border-gray-100">
-                      <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 flex items-center">
-                        <Clock className="w-3 h-3 mr-2" />
-                        Recent Searches
-                      </div>
-                      <div className="space-y-1">
-                        {recentSearches.map((search, index) => (
-                          <button
-                            key={index}
-                            onClick={() => handleSuggestionClick(search)}
-                            className="w-full text-left p-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 flex items-center justify-between"
-                          >
-                            <span>{search}</span>
-                            <Clock className="w-3 h-3 text-gray-400" />
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Popular Searches */}
-                  {popularSearches.length > 0 && (
-                    <div className="p-3 border-b border-gray-100">
-                      <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 flex items-center">
-                        <TrendingUp className="w-3 h-3 mr-2" />
-                        Popular Searches
-                      </div>
-                      <div className="space-y-1">
-                        {popularSearches.map((search, index) => (
-                          <button
-                            key={index}
-                            onClick={() => handleSuggestionClick(search)}
-                            className="w-full text-left p-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
-                          >
-                            {search}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Clear Filters Button */}
-                  {(location.pathname === '/products' && location.search) && (
-                    <div className="p-3 border-t border-gray-100">
-                      <button
-                        onClick={handleClearFilters}
-                        className="w-full text-center py-2 text-sm text-[#f97316] hover:text-[#ea580c] font-medium transition-colors"
-                      >
-                        Clear All Filters
-                      </button>
-                    </div>
-                  )}
                 </div>
-              )}
-            </form>
+
+                {/* Search Suggestions */}
+                {showSearchSuggestions && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-96 overflow-y-auto animate-fadeIn">
+                    {/* Current Search */}
+                    {searchQuery.trim() && (
+                      <div className="p-3 border-b border-gray-100 bg-gradient-to-r from-blue-50/50 to-purple-50/50">
+                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
+                          Search for "{searchQuery}"
+                        </div>
+                        <button
+                          onClick={() => handleSuggestionClick(searchQuery)}
+                          className="w-full text-left p-3 rounded-lg hover:bg-white transition-colors text-gray-800 flex items-center bg-white shadow-sm"
+                        >
+                          <Search className="w-4 h-4 mr-3 text-blue-500" />
+                          <span className="font-medium">"{searchQuery}"</span>
+                          <span className="ml-auto text-xs text-gray-500 px-2 py-1 bg-gray-100 rounded">Enter</span>
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Recent Searches */}
+                    {recentSearches.length > 0 && (
+                      <div className="p-3 border-b border-gray-100">
+                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 flex items-center">
+                          <Clock className="w-3 h-3 mr-2" />
+                          Recent Searches
+                        </div>
+                        <div className="space-y-1">
+                          {recentSearches.map((search, index) => (
+                            <button
+                              key={index}
+                              onClick={() => handleSuggestionClick(search)}
+                              className="w-full text-left p-2.5 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 flex items-center justify-between group"
+                            >
+                              <div className="flex items-center">
+                                <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center mr-3 group-hover:bg-blue-100 transition-colors">
+                                  <Clock className="w-3 h-3 text-gray-400" />
+                                </div>
+                                <span>{search}</span>
+                              </div>
+                              <div className="w-2 h-2 rounded-full bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Popular Searches */}
+                    {popularSearches.length > 0 && (
+                      <div className="p-3">
+                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 flex items-center">
+                          <TrendingUp className="w-3 h-3 mr-2" />
+                          Trending Now
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {popularSearches.map((search, index) => (
+                            <button
+                              key={index}
+                              onClick={() => handleSuggestionClick(search)}
+                              className="inline-flex items-center px-3 py-1.5 rounded-full text-sm bg-gradient-to-r from-blue-50 to-purple-50 text-gray-700 hover:from-blue-100 hover:to-purple-100 transition-all duration-300 border border-blue-100"
+                            >
+                              {search}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Clear Filters Button */}
+                    {(location.pathname === '/products' && location.search) && (
+                      <div className="p-3 border-t border-gray-100">
+                        <button
+                          onClick={handleClearFilters}
+                          className="w-full text-center py-2.5 text-sm text-gray-600 hover:text-black font-medium transition-colors rounded-lg hover:bg-gray-50"
+                        >
+                          Clear All Filters
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </form>
             </div>
           )}
 
           {/* Navigation Icons and User Menu */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             {/* Mobile Search Icon */}
             <button 
               onClick={() => navigate('/products')}
-              className="md:hidden p-2 text-gray-700 hover:text-[#2563eb] transition-colors rounded-lg hover:bg-gray-100"
+              className="md:hidden p-2.5 text-gray-700 hover:text-black transition-colors rounded-lg hover:bg-gray-100"
             >
               <Search className="h-5 w-5" />
             </button>
@@ -354,14 +431,17 @@ const Navbar = () => {
             {/* Cart Icon */}
             <Link 
               to="/cart"
-              className="p-2 text-gray-700 hover:text-[#2563eb] transition-colors rounded-lg hover:bg-gray-100 relative"
+              className="p-2.5 text-gray-700 hover:text-black transition-colors rounded-lg hover:bg-gray-100 relative group"
             >
-              <ShoppingCart className="h-5 w-5" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-[#2563eb] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                    {cartCount > 99 ? '99+' : cartCount}
-                  </span>
-                )}
+              <ShoppingCart className="h-5 w-5 group-hover:scale-110 transition-transform" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold shadow-sm">
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
+              <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                Cart ({cartCount})
+              </div>
             </Link>
 
             {/* User Menu */}
@@ -370,27 +450,30 @@ const Navbar = () => {
                 <>
                   <button
                     onClick={() => setIsProfileOpen(!isProfileOpen)}
-                    className="flex items-center space-x-2 p-2 text-gray-700 hover:text-[#2563eb] transition-colors rounded-lg hover:bg-gray-100"
+                    className="flex items-center space-x-2 p-2 text-gray-700 hover:text-black transition-colors rounded-lg hover:bg-gray-100 group"
                   >
-                    <div className="w-8 h-8 bg-gradient-to-r from-[#2563eb] to-[#f97316] rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-semibold shadow-sm group-hover:shadow-md transition-shadow">
                       {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                     </div>
                     <span className="hidden lg:block text-sm font-medium">Account</span>
                   </button>
 
                   {isProfileOpen && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
+                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50 animate-fadeIn">
                       {/* User Info */}
-                      <div className="px-4 py-3 border-b border-gray-100">
-                        <p className="text-sm font-semibold text-gray-900 truncate">
+                      <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                        <p className="text-sm font-semibold text-gray-900 truncate flex items-center">
+                          <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-xs mr-2">
+                            {user?.name?.charAt(0)?.toUpperCase()}
+                          </div>
                           {user?.name || 'User'}
                         </p>
-                        <p className="text-xs text-gray-500 truncate">
+                        <p className="text-xs text-gray-500 truncate mt-1">
                           {user?.email}
                         </p>
                         {isAdmin && (
-                          <span className="inline-block mt-1 px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full font-medium">
-                            Administrator
+                          <span className="inline-block mt-2 px-2.5 py-1 text-xs bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 rounded-full font-medium border border-purple-200">
+                            ⚡ Administrator
                           </span>
                         )}
                       </div>
@@ -401,20 +484,20 @@ const Navbar = () => {
                         {isAdmin && (
                           <Link
                             to="/admin/dashboard"
-                            className="flex items-center space-x-2 px-4 py-2 text-sm text-purple-700 hover:bg-purple-50 transition-colors"
+                            className="flex items-center space-x-3 px-4 py-2.5 text-sm text-purple-700 hover:bg-purple-50 transition-colors group"
                             onClick={() => setIsProfileOpen(false)}
                           >
-                            <Settings className="h-4 w-4" />
+                            <Settings className="h-4 w-4 group-hover:rotate-180 transition-transform" />
                             <span>Admin Dashboard</span>
                           </Link>
                         )}
                         
                         <Link
                           to="/profile"
-                          className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                          className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition-colors group"
                           onClick={() => setIsProfileOpen(false)}
                         >
-                          <User className="h-4 w-4" />
+                          <User className="h-4 w-4 group-hover:scale-110 transition-transform" />
                           <span>My Profile</span>
                         </Link>
                       </div>
@@ -423,9 +506,13 @@ const Navbar = () => {
                       <div className="border-t border-gray-100 pt-1">
                         <button
                           onClick={handleLogout}
-                          className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                          className="flex items-center space-x-3 w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors group"
                         >
-                          Sign Out
+                          <div className="w-4 h-4 flex items-center justify-center">
+                            <div className="w-3 h-0.5 bg-red-500 transform rotate-45"></div>
+                            <div className="w-3 h-0.5 bg-red-500 transform -rotate-45 -ml-3"></div>
+                          </div>
+                          <span>Sign Out</span>
                         </button>
                       </div>
                     </div>
@@ -435,13 +522,13 @@ const Navbar = () => {
                 <div className="flex items-center space-x-2">
                   <Link
                     to="/login"
-                    className="hidden sm:block bg-[#2563eb] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors text-sm"
+                    className="hidden sm:block bg-gradient-to-r from-gray-900 to-black text-white px-4 py-2.5 rounded-lg font-semibold hover:from-black hover:to-gray-900 transition-all duration-300 text-sm shadow-sm hover:shadow-md"
                   >
                     Sign In
                   </Link>
                   <Link
                     to="/login"
-                    className="sm:hidden p-2 text-gray-700 hover:text-[#2563eb] transition-colors rounded-lg hover:bg-gray-100"
+                    className="sm:hidden p-2.5 text-gray-700 hover:text-black transition-colors rounded-lg hover:bg-gray-100"
                   >
                     <User className="h-5 w-5" />
                   </Link>
@@ -461,16 +548,16 @@ const Navbar = () => {
                   value={searchQuery}
                   onChange={handleSearchChange}
                   onFocus={() => searchQuery.trim() && setShowSearchSuggestions(true)}
-                  placeholder="Search products..."
-                  className="w-full px-4 py-2 pl-10 pr-16 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-transparent text-sm"
+                  placeholder="Search AI tools, software..."
+                  className="w-full px-4 py-3 pl-12 pr-20 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-gray-50"
                 />
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-4 top-3.5 h-4 w-4 text-gray-400" />
                 
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={handleClearSearch}
-                    className="absolute right-12 top-2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute right-16 top-3 p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -478,7 +565,7 @@ const Navbar = () => {
                 
                 <button 
                   type="submit" 
-                  className="absolute right-2 top-1.5 bg-[#2563eb] text-white px-3 py-1 rounded-full text-xs font-semibold hover:bg-[#1e40af] transition-colors"
+                  className="absolute right-2 top-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:from-blue-700 hover:to-purple-700 transition-colors"
                 >
                   Go
                 </button>
@@ -488,7 +575,7 @@ const Navbar = () => {
               {(location.pathname === '/products' && location.search) && (
                 <button
                   onClick={handleClearFilters}
-                  className="w-full mt-2 text-center py-2 text-sm text-[#f97316] hover:text-[#ea580c] font-medium transition-colors"
+                  className="w-full mt-3 text-center py-2.5 text-sm text-gray-600 hover:text-black font-medium transition-colors bg-gray-50 rounded-lg hover:bg-gray-100"
                 >
                   Clear All Filters
                 </button>
@@ -499,83 +586,101 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-gray-200">
-            <div className="flex flex-col space-y-1 py-2">
+          <div className="md:hidden border-t border-gray-200 pt-4 pb-4">
+            <div className="flex flex-col space-y-1">
               <Link
                 to="/"
-                className="flex items-center space-x-2 px-4 py-3 text-gray-700 hover:text-[#2563eb] hover:bg-blue-50 transition-colors font-medium rounded-lg"
+                className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-black hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-colors font-medium rounded-xl"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <Home className="h-4 w-4" />
+                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <Home className="h-4 w-4 text-blue-600" />
+                </div>
                 <span>Home</span>
               </Link>
+              
               <Link
                 to="/products"
-                className="flex items-center space-x-2 px-4 py-3 text-gray-700 hover:text-[#2563eb] hover:bg-blue-50 transition-colors rounded-lg"
+                className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-black hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-colors rounded-xl"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <Package className="h-4 w-4" />
+                <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                  <Package className="h-4 w-4 text-green-600" />
+                </div>
                 <span>Products</span>
               </Link>
+              
               <Link
                 to="/categories"
-                className="flex items-center space-x-2 px-4 py-3 text-gray-700 hover:text-[#2563eb] hover:bg-blue-50 transition-colors rounded-lg"
+                className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-black hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-colors rounded-xl"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <FolderOpen className="h-4 w-4" />
+                <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                  <FolderOpen className="h-4 w-4 text-purple-600" />
+                </div>
                 <span>Categories</span>
               </Link>
+              
               <Link
                 to="/blogs"
-                className="flex items-center space-x-2 px-4 py-3 text-gray-700 hover:text-[#2563eb] hover:bg-blue-50 transition-colors rounded-lg"
+                className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-black hover:bg-gradient-to-r hover:from-orange-50 hover:to-yellow-50 transition-colors rounded-xl"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <BookOpen className="h-4 w-4" />
+                <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center">
+                  <BookOpen className="h-4 w-4 text-orange-600" />
+                </div>
                 <span>Blogs</span>
               </Link>
 
               {/* Cart in Mobile Menu */}
               <Link
                 to="/cart"
-                className="flex items-center space-x-2 px-4 py-3 text-gray-700 hover:text-[#2563eb] hover:bg-blue-50 transition-colors rounded-lg"
+                className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-black hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 transition-colors rounded-xl"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <ShoppingCart className="h-4 w-4" />
-                <span>Shopping Cart</span>
+                <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center relative">
+                  <ShoppingCart className="h-4 w-4 text-gray-600" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                      {cartCount}
+                    </span>
+                  )}
+                </div>
+                <span>Shopping Cart {cartCount > 0 && `(${cartCount})`}</span>
               </Link>
               
               {/* Admin Dashboard Button in Mobile Menu */}
               {isAuthenticated && isAdmin && (
                 <Link 
                   to="/admin/dashboard" 
-                  className="flex items-center space-x-2 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                  className="flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-sm"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <Settings className="h-4 w-4" />
-                  <span>Admin Dashboard</span>
+                  <span className="font-semibold">Admin Dashboard</span>
                 </Link>
               )}
               
               {/* Auth Links */}
               {!isAuthenticated ? (
-                <div className="flex space-x-2 px-4 py-3">
+                <div className="flex space-x-3 px-4 py-3">
                   <Link
                     to="/login"
-                    className="flex-1 text-center bg-[#2563eb] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors text-sm"
+                    className="flex-1 text-center bg-gradient-to-r from-gray-900 to-black text-white px-4 py-3 rounded-xl font-semibold hover:from-black hover:to-gray-900 transition-all duration-300 text-sm shadow-sm"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Sign In
                   </Link>
                   <Link
                     to="/register"
-                    className="flex-1 text-center border border-[#2563eb] text-[#2563eb] px-4 py-2 rounded-lg font-semibold hover:bg-[#2563eb] hover:text-white transition-colors text-sm"
+                    className="flex-1 text-center border border-gray-300 text-gray-700 px-4 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-colors text-sm"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Sign Up
                   </Link>
                 </div>
               ) : (
-                <div className="px-4 py-3 border-t border-gray-200">
+                <div className="px-4 py-3 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-white rounded-xl mt-2">
                   <p className="text-xs text-gray-500 mb-2">Signed in as</p>
                   <p className="text-sm font-semibold text-gray-900 truncate">
                     {user?.name || 'User'}

@@ -1,0 +1,88 @@
+<svg 
+  width="40" 
+  height="40" 
+  viewBox="0 0 40 40" 
+  fill="none" 
+  xmlns="http://www.w3.org/2000/svg"
+  class="w-10 h-10"
+>
+  <!-- Main square -->
+  <rect 
+    x="0" 
+    y="0" 
+    width="40" 
+    height="40" 
+    rx="8" 
+    fill="url(#main-gradient)"
+  />
+  
+  <!-- Rotated square -->
+  <rect
+    x="12"
+    y="12"
+    width="16"
+    height="16"
+    rx="2"
+    transform="rotate(45 20 20)"
+    stroke="white"
+    stroke-width="2"
+    fill="none"
+  />
+  
+  <!-- Top-right accent dot -->
+  <circle 
+    cx="34" 
+    cy="6" 
+    r="6" 
+    fill="url(#top-dot-gradient)"
+  />
+  
+  <!-- Bottom-left accent dot -->
+  <circle 
+    cx="6" 
+    cy="34" 
+    r="4" 
+    fill="url(#bottom-dot-gradient)"
+  />
+  
+  <defs>
+    <!-- from-blue-500 to-purple-500 -->
+    <linearGradient 
+      id="main-gradient" 
+      x1="0" 
+      y1="0" 
+      x2="40" 
+      y2="40"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop stop-color="#3B82F6" /> <!-- blue-500 -->
+      <stop offset="1" stop-color="#8B5CF6" /> <!-- purple-500 -->
+    </linearGradient>
+    
+    <!-- from-cyan-400 to-blue-400 -->
+    <linearGradient 
+      id="top-dot-gradient" 
+      x1="28" 
+      y1="0" 
+      x2="40" 
+      y2="12"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop offset="0%" stop-color="#22D3EE" /> <!-- cyan-400 -->
+      <stop offset="100%" stop-color="#60A5FA" /> <!-- blue-400 -->
+    </linearGradient>
+    
+    <!-- from-purple-400 to-pink-400 -->
+    <linearGradient 
+      id="bottom-dot-gradient" 
+      x1="0" 
+      y1="28" 
+      x2="12" 
+      y2="40"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop offset="0%" stop-color="#A78BFA" /> <!-- purple-400 -->
+      <stop offset="100%" stop-color="#F472B6" /> <!-- pink-400 -->
+    </linearGradient>
+  </defs>
+</svg>

@@ -8,7 +8,7 @@ const NotFound = () => {
       <div className="max-w-md w-full text-center">
         {/* 404 Illustration */}
         <div className="mb-8">
-          <div className="mx-auto w-48 h-48 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
+          <div className="mx-auto w-48 h-48 bg-gradient-to-br from-gray-100 to-white rounded-full flex items-center justify-center">
             <span className="text-6xl">404</span>
           </div>
         </div>
@@ -34,7 +34,7 @@ const NotFound = () => {
         </div>
 
         {/* Additional Help */}
-        <div className="mt-12 p-6 bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="mt-12 p-6 bg-white rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-lg font-medium text-gray-900 mb-2">Need Help?</h3>
           <p className="text-gray-600 mb-4">
             If you believe this is an error, please contact our support team.
@@ -58,17 +58,17 @@ const NotFound = () => {
         {/* Quick Links */}
         <div className="mt-8">
           <p className="text-sm text-gray-500 mb-4">Quick Links</p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link to="/categories" className="text-blue-600 hover:text-blue-700 text-sm">
+            <div className="flex flex-wrap justify-center gap-4">
+            <Link to="/categories" className="text-black hover:text-gray-700 text-sm">
               Categories
             </Link>
-            <Link to="/blogs" className="text-blue-600 hover:text-blue-700 text-sm">
+            <Link to="/blogs" className="text-black hover:text-gray-700 text-sm">
               Blog
             </Link>
-            <Link to="/about" className="text-blue-600 hover:text-blue-700 text-sm">
+            <Link to="/about" className="text-black hover:text-gray-700 text-sm">
               About Us
             </Link>
-            <Link to="/contact" className="text-blue-600 hover:text-blue-700 text-sm">
+            <Link to="/contact" className="text-black hover:text-gray-700 text-sm">
               Contact
             </Link>
           </div>

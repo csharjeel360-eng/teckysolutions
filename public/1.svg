@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 350 100" width="1000" height="200">
+  <defs>
+    <linearGradient id="grad5" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#06b6d4"/>
+      <stop offset="50%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#ec4899"/>
+    </linearGradient>
+    <radialGradient id="radial" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.8"/>
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Icon -->
+  <g transform="translate(20, 20)">
+    <!-- Circular Base -->
+    <circle cx="40" cy="40" r="35" fill="url(#grad5)"/>
+    <circle cx="40" cy="40" r="34" fill="none" stroke="white" stroke-width="2" opacity="0.3"/>
+    
+    <!-- Wind Flow Lines -->
+    <path d="M20,40 Q40,20 60,40 Q80,60 100,40" 
+          stroke="white" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.9"/>
+    
+    <!-- Tech Dots -->
+    <g fill="white">
+      <circle cx="25" cy="25" r="2"/>
+      <circle cx="55" cy="25" r="2"/>
+      <circle cx="25" cy="55" r="2"/>
+      <circle cx="55" cy="55" r="2"/>
+      <circle cx="40" cy="40" r="3"/>
+    </g>
+    
+    <!-- Arrow/Play Symbol -->
+    <path d="M40,35 L45,40 L40,45 Z" fill="white" opacity="0.9"/>
+  </g>
+  
+  <!-- Text -->
+  <g transform="translate(100, 25)">
+    <!-- Main Logo Text -->
+    <text x="0" y="35" font-family="'SF Pro Display', 'Arial', sans-serif" font-size="35" font-weight="800" letter-spacing="-0.5" fill="#7e0ae4ff">
+      trendy
+      <tspan fill="url(#grad5)">breeze</tspan>
+    </text>
+    
+    <!-- Minimal Tagline -->
+    <text x="0" y="60" font-family="'SF Pro Display', 'Arial', sans-serif" font-size="12" font-weight="500" letter-spacing="3" fill="#9ca3af">
+      DIGITAL INNOVATION
+    </text>
+  </g>
+</svg>

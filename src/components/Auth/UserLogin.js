@@ -69,18 +69,18 @@ const UserLogin = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+          <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center">
             <span className="text-white font-bold text-xl">T</span>
           </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Sign in to your account
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-center text-sm text-gray-600">
           Or{' '}
           <Link
             to="/signup"
-            className="font-medium text-blue-600 hover:text-blue-500"
+            className="font-medium text-black hover:text-gray-700"
           >
             create a new account
           </Link>
@@ -154,7 +154,7 @@ const UserLogin = () => {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-black focus:ring-black border-gray-300 rounded"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
                   Remember me
@@ -164,7 +164,7 @@ const UserLogin = () => {
               <div className="text-sm">
                 <Link
                   to="/forgot-password"
-                  className="font-medium text-blue-600 hover:text-blue-500"
+                  className="font-medium text-black hover:text-gray-700"
                 >
                   Forgot your password?
                 </Link>
@@ -177,7 +177,7 @@ const UserLogin = () => {
                 variant="primary"
                 size="large"
                 loading={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700"
+                className="w-full bg-black hover:bg-gray-800"
               >
                 Sign in
               </Button>
@@ -185,11 +185,11 @@ const UserLogin = () => {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600">
               Are you an admin?{' '}
               <Link
                 to="/admin/login"
-                className="font-medium text-blue-600 hover:text-blue-500"
+                className="font-medium text-black hover:text-gray-700"
               >
                 Sign in here
               </Link>

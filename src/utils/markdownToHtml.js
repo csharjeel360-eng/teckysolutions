@@ -110,7 +110,7 @@ export default function convertMarkdownToHtml(markdown = '', contentImages = [],
       .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
       .replace(/_(.*?)_/g, '<em class="italic">$1</em>')
       .replace(/`(.*?)`/g, '<code class="bg-gray-100 px-2 py-1 rounded text-sm font-mono border">$1</code>')
-      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">$1</a>');
+      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-black hover:text-gray-700 underline">$1</a>');
     
     // Process color tags LAST to preserve them through other formatting
     processedLine = processedLine.replace(/\{color:(#[0-9A-Fa-f]{6}|[a-zA-Z]+)\}(.*?)\{\/color\}/g, '<span style="color: $1 !important;">$2</span>');
@@ -192,7 +192,7 @@ export default function convertMarkdownToHtml(markdown = '', contentImages = [],
     if (line.startsWith('> ')) {
       flushParagraphBuffer();
       if (inList) { processedLines.push('</ul>'); inList = false; }
-      processedLines.push(`<blockquote class="border-l-4 border-blue-500 pl-4 py-2 my-4 text-gray-600 italic bg-blue-50 rounded-r-lg">${line.substring(2)}</blockquote>`);
+      processedLines.push(`<blockquote class="border-l-4 border-gray-300 pl-4 py-2 my-4 text-gray-600 italic bg-gray-50 rounded-r-lg">${line.substring(2)}</blockquote>`);
       continue;
     }
 

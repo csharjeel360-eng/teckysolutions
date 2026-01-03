@@ -112,7 +112,7 @@ const Cart = () => {
           <div className="flex items-center gap-3">
             <Link 
               to="/products" 
-              className="p-2 text-gray-600 hover:text-[#2563eb] transition-colors rounded-lg hover:bg-gray-100"
+              className="p-2 text-gray-600 hover:text-[black] transition-colors rounded-lg hover:bg-gray-100"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
@@ -152,7 +152,7 @@ const Cart = () => {
                         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
                           <Link
                             to={`/product/${createSlug(item.product._id, item.product.title)}`}
-                            className="text-lg sm:text-xl font-semibold text-gray-900 hover:text-[#2563eb] line-clamp-2"
+                            className="text-lg sm:text-xl font-semibold text-gray-900 hover:text-[black] line-clamp-2"
                           >
                             {item.product.title || item.productTitle}
                           </Link>
@@ -253,17 +253,17 @@ const Cart = () => {
 
                     {/* External Link Notice */}
                     {isExternal && (
-                      <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                        <div className="flex items-center gap-2 mb-1">
-                          <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
-                          <span className="text-blue-800 text-xs sm:text-sm font-medium">
-                            External Store Product
-                          </span>
+                      <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                          <div className="flex items-center gap-2 mb-1">
+                            <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 text-black" />
+                            <span className="text-black text-xs sm:text-sm font-medium">
+                              External Store Product
+                            </span>
+                          </div>
+                          <p className="text-black text-xs sm:text-sm">
+                            Click "Buy Now" to purchase directly from the official store
+                          </p>
                         </div>
-                        <p className="text-blue-700 text-xs sm:text-sm">
-                          Click "Buy Now" to purchase directly from the official store
-                        </p>
-                      </div>
                     )}
                   </div>
                 );
@@ -285,7 +285,7 @@ const Cart = () => {
                 {externalProductsCount > 0 && (
                   <div className="flex justify-between items-center">
                     <span className="text-sm sm:text-base text-gray-600">External Products:</span>
-                    <span className="text-sm sm:text-base font-medium text-[#2563eb]">{externalProductsCount}</span>
+                    <span className="text-sm sm:text-base font-medium text-[black]">{externalProductsCount}</span>
                   </div>
                 )}
               </div>

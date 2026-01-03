@@ -70,7 +70,7 @@ const AdminSidebar = () => {
       <div className="lg:hidden fixed top-4 left-4 z-50">
         <button
           onClick={toggleMobileMenu}
-          className="p-2 bg-white rounded-lg shadow-lg border border-gray-200 text-gray-700 hover:text-[#2563eb] transition-colors"
+          className="p-2 bg-white rounded-lg shadow-lg border border-gray-200 text-gray-700 hover:text-[black] transition-colors"
         >
           {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
@@ -98,7 +98,7 @@ const AdminSidebar = () => {
               className="flex items-center space-x-2"
               onClick={closeMobileMenu}
             >
-              <div className="w-8 h-8 bg-gradient-to-r from-[#2563eb] to-[#f97316] rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-r from-[black] to-[black] rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">A</span>
               </div>
               <span className="text-xl font-bold text-gray-900">Admin Panel</span>
@@ -126,8 +126,8 @@ const AdminSidebar = () => {
                     onClick={closeMobileMenu}
                     className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
                       isActive(item.path)
-                        ? 'bg-gradient-to-r from-[#2563eb] to-[#f97316] text-white shadow-sm'
-                        : 'text-gray-700 hover:bg-gray-100 hover:text-[#2563eb]'
+                        ? 'bg-gradient-to-r from-[black] to-[black] text-white shadow-sm'
+                        : 'text-gray-700 hover:bg-gray-100 hover:text-[black]'
                     }`}
                   >
                     <Icon className="w-5 h-5" />

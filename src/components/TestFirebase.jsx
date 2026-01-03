@@ -22,9 +22,10 @@ const TestFirebase = () => {
   return (
     <div className="p-6">
       <h2 className="text-xl font-semibold mb-4">Test Firebase Google Sign-In</h2>
-      <button onClick={handleTest} className="px-4 py-2 bg-blue-600 text-white rounded">Sign in with Google (Test)</button>
+      <button onClick={handleTest} className="px-4 py-2 bg-black text-white rounded">Sign in with Google (Test)</button>
     </div>
   );
 };
 
 export default TestFirebase;
+

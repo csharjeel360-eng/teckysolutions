@@ -6,7 +6,6 @@ import useProducts from '../../hooks/useProducts';
 import useCategories from '../../hooks/useCategories';
 import useBlogs from '../../hooks/useBlogs';
 import HeroBanner from '../../components/Common/HeroBanner';
-import FlashSale from '../../components/Common/FlashSale';
 import Notification from '../../components/Common/Notification';
 import ProductGrid from '../../components/Products/ProductGrid';
 import CategoryGrid from '../../components/Categories/CategoryGrid';
@@ -45,41 +44,31 @@ const Home = () => {
 
   // Local state
   const [notification, setNotification] = useState({ show: false, message: '', type: '' });
-  const [showAllFeatured, setShowAllFeatured] = useState(false);
 
   // Memoized banner data
   const topBanners = useMemo(() => getBannersByPosition('home-top'), [getBannersByPosition, banners]);
   const middleBanners = useMemo(() => getBannersByPosition('home-middle'), [getBannersByPosition, banners]);
   const bottomBanners = useMemo(() => getBannersByPosition('home-bottom'), [getBannersByPosition, banners]);
 
-  // Memoized product data
+  // Memoized product data - exactly 9 products
   const featuredProducts = useMemo(() => 
-    Array.isArray(products) ? products.slice(0, 8) : []
+    Array.isArray(products) ? products.slice(0, 9) : []
   , [products]);
-
-  const popularProducts = useMemo(() => 
-    Array.isArray(products) ? products.slice(0, 12) : []
-  , [products]);
-
-  // Show only 4 featured products initially, or all if showAllFeatured is true
-  const displayedFeaturedProducts = useMemo(() => 
-    showAllFeatured ? featuredProducts : featuredProducts.slice(0, 4)
-  , [featuredProducts, showAllFeatured]);
 
   // Memoized category data
   const featuredCategories = useMemo(() => 
     Array.isArray(categories) ? categories.slice(0, 6) : []
   , [categories]);
 
-  // Memoized blog data
-  const popularBlogs = useMemo(() => 
-    Array.isArray(blogs) ? blogs.slice(0, 4) : []
+  // Memoized blog data - exactly 9 blogs
+  const featuredBlogs = useMemo(() => 
+    Array.isArray(blogs) ? blogs.slice(0, 9) : []
   , [blogs]);
 
   // Handle errors from hooks
   useEffect(() => {
-    // Set home page title
-    setPageTitle('Home');
+    // Set SEO title for homepage
+    setPageTitle('TrendyBreeze – Smart Software, AI Tools & Tech Blogs for Digital Growth');
     
     const errors = [];
     if (bannersError) errors.push(`Banners: ${bannersError}`);
@@ -95,9 +84,6 @@ const Home = () => {
       });
     }
   }, [bannersError, productsError, categoriesError, blogsError]);
-
-  // Flash sale end time (24 hours from now)
-  const flashSaleEndTime = useMemo(() => Date.now() + 24 * 60 * 60 * 1000, []);
 
   // Show loading spinner if any data is still loading
   if (bannersLoading || productsLoading || categoriesLoading) {
@@ -128,14 +114,19 @@ const Home = () => {
     }
   };
 
-  const toggleFeaturedProducts = () => {
-    setShowAllFeatured(!showAllFeatured);
+  // Common banner style props
+  const commonBannerProps = {
+    autoPlay: true,
+    showArrows: true,
+    showDots: true,
+    interval: 4000,
+    className: "h-[350px] md:h-[400px] rounded-3xl shadow-2xl overflow-hidden"
   };
-
-  // (Development) banner status removed from UI
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* SEO Meta Description should be added in your main HTML head via helmet or similar */}
+      
       {/* Notification */}
       {notification.show && (
         <Notification
@@ -146,74 +137,189 @@ const Home = () => {
         />
       )}
 
-      {/* Debug Info removed in production build */}
-
-      {/* Hero Banner Section */}
-      <section className="relative">
-        {topBanners.length > 0 ? (
-          <HeroBanner 
-            banners={topBanners}
-            autoPlay={true}
-            interval={5000}
-            className="h-[300px] sm:h-[350px] md:h-[400px] lg:h-[500px] xl:h-[600px]"
-          />
-        ) : (
-          // Fallback hero section when no banners
-          <div className="bg-gradient-to-r from-blue-600 to-purple-700 text-white py-12 sm:py-16 md:py-20 lg:py-24">
-            <div className="container mx-auto px-4 text-center">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-3 sm:mb-4">
-                Welcome to Our Store
-              </h1>
-              <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
-                Discover amazing products at unbeatable prices. Shop the latest trends with free shipping.
+      {/* Modern Gradient Hero Banner */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-black to-blue-950 text-white">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-0 w-72 h-72 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-l from-cyan-500/10 to-pink-500/10 rounded-full blur-3xl"></div>
+        </div>
+        
+        {/* Grid Pattern Overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
+        
+        <div className="container relative mx-auto px-4 py-20 sm:py-24 md:py-32 lg:py-40">
+          <div className="max-w-4xl mx-auto text-center">
+            {/* Modern Typography with Gradient */}
+            <div className="mb-8">
+              <span className="inline-block px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full text-sm font-semibold mb-6 backdrop-blur-sm">
+                ✨ Your Digital Growth Partner
+              </span>
+            </div>
+            
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black mb-8 leading-none tracking-tight">
+              <span className="block bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+                Smart Software
+              </span>
+              <span className="block bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
+                AI Tools &
+              </span>
+              <span className="block bg-gradient-to-r from-cyan-300 to-purple-400 bg-clip-text text-transparent">
+                Tech Insights
+              </span>
+            </h1>
+            
+            {/* Hero Section Content */}
+            <div className="mb-12 max-w-3xl mx-auto">
+              <p className="text-xl md:text-2xl text-gray-200 mb-6 leading-relaxed font-light">
+                At <span className="font-bold text-white">TrendyBreeze</span>, we bring you the latest software solutions, AI-powered tools, and high-value tech blogs designed to help businesses, creators, and professionals grow faster in the digital world.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-                <Link to="/products">
-                  <Button variant="primary" size="large" className="w-full sm:w-auto">
-                    Shop Now
-                  </Button>
-                </Link>
-                <Link to="/categories">
-                  <Button variant="outline" size="large" className="w-full sm:w-auto text-white border-white hover:bg-white hover:text-blue-600 transition-colors">
-                    Browse Categories
-                  </Button>
-                </Link>
+              
+              <div className="inline-flex items-center gap-4 bg-white/10 backdrop-blur-sm px-6 py-4 rounded-2xl border border-white/20">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">🚀</span>
+                </div>
+                <div className="text-left">
+                  <p className="text-lg font-bold text-white">Explore. Compare. Grow Smarter.</p>
+                  <p className="text-sm text-gray-300">Join thousands of successful users</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/products">
+                <Button 
+                  variant="primary" 
+                  size="large"
+                  className="group bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-xl hover:shadow-2xl transition-all duration-300 px-8 py-4 rounded-xl"
+                >
+                  <span className="flex items-center gap-3">
+                    <span className="text-2xl group-hover:scale-110 transition-transform">🚀</span>
+                    <span className="font-bold text-lg">Browse Software Tools</span>
+                  </span>
+                </Button>
+              </Link>
+              
+              <Link to="/blogs">
+                <Button 
+                  variant="outline" 
+                  size="large"
+                  className="border-2 border-white/30 text-white hover:bg-white/10 hover:border-white/50 backdrop-blur-sm transition-all duration-300 px-8 py-4 rounded-xl"
+                >
+                  <span className="flex items-center gap-3">
+                    <span className="text-2xl">📘</span>
+                    <span className="font-bold text-lg">Read Expert Blogs</span>
+                  </span>
+                </Button>
+              </Link>
+            </div>
+            
+            {/* Stats Preview */}
+            <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
+              {[
+                { value: "100+", label: "Software Tools", icon: "🛠️", gradient: "from-blue-500 to-cyan-500" },
+                { value: "AI", label: "Powered Solutions", icon: "🤖", gradient: "from-purple-500 to-pink-500" },
+                { value: "50+", label: "Expert Guides", icon: "📚", gradient: "from-cyan-500 to-blue-500" },
+                { value: "SEO", label: "Optimized Content", icon: "🔍", gradient: "from-pink-500 to-purple-500" }
+              ].map((stat, index) => (
+                <div key={index} className="text-center p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/10 transition-all duration-300">
+                  <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${stat.gradient} mb-3`}>
+                    <span className="text-2xl">{stat.icon}</span>
+                  </div>
+                  <div className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                    {stat.value}
+                  </div>
+                  <div className="text-sm text-gray-300">{stat.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        
+        {/* Scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+          <div className="w-8 h-14 border-2 border-white/30 rounded-full flex justify-center backdrop-blur-sm">
+            <div className="w-1 h-4 bg-gradient-to-b from-blue-400 to-cyan-300 mt-2 rounded-full animate-bounce"></div>
+          </div>
+        </div>
+        
+        {/* Bottom gradient transition */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-50 to-transparent"></div>
+      </section>
+
+      {/* Modern Top Banner Section - Updated to match middle banner structure */}
+      {topBanners.length > 0 ? (
+        <section className="py-8 sm:py-12 bg-gradient-to-r from-gray-50 to-white">
+          <div className="container mx-auto px-4">
+            <div className="relative overflow-hidden rounded-3xl shadow-2xl">
+              <HeroBanner 
+                banners={topBanners}
+                {...commonBannerProps}
+              />
+            </div>
+          </div>
+        </section>
+      ) : (
+        // Modern Placeholder Banner - Updated structure
+        <section className="py-8 sm:py-12 bg-gradient-to-r from-gray-50 to-white">
+          <div className="container mx-auto px-4">
+            <div className="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 rounded-3xl overflow-hidden shadow-2xl">
+              <div className="relative h-[350px] md:h-[400px] flex items-center">
+                <div className="absolute inset-0">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-blue-500/20 to-purple-500/20 rounded-full blur-3xl"></div>
+                  <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-cyan-500/20 to-blue-500/20 rounded-full blur-3xl"></div>
+                </div>
+                <div className="relative px-8 md:px-16 grid md:grid-cols-2 gap-8 items-center">
+                  <div>
+                    <span className="inline-block px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full text-sm font-semibold mb-6">
+                      ✨ Trending Now
+                    </span>
+                    <h3 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                      Discover <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">Innovation</span>
+                    </h3>
+                    <p className="text-xl text-gray-300 mb-6">
+                      Explore the latest technology trends and insights
+                    </p>
+                    <Button 
+                      variant="primary" 
+                      className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 border-0 shadow-lg"
+                    >
+                      Learn More
+                    </Button>
+                  </div>
+                  <div className="hidden md:block">
+                    <div className="relative">
+                      <div className="absolute -ins-8 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full blur-2xl"></div>
+                      <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
+                        <div className="text-6xl mb-4">🚀</div>
+                        <p className="text-white text-lg font-semibold">Featured Content</p>
+                        <p className="text-gray-300">Latest updates</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        )}
-      </section>
-
-      {/* Flash Sale Section */}
-      <section className="py-8 sm:py-10 md:py-12 bg-gradient-to-r from-red-500 to-orange-500 text-white">
-        <div className="container mx-auto px-3 sm:px-4">
-          <div className="text-center mb-6 sm:mb-8">
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-2">Flash Sale</h2>
-            <p className="text-sm sm:text-base md:text-lg opacity-90">Limited time offers - Don't miss out!</p>
-          </div>
-          <FlashSale 
-            products={featuredProducts}
-            endTime={flashSaleEndTime}
-          />
-          <div className="text-center mt-6 sm:mt-8">
-            <Link to="/products?sort=discount">
-              <Button variant="outline" size="large" className="text-white border-white hover:bg-white hover:text-orange-500 transition-colors w-full sm:w-auto">
-                View All Deals
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Categories Section */}
-      <section className="py-12 sm:py-14 md:py-16 bg-white">
-        <div className="container mx-auto px-3 sm:px-4">
-          <div className="text-center mb-8 sm:mb-10 md:mb-12">
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
-              Shop by Category
+      <section className="py-12 sm:py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12 md:mb-16">
+            <div className="inline-block mb-4">
+              <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-600 text-sm font-semibold rounded-full">
+                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                Browse Collections
+              </span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Find Your Perfect <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">Tools</span>
             </h2>
-            <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-              Explore our wide range of product categories.
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Explore our curated categories and discover tools tailored to your specific needs
             </p>
           </div>
           
@@ -221,197 +327,380 @@ const Home = () => {
             <>
               <CategoryGrid 
                 categories={featuredCategories}
-                className="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4"
+                className="grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 sm:gap-6"
+                cardClassName="group hover:shadow-2xl hover:scale-[1.02] transition-all duration-300"
               />
-              <div className="text-center mt-6 sm:mt-8">
+              <div className="text-center mt-10 sm:mt-12">
                 <Link to="/categories">
-                  <Button variant="primary" size="large" className="w-full sm:w-auto">
-                    View All Categories
+                  <Button 
+                    variant="primary" 
+                    size="large" 
+                    className="bg-gradient-to-r from-gray-900 to-black hover:from-black hover:to-gray-900 text-white border-0 shadow-lg hover:shadow-xl px-8 py-4 rounded-xl"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="text-xl">🔍</span>
+                      <span className="font-bold">Explore All Categories</span>
+                    </span>
                   </Button>
                 </Link>
               </div>
             </>
           ) : (
-            <div className="text-center py-8 sm:py-12">
-              <div className="text-gray-400 text-4xl sm:text-6xl mb-3 sm:mb-4">📁</div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-600 mb-2">No Categories Available</h3>
-              <p className="text-gray-500 text-sm sm:text-base">Categories will be available soon.</p>
+            <div className="text-center py-16 bg-gradient-to-b from-white to-gray-50 rounded-3xl">
+              <div className="relative inline-block mb-6">
+                <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl flex items-center justify-center">
+                  <span className="text-4xl">📁</span>
+                </div>
+                <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm">+</span>
+                </div>
+              </div>
+              <h3 className="text-2xl font-semibold text-gray-800 mb-3">Curating Amazing Categories</h3>
+              <p className="text-gray-600 max-w-md mx-auto mb-8">We're organizing the best tools into easy-to-browse collections</p>
+              <Button 
+                variant="outline" 
+                className="border-gray-300 text-gray-700 hover:border-gray-400"
+                onClick={handleRefreshBanners}
+              >
+                Check for Updates
+              </Button>
             </div>
           )}
         </div>
       </section>
 
-      {/* Middle Banner */}
-      {middleBanners.length > 0 && (
-        <section className="py-8 sm:py-12 md:py-16 bg-white">
-          <div className="container mx-auto px-3 sm:px-4">
-            <HeroBanner 
-              banners={middleBanners}
-              autoPlay={true}
-              interval={5000}
-              showArrows={false}
-              showDots={true}
-              className="h-[200px] sm:h-[250px] md:h-[300px] lg:h-[350px] xl:h-[400px] rounded-lg overflow-hidden"
-            />
+      {/* Products Section */}
+      <section className="py-12 sm:py-16 bg-gradient-to-b from-gray-50 to-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12 md:mb-16">
+            <div className="inline-block mb-4">
+              <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-50 to-emerald-50 text-green-600 text-sm font-semibold rounded-full">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                Featured Collection
+              </span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Top <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Software & AI</span> Tools
+            </h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Discover powerful tools to boost productivity, automate workflows, and scale your business
+            </p>
+          </div>
+          
+          {/* Feature Tags */}
+          <div className="flex flex-wrap justify-center gap-3 mb-12 max-w-4xl mx-auto">
+            {[
+              { icon: "🤖", label: "AI Tools", color: "bg-purple-100 text-purple-700" },
+              { icon: "🖼️", label: "Image Tools", color: "bg-blue-100 text-blue-700" },
+              { icon: "⚡", label: "Productivity", color: "bg-cyan-100 text-cyan-700" },
+              { icon: "🏢", label: "Business SaaS", color: "bg-emerald-100 text-emerald-700" },
+              { icon: "🔒", label: "Security", color: "bg-red-100 text-red-700" },
+              { icon: "📊", label: "Analytics", color: "bg-orange-100 text-orange-700" }
+            ].map((tag, index) => (
+              <span key={index} className={`inline-flex items-center gap-2 px-4 py-2 ${tag.color} rounded-full text-sm font-medium`}>
+                <span>{tag.icon}</span>
+                {tag.label}
+              </span>
+            ))}
+          </div>
+          
+          {featuredProducts.length > 0 ? (
+            <>
+              <ProductGrid 
+                products={featuredProducts}
+                className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+                cardClassName="hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
+              />
+              <div className="text-center mt-12">
+                <Link to="/products">
+                  <Button 
+                    variant="primary" 
+                    size="large" 
+                    className="group bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white border-0 shadow-xl hover:shadow-2xl px-10 py-5 rounded-xl"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="text-2xl group-hover:rotate-12 transition-transform">🚀</span>
+                      <span className="font-bold text-lg">Explore All Software Tools</span>
+                      <span className="group-hover:translate-x-2 transition-transform">→</span>
+                    </span>
+                  </Button>
+                </Link>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-16 bg-white rounded-3xl shadow-lg border border-gray-100">
+              <div className="relative inline-block mb-6">
+                <div className="w-24 h-24 bg-gradient-to-br from-green-100 to-emerald-100 rounded-2xl flex items-center justify-center animate-pulse">
+                  <span className="text-4xl">📦</span>
+                </div>
+                <div className="absolute -inset-4 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-full blur-xl"></div>
+              </div>
+              <h3 className="text-2xl font-semibold text-gray-800 mb-3">Loading Amazing Tools</h3>
+              <p className="text-gray-600 max-w-md mx-auto mb-8">We're curating the best software solutions for you</p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link to="/products">
+                  <Button variant="primary" className="bg-gradient-to-r from-green-600 to-emerald-600">
+                    Browse All Tools
+                  </Button>
+                </Link>
+                <Button variant="outline" className="border-gray-300">
+                  Notify Me
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Modern Middle Banner */}
+      {middleBanners.length > 0 ? (
+        <section className="py-8 sm:py-12 bg-gradient-to-r from-blue-50 to-cyan-50">
+          <div className="container mx-auto px-4">
+            <div className="relative overflow-hidden rounded-3xl shadow-2xl">
+              <HeroBanner 
+                banners={middleBanners}
+                {...commonBannerProps}
+              />
+            </div>
+          </div>
+        </section>
+      ) : (
+        // Modern Promotional Banner Placeholder
+        <section className="py-8 sm:py-12 bg-gradient-to-r from-blue-50 to-cyan-50">
+          <div className="container mx-auto px-4">
+            <div className="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 rounded-3xl overflow-hidden shadow-2xl">
+              <div className="relative h-[350px] md:h-[400px] flex items-center">
+                <div className="absolute inset-0">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-blue-500/20 to-purple-500/20 rounded-full blur-3xl"></div>
+                  <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-cyan-500/20 to-blue-500/20 rounded-full blur-3xl"></div>
+                </div>
+                <div className="relative px-8 md:px-16 grid md:grid-cols-2 gap-8 items-center">
+                  <div>
+                    <span className="inline-block px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full text-sm font-semibold mb-6">
+                      ✨ Featured Content
+                    </span>
+                    <h3 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                      Discover <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">Innovation</span>
+                    </h3>
+                    <p className="text-xl text-gray-300 mb-6">
+                      Explore the latest technology trends and insights
+                    </p>
+                    <Button 
+                      variant="primary" 
+                      className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 border-0 shadow-lg"
+                    >
+                      Learn More
+                    </Button>
+                  </div>
+                  <div className="hidden md:block">
+                    <div className="relative">
+                      <div className="absolute -ins-8 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full blur-2xl"></div>
+                      <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
+                        <div className="text-6xl mb-4">🎯</div>
+                        <p className="text-white text-lg font-semibold">Featured Content</p>
+                        <p className="text-gray-300">Latest updates</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       )}
 
-      {/* Featured Products Section */}
-      <section className="py-12 sm:py-14 md:py-16 bg-gray-50">
-        <div className="container mx-auto px-3 sm:px-4">
-          <div className="text-center mb-8 sm:mb-10 md:mb-12">
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
-              Featured Products
+      {/* Rest of the sections remain similar but with improved styling */}
+      
+      {/* Why Choose TrendyBreeze Section */}
+      <section className="py-12 sm:py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Why Choose <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">TrendyBreeze</span>?
             </h2>
-            <p className="text-sm sm:text-base md:text-lg text-gray-600">Handpicked items just for you</p>
           </div>
           
-          {displayedFeaturedProducts.length > 0 ? (
-            <>
-              <ProductGrid 
-                products={displayedFeaturedProducts}
-                className="grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"
-              />
-              <div className="text-center mt-6 sm:mt-8">
-                {featuredProducts.length > 4 && (
+          {/* Benefits Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto mb-16">
+            {[
+              { 
+                icon: "🚀", 
+                title: "Premium Quality Tools", 
+                desc: "Carefully curated software solutions",
+                gradient: "from-purple-500 to-pink-500",
+                bg: "bg-gradient-to-br from-purple-50 to-pink-50"
+              },
+              { 
+                icon: "📈", 
+                title: "SEO Optimized Content", 
+                desc: "Rank higher with our expert guides",
+                gradient: "from-blue-500 to-cyan-500",
+                bg: "bg-gradient-to-br from-blue-50 to-cyan-50"
+              },
+              { 
+                icon: "🔍", 
+                title: "Honest Reviews", 
+                desc: "Unbiased comparisons & ratings",
+                gradient: "from-green-500 to-emerald-500",
+                bg: "bg-gradient-to-br from-green-50 to-emerald-50"
+              },
+              { 
+                icon: "💡", 
+                title: "Regular Updates", 
+                desc: "Fresh content & latest tools",
+                gradient: "from-orange-500 to-red-500",
+                bg: "bg-gradient-to-br from-orange-50 to-red-50"
+              },
+              { 
+                icon: "🌐", 
+                title: "User-Friendly Platform", 
+                desc: "Easy navigation & fast loading",
+                gradient: "from-indigo-500 to-purple-500",
+                bg: "bg-gradient-to-br from-indigo-50 to-purple-50"
+              },
+              { 
+                icon: "✅", 
+                title: "Trusted Community", 
+                desc: "Join thousands of satisfied users",
+                gradient: "from-gray-900 to-black",
+                bg: "bg-gradient-to-br from-gray-50 to-black/5"
+              }
+            ].map((item, index) => (
+              <div key={index} className={`${item.bg} p-8 rounded-2xl border border-gray-200 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300`}>
+                <div className={`inline-flex p-4 rounded-xl bg-gradient-to-br ${item.gradient} mb-6`}>
+                  <span className="text-2xl text-white">{item.icon}</span>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
+                <p className="text-gray-600">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+          
+          {/* CTA Card */}
+          <div className="bg-gradient-to-r from-gray-900 via-black to-gray-900 text-white p-12 rounded-3xl max-w-4xl mx-auto border border-gray-800 shadow-2xl">
+            <div className="text-center">
+              <div className="inline-block mb-6">
+                <span className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-white text-sm font-semibold rounded-full backdrop-blur-sm">
+                  <span className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></span>
+                  Ready to Grow?
+                </span>
+              </div>
+              <h3 className="text-3xl md:text-4xl font-bold mb-6">
+                Start Your Digital <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">Journey</span> Today
+              </h3>
+              <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+                Join thousands of users who trust TrendyBreeze for discovering the best software, AI tools, and technology content.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link to="/products">
                   <Button 
                     variant="primary" 
                     size="large"
-                    onClick={toggleFeaturedProducts}
-                    className="w-full sm:w-auto mb-4 sm:mb-0 sm:mr-4"
+                    className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 border-0 shadow-lg"
                   >
-                    {showAllFeatured ? 'Show Less' : 'Show More'}
+                    <span className="flex items-center gap-3">
+                      <span>🚀</span>
+                      <span>Browse Tools</span>
+                    </span>
                   </Button>
-                )}
-                <Link to="/products">
-                  <Button variant="outline" size="large" className="w-full sm:w-auto">
-                    View All Products
+                </Link>
+                <Link to="/signup">
+                  <Button 
+                    variant="outline" 
+                    size="large"
+                    className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span>✨</span>
+                      <span>Join Free</span>
+                    </span>
                   </Button>
                 </Link>
               </div>
-            </>
-          ) : (
-            <div className="text-center py-8 sm:py-12">
-              <div className="text-gray-400 text-4xl sm:text-6xl mb-3 sm:mb-4">📦</div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-600 mb-2">No Products Available</h3>
-              <p className="text-gray-500 text-sm sm:text-base mb-4">Check back soon for amazing products.</p>
-              <Link to="/products">
-                <Button variant="primary" className="w-full sm:w-auto">
-                  Browse Products
-                </Button>
-              </Link>
             </div>
-          )}
-        </div>
-      </section>
-
-      {/* Popular Products Section */}
-      <section className="py-12 sm:py-14 md:py-16 bg-white">
-        <div className="container mx-auto px-3 sm:px-4">
-          <div className="text-center mb-8 sm:mb-10 md:mb-12">
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
-              Popular Right Now
-            </h2>
-            <p className="text-sm sm:text-base md:text-lg text-gray-600">Trending products everyone's buying</p>
           </div>
-          
-          {popularProducts.length > 0 ? (
-            <ProductGrid 
-              products={popularProducts}
-              className="grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4"
-            />
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-500 text-sm sm:text-base">No popular products at the moment.</p>
-            </div>
-          )}
         </div>
       </section>
 
-      {/* Bottom Banner */}
-      {bottomBanners.length > 0 && (
-        <section className="py-8 sm:py-12 md:py-16 bg-white">
-          <div className="container mx-auto px-3 sm:px-4">
-            <HeroBanner 
-              banners={bottomBanners}
-              autoPlay={true}
-              interval={5000}
-              showArrows={false}
-              className="h-[150px] sm:h-[200px] md:h-[250px] lg:h-[300px] rounded-lg overflow-hidden"
-            />
+      {/* Modern Bottom Banner - Updated to match middle banner structure */}
+      {bottomBanners.length > 0 ? (
+        <section className="py-8 sm:py-12 bg-gradient-to-r from-gray-50 to-white">
+          <div className="container mx-auto px-4">
+            <div className="relative overflow-hidden rounded-3xl shadow-2xl">
+              <HeroBanner 
+                banners={bottomBanners}
+                {...commonBannerProps}
+              />
+            </div>
+          </div>
+        </section>
+      ) : (
+        // Bottom Banner Placeholder - Updated structure
+        <section className="py-8 sm:py-12 bg-gradient-to-r from-gray-50 to-white">
+          <div className="container mx-auto px-4">
+            <div className="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 rounded-3xl overflow-hidden shadow-2xl">
+              <div className="relative h-[350px] md:h-[400px] flex items-center">
+                <div className="absolute inset-0">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-blue-500/20 to-purple-500/20 rounded-full blur-3xl"></div>
+                  <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-cyan-500/20 to-blue-500/20 rounded-full blur-3xl"></div>
+                </div>
+                <div className="relative px-8 md:px-16 grid md:grid-cols-2 gap-8 items-center">
+                  <div>
+                    <span className="inline-block px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full text-sm font-semibold mb-6">
+                      ✨ Stay Updated
+                    </span>
+                    <h3 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                      Latest <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">Insights</span>
+                    </h3>
+                    <p className="text-xl text-gray-300 mb-6">
+                      Get the most recent technology news and updates
+                    </p>
+                    <Button 
+                      variant="primary" 
+                      className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 border-0 shadow-lg"
+                    >
+                      Explore More
+                    </Button>
+                  </div>
+                  <div className="hidden md:block">
+                    <div className="relative">
+                      <div className="absolute -ins-8 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full blur-2xl"></div>
+                      <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
+                        <div className="text-6xl mb-4">📰</div>
+                        <p className="text-white text-lg font-semibold">Latest News</p>
+                        <p className="text-gray-300">Stay informed</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       )}
 
-      {/* Blog Section */}
-      <section className="py-12 sm:py-14 md:py-16 bg-gray-50">
-        <div className="container mx-auto px-3 sm:px-4">
-          <div className="text-center mb-8 sm:mb-10 md:mb-12">
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
-              From Our Blog
+      {/* Final Trust Section */}
+      <section className="py-12 md:py-16 bg-gradient-to-b from-gray-900 to-black text-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+              Trusted by <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">Digital Professionals</span>
             </h2>
-            <p className="text-sm sm:text-base md:text-lg text-gray-600">Latest news, tips, and shopping guides</p>
           </div>
           
-          {popularBlogs.length > 0 ? (
-            <>
-              <BlogGrid 
-                blogs={popularBlogs}
-                className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
-              />
-              <div className="text-center mt-6 sm:mt-8">
-                <Link to="/blogs">
-                  <Button variant="primary" size="large" className="w-full sm:w-auto">
-                    Read Our Blog
-                  </Button>
-                </Link>
-              </div>
-            </>
-          ) : (
-            <div className="text-center py-8 sm:py-12">
-              <div className="text-gray-400 text-4xl sm:text-6xl mb-3 sm:mb-4">📝</div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-600 mb-2">No Blog Posts Yet</h3>
-              <p className="text-gray-500 text-sm sm:text-base">Stay tuned for exciting content coming soon.</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Trust Badges Section */}
-      <section className="py-8 sm:py-10 md:py-12 bg-white border-t border-gray-200">
-        <div className="container mx-auto px-3 sm:px-4">
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8 text-center">
-            <div className="flex flex-col items-center p-3 sm:p-4">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-green-100 rounded-full flex items-center justify-center mb-2 sm:mb-3">
-                <span className="text-green-600 text-lg sm:text-xl">🚚</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">Free Shipping</h3>
-              <p className="text-xs sm:text-sm text-gray-600">On orders over $50</p>
-            </div>
-            
-            <div className="flex flex-col items-center p-3 sm:p-4">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-blue-100 rounded-full flex items-center justify-center mb-2 sm:mb-3">
-                <span className="text-blue-600 text-lg sm:text-xl">↩️</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">Easy Returns</h3>
-              <p className="text-xs sm:text-sm text-gray-600">30-day return policy</p>
-            </div>
-            
-            <div className="flex flex-col items-center p-3 sm:p-4">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-purple-100 rounded-full flex items-center justify-center mb-2 sm:mb-3">
-                <span className="text-purple-600 text-lg sm:text-xl">🔒</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">Secure Payment</h3>
-              <p className="text-xs sm:text-sm text-gray-600">100% secure checkout</p>
-            </div>
-            
-            <div className="flex flex-col items-center p-3 sm:p-4">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-orange-100 rounded-full flex items-center justify-center mb-2 sm:mb-3">
-                <span className="text-orange-600 text-lg sm:text-xl">📞</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">24/7 Support</h3>
-              <p className="text-xs sm:text-sm text-gray-600">Dedicated support</p>
+          {/* Final CTA */}
+          <div className="text-center mt-12 pt-8 border-t border-white/10">
+            <p className="text-2xl font-semibold mb-6">Ready to Transform Your Digital Experience?</p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/signup">
+                <Button 
+                  variant="primary" 
+                  size="large"
+                  className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 shadow-xl hover:shadow-2xl px-10 py-5 rounded-xl"
+                >
+                  Join TrendyBreeze Today
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

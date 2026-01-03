@@ -429,7 +429,7 @@ const ProductDetail = () => {
           <div className="text-red-600 text-xl mb-4">{error || 'Product not found'}</div>
           <Link
             to="/products"
-            className="text-blue-600 hover:text-blue-700 font-medium"
+            className="text-black hover:text-gray-700 font-medium"
           >
             Back to Products
           </Link>
@@ -521,12 +521,12 @@ const ProductDetail = () => {
               </div>
 
               {hasExternalLink && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                   <div className="flex items-center">
-                    <ExternalLink className="w-5 h-5 text-blue-600 mr-2" />
-                    <span className="text-blue-800 font-medium">External product available</span>
+                    <ExternalLink className="w-5 h-5 text-black mr-2" />
+                    <span className="text-black font-medium">External product available</span>
                   </div>
-                  <p className="text-blue-700 text-sm mt-1">
+                  <p className="text-black text-sm mt-1">
                     Click "Buy Now" to visit the official store.
                   </p>
                   {product.productLink && (
@@ -534,7 +534,7 @@ const ProductDetail = () => {
                       href={product.productLink} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-700 text-sm mt-2 inline-block break-all"
+                      className="text-black hover:text-gray-700 text-sm mt-2 inline-block break-all"
                     >
                       {product.productLink}
                     </a>
@@ -570,7 +570,7 @@ const ProductDetail = () => {
                     id="quantity"
                     value={quantity}
                     onChange={(e) => setQuantity(parseInt(e.target.value))}
-                    className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                     disabled={product.stock === 0}
                   >
                     {[...Array(Math.min(product.stock || 0, 10))].map((_, i) => (
@@ -659,7 +659,7 @@ const ProductDetail = () => {
                       {product.tags.map((tag, index) => (
                         <span 
                           key={index}
-                          className="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg text-sm font-medium"
+                          className="bg-gray-100 text-black px-3 py-2 rounded-lg text-sm font-medium"
                         >
                           {tag}
                         </span>
@@ -801,7 +801,7 @@ const ProductDetail = () => {
               <div className="lg:w-2/3">
                 {/* Review Form */}
                 {showReviewForm && isAuthenticated && !hasUserReviewed && (
-                  <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-8 relative">
+                  <div className="bg-gray-50 border-2 border-gray-200 rounded-lg p-6 mb-8 relative">
                     <button
                       onClick={resetReviewForm}
                       className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors"
@@ -810,7 +810,7 @@ const ProductDetail = () => {
                     </button>
                     
                     <div className="flex items-center gap-2 mb-4">
-                      <Edit3 className="w-5 h-5 text-blue-600" />
+                      <Edit3 className="w-5 h-5 text-black" />
                       <h3 className="text-xl font-semibold text-gray-900">Write Your Review</h3>
                     </div>
 
@@ -825,7 +825,7 @@ const ProductDetail = () => {
                           id="reviewTitle"
                           value={reviewTitle}
                           onChange={(e) => setReviewTitle(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                           placeholder="Give your review a title (e.g., 'Great product!', 'Would recommend')"
                           required
                           disabled={isSubmittingReview}
@@ -942,8 +942,8 @@ const ProductDetail = () => {
                       >
                         <div className="flex items-start justify-between mb-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                              <User className="w-5 h-5 text-blue-600" />
+                            <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                              <User className="w-5 h-5 text-black" />
                             </div>
                             <div>
                               <div className="flex items-center gap-2">
@@ -951,7 +951,7 @@ const ProductDetail = () => {
                                   {review.user?.name || 'Anonymous User'}
                                 </h4>
                                 {user && (review.user?._id === user._id || review.user === user._id) && (
-                                  <span className="inline-flex items-center gap-1 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                                  <span className="inline-flex items-center gap-1 bg-gray-100 text-black text-xs px-2 py-1 rounded-full">
                                     <CheckCircle className="w-3 h-3" />
                                     You
                                   </span>

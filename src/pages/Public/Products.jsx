@@ -205,12 +205,12 @@ const Products = () => {
               
               {/* Search Filter Badge */}
               {searchTerm && (
-                <div className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                <div className="flex items-center gap-2 bg-gray-100 text-black px-3 py-1 rounded-full text-sm">
                   <Search className="w-3 h-3" />
                   <span>Search: "{searchTerm}"</span>
                   <button
                     onClick={handleClearSearch}
-                    className="text-blue-600 hover:text-blue-800"
+                    className="text-black hover:text-gray-700"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -234,7 +234,7 @@ const Products = () => {
               {/* Clear All Button */}
               <button
                 onClick={handleClearAllFilters}
-                className="text-sm text-[#f97316] hover:text-[#ea580c] font-medium px-3 py-1 border border-[#f97316] rounded-lg hover:bg-orange-50 transition-colors"
+                className="text-sm text-black hover:text-gray-700 font-medium px-3 py-1 border border-black rounded-lg hover:bg-gray-200 transition-colors"
               >
                 Clear All Filters
               </button>
@@ -265,7 +265,7 @@ const Products = () => {
                 
                 {/* No Results Message */}
                 {hasSearchResults && (
-                  <p className="text-sm text-[#f97316] font-medium">
+                  <p className="text-sm text-black font-medium">
                     No products found for "{searchTerm}". Try different keywords or browse all products.
                   </p>
                 )}
@@ -278,7 +278,7 @@ const Products = () => {
                   <select
                     value={localFilters.sortBy}
                     onChange={(e) => handleSortChange(e.target.value)}
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-transparent"
+                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                   >
                     <option value="newest">Newest</option>
                     <option value="price-low">Price: Low to High</option>
@@ -320,7 +320,7 @@ const Products = () => {
                     {searchTerm && (
                       <button
                         onClick={handleClearSearch}
-                        className="px-6 py-2 bg-[#f97316] text-white rounded-lg hover:bg-[#ea580c] transition-colors font-medium"
+                        className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
                       >
                         Clear Search
                       </button>
@@ -330,7 +330,7 @@ const Products = () => {
                     {categoryId && (
                       <button
                         onClick={handleClearCategory}
-                        className="px-6 py-2 border border-[#2563eb] text-[#2563eb] rounded-lg hover:bg-[#2563eb] hover:text-white transition-colors font-medium"
+                        className="px-6 py-2 border border-black text-black rounded-lg hover:bg-black hover:text-white transition-colors font-medium"
                       >
                         View All Categories
                       </button>
@@ -340,7 +340,7 @@ const Products = () => {
                     {(searchTerm || categoryId) && (
                       <button
                         onClick={handleClearAllFilters}
-                        className="px-6 py-2 bg-[#2563eb] text-white rounded-lg hover:bg-[#1e40af] transition-colors font-medium"
+                        className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
                       >
                         View All Products
                       </button>
@@ -350,7 +350,7 @@ const Products = () => {
                     {!searchTerm && !categoryId && filteredProducts.length === 0 && (
                       <button
                         onClick={() => navigate('/categories')}
-                        className="px-6 py-2 bg-[#2563eb] text-white rounded-lg hover:bg-[#1e40af] transition-colors font-medium"
+                        className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
                       >
                         Browse Categories
                       </button>

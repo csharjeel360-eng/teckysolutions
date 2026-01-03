@@ -28,8 +28,8 @@ const CategorySidebar = ({
           to="/products"
           className={`block py-2 px-3 rounded-lg transition-colors ${
             !currentCategoryId
-              ? 'bg-[#2563eb] text-white font-medium'
-              : 'text-gray-700 hover:bg-gray-50 hover:text-[#2563eb]'
+              ? 'bg-black text-white font-medium'
+              : 'text-gray-700 hover:bg-gray-50 hover:text-black'
           }`}
           onClick={() => handleCategoryClick(null)}
         >
@@ -45,8 +45,8 @@ const CategorySidebar = ({
             to={`/category/${category._id}/products`}
             className={`block py-2 px-3 rounded-lg transition-colors ${
               currentCategoryId === category._id
-                ? 'bg-[#2563eb] text-white font-medium'
-                : 'text-gray-700 hover:bg-gray-50 hover:text-[#2563eb]'
+                ? 'bg-black text-white font-medium'
+                : 'text-gray-700 hover:bg-gray-50 hover:text-black'
             }`}
             onClick={() => handleCategoryClick(category)}
           >

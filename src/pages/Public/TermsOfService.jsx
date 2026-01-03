@@ -9,7 +9,7 @@ const TermsOfService = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-gradient-to-r from-[#2563eb] to-[#f97316] rounded-full flex items-center justify-center">
+            <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center">
               <FileText className="w-8 h-8 text-white" />
             </div>
           </div>
@@ -81,7 +81,7 @@ const TermsOfService = () => {
             
             <div className="space-y-6">
               <div className="flex items-start space-x-3">
-                <Upload className="w-5 h-5 text-[#2563eb] mt-1 flex-shrink-0" />
+                <Upload className="w-5 h-5 text-[black] mt-1 flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Product Upload Guidelines</h3>
                   <ul className="text-gray-700 list-disc list-inside space-y-1">
@@ -94,7 +94,7 @@ const TermsOfService = () => {
               </div>
 
               <div className="flex items-start space-x-3">
-                <BarChart className="w-5 h-5 text-[#2563eb] mt-1 flex-shrink-0" />
+                <BarChart className="w-5 h-5 text-[black] mt-1 flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Promotional Activities</h3>
                   <ul className="text-gray-700 list-disc list-inside space-y-1">
@@ -107,7 +107,7 @@ const TermsOfService = () => {
               </div>
 
               <div className="flex items-start space-x-3">
-                <DollarSign className="w-5 h-5 text-[#2563eb] mt-1 flex-shrink-0" />
+                <DollarSign className="w-5 h-5 text-[black] mt-1 flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Commission & Payments</h3>
                   <ul className="text-gray-700 list-disc list-inside space-y-1">
@@ -206,10 +206,10 @@ const TermsOfService = () => {
 
           {/* Navigation */}
           <div className="border-t border-gray-200 pt-8 mt-8 flex justify-between">
-            <Link to="/privacy-policy" className="text-[#2563eb] hover:text-[#1e40af] font-medium">
+            <Link to="/privacy-policy" className="text-black hover:text-gray-700 font-medium">
               ← Privacy Policy
             </Link>
-            <Link to="/" className="text-[#2563eb] hover:text-[#1e40af] font-medium">
+            <Link to="/" className="text-black hover:text-gray-700 font-medium">
               Back to Home →
             </Link>
           </div>

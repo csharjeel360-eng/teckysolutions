@@ -96,21 +96,23 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
         className={`
           bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 
           overflow-hidden border border-gray-100 group
-          ${featured ? 'border-2 border-[#2563eb]' : ''}
-          ${isDraft ? 'border-[#f97316]' : ''}
+          flex flex-col h-full
+          ${featured ? 'border-2 border-black' : ''}
+          ${isDraft ? 'border-black' : ''}
           ${className}
         `}
       >
         <Link to={isDraft ? '#' : `/blog/${safeSlug}`} className="block">
           {/* Blog Image */}
-          <div className="relative overflow-hidden bg-gray-100">
+          <div className="relative w-full h-40 sm:h-48 md:h-56 lg:h-64 overflow-hidden bg-gray-100">
             <img
               src={getImageUrl()}
               alt={title}
-              className="w-full h-40 object-cover transition-transform duration-300 group-hover:scale-105"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               loading="lazy"
+              decoding="async"
               onError={(e) => {
-                e.target.src = `https://via.placeholder.com/400x200/2563eb/ffffff?text=${encodeURIComponent(title)}`;
+                e.target.src = `https://via.placeholder.com/800x450/2563eb/ffffff?text=${encodeURIComponent(title)}`;
               }}
             />
             
@@ -122,14 +124,14 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
 
             {/* Featured Badge */}
             {featured && !isDraft && (
-              <div className="absolute top-2 left-2 bg-[#2563eb] text-white px-2 py-1 rounded text-xs font-semibold">
+              <div className="absolute top-2 left-2 bg-black text-white px-2 py-1 rounded text-xs font-semibold">
                 Featured
               </div>
             )}
 
             {/* Draft Badge */}
             {isDraft && (
-              <div className="absolute top-2 left-2 bg-[#f97316] text-white px-2 py-1 rounded text-xs font-semibold">
+              <div className="absolute top-2 left-2 bg-gray-600 text-white px-2 py-1 rounded text-xs font-semibold">
                 Draft
               </div>
             )}
@@ -137,7 +139,7 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
         </Link>
 
         {/* Blog Content */}
-        <div className="p-4">
+        <div className="p-4 flex-1 flex flex-col">
           {/* Meta Information */}
           <div className="flex items-center text-xs text-gray-500 mb-2 space-x-2">
             <div className="flex items-center space-x-1">
@@ -155,14 +157,14 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
             </h3>
           ) : (
             <Link to={`/blog/${safeSlug}`}>
-              <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-[#2563eb] transition-colors duration-200">
+              <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-black transition-colors duration-200">
                 {title}
               </h3>
             </Link>
           )}
 
           {/* Excerpt */}
-          <p className="text-gray-600 text-sm mb-3 line-clamp-2 leading-relaxed">
+          <p className="text-gray-600 text-sm mb-3 line-clamp-2 leading-relaxed flex-1">
             {generateExcerpt(excerpt || `Read more about ${title}`, 80)}
           </p>
 
@@ -174,8 +176,8 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
                   key={index}
                   className={`px-2 py-1 rounded text-xs font-medium ${
                     isDraft 
-                      ? 'bg-orange-100 text-[#ea580c]' 
-                      : 'bg-[#2563eb]/10 text-[#2563eb]'
+                      ? 'bg-gray-100 text-gray-700' 
+                      : 'bg-black/10 text-black'
                   }`}
                 >
                   #{tag}
@@ -190,7 +192,7 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
           )}
 
           {/* Stats and Actions */}
-          <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+          <div className="mt-auto flex items-center justify-between pt-3 border-t border-gray-100">
             <div className="flex items-center space-x-3 text-xs text-gray-500">
               {/* Like Button */}
               {!isDraft && (
@@ -200,8 +202,8 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
                   className={`
                     flex items-center space-x-1 transition-all duration-200
                     ${isLiked 
-                      ? 'text-[#f97316]' 
-                      : 'text-gray-500 hover:text-[#f97316]'
+                      ? 'text-red-500' 
+                      : 'text-gray-500 hover:text-red-500'
                     }
                     ${loading ? 'opacity-50 cursor-not-allowed' : ''}
                   `}
@@ -223,7 +225,7 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
             {!isDraft && (
               <Link 
                 to={`/blog/${safeSlug}`}
-                className="text-[#2563eb] hover:text-[#1e40af] text-xs font-medium transition-colors"
+                className="text-black hover:text-gray-700 text-xs font-medium transition-colors"
               >
                 Read →
               </Link>
@@ -237,7 +239,7 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
                   e.stopPropagation();
                   onEdit(blog);
                 }}
-                className="text-[#f97316] hover:text-[#ea580c] text-xs font-medium transition-colors"
+                className="text-gray-700 hover:text-black text-xs font-medium transition-colors"
               >
                 Edit
               </button>

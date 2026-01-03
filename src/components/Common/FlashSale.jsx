@@ -102,7 +102,7 @@ const FlashSale = ({
   const daysLeft = daysInMonth - currentDay;
 
   return (
-    <div className="bg-gradient-to-r from-[#2563eb] to-[#f97316] text-black rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 mx-2 sm:mx-0">
+    <div className="bg-black text-white rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 mx-2 sm:mx-0">
       <div className="flex flex-col lg:flex-row items-center justify-between gap-3 sm:gap-4">
         {/* Sale Info */}
         <div className="flex items-center space-x-2 sm:space-x-3 w-full lg:w-auto justify-center lg:justify-start">
@@ -167,7 +167,7 @@ const FlashSale = ({
         {/* Action Button */}
         <Link
           to={buttonLink}
-          className="bg-white text-[#f97316] px-3 sm:px-4 py-1.5 sm:py-2 rounded-full font-semibold hover:bg-gray-100 transition-all duration-300 flex items-center space-x-1 text-xs sm:text-sm hover:scale-105 w-full lg:w-auto justify-center"
+          className="bg-white text-black px-3 sm:px-4 py-1.5 sm:py-2 rounded-full font-semibold hover:bg-gray-100 transition-all duration-300 flex items-center space-x-1 text-xs sm:text-sm hover:scale-105 w-full lg:w-auto justify-center"
         >
           <span>{buttonText}</span>
           <ArrowRight className="w-3 h-3" />
