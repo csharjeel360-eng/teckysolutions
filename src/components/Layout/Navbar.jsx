@@ -47,7 +47,6 @@ const Navbar = () => {
   };
 
   useEffect(() => {
-    // initialize
     setCartCount(getCountFromStorage());
 
     const handler = (e) => {
@@ -64,12 +63,10 @@ const Navbar = () => {
   
   const navigate = useNavigate();
   const location = useLocation();
-  // Detect if we're on a blog detail page like /blogs/:slug
   const isBlogDetail = /^\/blogs\/[^/]+/.test(location.pathname);
   const profileRef = useRef(null);
   const searchRef = useRef(null);
 
-  // Load recent searches from localStorage
   useEffect(() => {
     const savedSearches = localStorage.getItem('recentSearches');
     if (savedSearches) {
@@ -77,20 +74,6 @@ const Navbar = () => {
     }
   }, []);
 
-  // Save search to recent searches
-  const saveToRecentSearches = (query) => {
-    if (!query.trim()) return;
-    
-    const updatedSearches = [
-      query,
-      ...recentSearches.filter(search => search !== query)
-    ].slice(0, 5);
-    
-    setRecentSearches(updatedSearches);
-    localStorage.setItem('recentSearches', JSON.stringify(updatedSearches));
-  };
-
-  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
@@ -105,7 +88,6 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Clear search when route changes
   useEffect(() => {
     setSearchQuery('');
     setShowSearchSuggestions(false);
@@ -117,7 +99,18 @@ const Navbar = () => {
     navigate('/');
   };
 
-  // Debounced search function
+  const saveToRecentSearches = (query) => {
+    if (!query.trim()) return;
+    
+    const updatedSearches = [
+      query,
+      ...recentSearches.filter(search => search !== query)
+    ].slice(0, 5);
+    
+    setRecentSearches(updatedSearches);
+    localStorage.setItem('recentSearches', JSON.stringify(updatedSearches));
+  };
+
   const debouncedSearch = debounce((query) => {
     if (query.trim()) {
       saveToRecentSearches(query);
@@ -151,7 +144,6 @@ const Navbar = () => {
   const handleClearSearch = () => {
     setSearchQuery('');
     setShowSearchSuggestions(false);
-    // Navigate back to products without search query
     if (location.pathname === '/products') {
       navigate('/products');
     }
@@ -165,7 +157,6 @@ const Navbar = () => {
   };
 
   const handleClearFilters = () => {
-    // Clear all search filters and navigate to base products page
     navigate('/products');
     setSearchQuery('');
     setShowSearchSuggestions(false);
@@ -173,51 +164,12 @@ const Navbar = () => {
 
   const isAdmin = user?.role === 'admin';
 
-  // Inline SVG Logo for TrendyBreeze
-  const Logo = () => (
-    <svg width="140" height="40" viewBox="0 0 140 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Logo Icon */}
-      <g>
-        <circle cx="20" cy="20" r="12" fill="url(#logoGradient)" />
-        <path 
-          d="M20,10 C22,10 22,12 20,12 C18,12 18,14 20,14 C22,14 22,16 20,16 C18,16 18,18 20,18 C22,18 22,20 20,20 C18,20 18,22 20,22 C22,22 22,24 20,24 C18,24 18,26 20,26 C22,26 22,28 20,28 C18,28 18,30 20,30" 
-          stroke="white" 
-          strokeWidth="2" 
-          strokeLinecap="round"
-          opacity="0.9"
-        />
-        <circle cx="15" cy="15" r="1.5" fill="white" />
-        <circle cx="25" cy="15" r="1.5" fill="white" />
-        <circle cx="15" cy="25" r="1.5" fill="white" />
-        <circle cx="25" cy="25" r="1.5" fill="white" />
-      </g>
-      
-      {/* Gradient Definition */}
-      <defs>
-        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#6366f1" />
-          <stop offset="50%" stopColor="#8b5cf6" />
-          <stop offset="100%" stopColor="#ec4899" />
-        </linearGradient>
-      </defs>
-      
-      {/* Text: TrendyBreeze */}
-      <text x="45" y="25" fontFamily="'Segoe UI', 'Arial', sans-serif" fontSize="24" fontWeight="700" fill="#111827">
-        Trendy
-        <tspan fill="url(#logoGradient)">Breeze</tspan>
-      </text>
-    </svg>
-  );
-
-  // Alternative: Simple text logo for better performance
   const TextLogo = () => (
     <div className="flex items-center space-x-2">
       <div className="relative">
-        {/* Logo Symbol */}
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
           <div className="w-5 h-5 border-2 border-white rounded-sm transform rotate-45"></div>
         </div>
-        {/* Tech dots */}
         <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full"></div>
         <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"></div>
       </div>
@@ -229,78 +181,69 @@ const Navbar = () => {
 
   return (
     <nav className="bg-white shadow-lg sticky top-0 z-50 border-b border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo and Mobile Menu */}
-          <div className="flex items-center space-x-4">
-            {/* Mobile Menu Button */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-14 sm:h-16">
+          {/* Mobile Menu Button and Logo */}
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 text-gray-700 hover:text-black transition-colors rounded-lg hover:bg-gray-100"
+              className="lg:hidden p-2 text-gray-700 hover:text-black transition-colors rounded-lg hover:bg-gray-100"
+              aria-label="Toggle menu"
             >
-              <Menu className="h-5 w-5" />
+              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
 
-            {/* Logo */}
             <Link to="/" className="flex items-center">
-              {/* Option 1: SVG Logo */}
-              {/* <Logo /> */}
-              
-              {/* Option 2: Text Logo (Recommended for better performance) */}
               <TextLogo />
             </Link>
           </div>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center space-x-8 lg:ml-12">
+          <div className="hidden lg:flex items-center space-x-4 xl:space-x-8 lg:ml-12">
             <Link 
               to="/" 
-              className="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors font-medium group relative"
+              className="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors font-medium group relative px-3 py-2 rounded-lg hover:bg-gray-50"
             >
               <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-blue-50 flex items-center justify-center transition-colors">
                 <Home className="h-4 w-4 text-gray-600 group-hover:text-blue-600" />
               </div>
-              <span className="group-hover:font-semibold">Home</span>
-              <div className="absolute -bottom-1 left-0 w-0 group-hover:w-full h-0.5 bg-blue-600 transition-all duration-300"></div>
+              <span className="group-hover:font-semibold whitespace-nowrap">Home</span>
             </Link>
             
             <Link 
               to="/products" 
-              className="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors font-medium group relative"
+              className="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors font-medium group relative px-3 py-2 rounded-lg hover:bg-gray-50"
             >
               <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-green-50 flex items-center justify-center transition-colors">
                 <Package className="h-4 w-4 text-gray-600 group-hover:text-green-600" />
               </div>
-              <span className="group-hover:font-semibold">Products</span>
-              <div className="absolute -bottom-1 left-0 w-0 group-hover:w-full h-0.5 bg-green-600 transition-all duration-300"></div>
+              <span className="group-hover:font-semibold whitespace-nowrap">Products</span>
             </Link>
             
             <Link 
               to="/categories" 
-              className="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors font-medium group relative"
+              className="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors font-medium group relative px-3 py-2 rounded-lg hover:bg-gray-50"
             >
               <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-purple-50 flex items-center justify-center transition-colors">
                 <FolderOpen className="h-4 w-4 text-gray-600 group-hover:text-purple-600" />
               </div>
-              <span className="group-hover:font-semibold">Categories</span>
-              <div className="absolute -bottom-1 left-0 w-0 group-hover:w-full h-0.5 bg-purple-600 transition-all duration-300"></div>
+              <span className="group-hover:font-semibold whitespace-nowrap">Categories</span>
             </Link>
             
             <Link 
               to="/blogs" 
-              className="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors font-medium group relative"
+              className="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors font-medium group relative px-3 py-2 rounded-lg hover:bg-gray-50"
             >
               <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-orange-50 flex items-center justify-center transition-colors">
                 <BookOpen className="h-4 w-4 text-gray-600 group-hover:text-orange-600" />
               </div>
-              <span className="group-hover:font-semibold">Blogs</span>
-              <div className="absolute -bottom-1 left-0 w-0 group-hover:w-full h-0.5 bg-orange-600 transition-all duration-300"></div>
+              <span className="group-hover:font-semibold whitespace-nowrap">Blogs</span>
             </Link>
           </div>
 
-          {/* Search Bar (hidden on blog detail pages) */}
+          {/* Search Bar - Responsive */}
           {!isBlogDetail && (
-            <div className="hidden md:flex flex-1 max-w-2xl mx-4 lg:mx-8" ref={searchRef}>
+            <div className={`hidden md:flex flex-1 max-w-2xl mx-2 lg:mx-4 xl:mx-8 ${isMenuOpen ? 'hidden' : 'flex'}`} ref={searchRef}>
               <form onSubmit={handleSearchSubmit} className="relative w-full">
                 <div className="relative group">
                   <input
@@ -309,25 +252,23 @@ const Navbar = () => {
                     onChange={handleSearchChange}
                     onFocus={() => searchQuery.trim() && setShowSearchSuggestions(true)}
                     placeholder="Search AI tools, software, blogs..."
-                    className="w-full px-4 py-2.5 pl-12 pr-24 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-gray-50 group-hover:bg-white transition-all duration-300"
+                    className="w-full px-4 py-2 pl-10 pr-20 sm:pl-12 sm:pr-24 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-gray-50 group-hover:bg-white transition-all duration-300"
                   />
-                  <Search className="absolute left-4 top-3 h-4 w-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
+                  <Search className="absolute left-3 sm:left-4 top-2.5 sm:top-3 h-4 w-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
                   
-                  {/* Clear Search Button */}
                   {searchQuery && (
                     <button
                       type="button"
                       onClick={handleClearSearch}
-                      className="absolute right-20 top-2.5 p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                      className="absolute right-16 sm:right-20 top-2 sm:top-2.5 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                     >
-                      <X className="h-4 w-4" />
+                      <X className="h-3 w-3 sm:h-4 sm:w-4" />
                     </button>
                   )}
                   
-                  {/* Search Button */}
                   <button 
                     type="submit" 
-                    className="absolute right-2 top-1.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-5 py-1.5 rounded-lg text-sm font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-sm hover:shadow-md"
+                    className="absolute right-2 top-1.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-sm hover:shadow-md"
                   >
                     Search
                   </button>
@@ -335,8 +276,7 @@ const Navbar = () => {
 
                 {/* Search Suggestions */}
                 {showSearchSuggestions && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-96 overflow-y-auto animate-fadeIn">
-                    {/* Current Search */}
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-96 overflow-y-auto">
                     {searchQuery.trim() && (
                       <div className="p-3 border-b border-gray-100 bg-gradient-to-r from-blue-50/50 to-purple-50/50">
                         <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
@@ -353,7 +293,6 @@ const Navbar = () => {
                       </div>
                     )}
 
-                    {/* Recent Searches */}
                     {recentSearches.length > 0 && (
                       <div className="p-3 border-b border-gray-100">
                         <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 flex items-center">
@@ -371,16 +310,14 @@ const Navbar = () => {
                                 <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center mr-3 group-hover:bg-blue-100 transition-colors">
                                   <Clock className="w-3 h-3 text-gray-400" />
                                 </div>
-                                <span>{search}</span>
+                                <span className="text-sm">{search}</span>
                               </div>
-                              <div className="w-2 h-2 rounded-full bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             </button>
                           ))}
                         </div>
                       </div>
                     )}
 
-                    {/* Popular Searches */}
                     {popularSearches.length > 0 && (
                       <div className="p-3">
                         <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 flex items-center">
@@ -401,7 +338,6 @@ const Navbar = () => {
                       </div>
                     )}
 
-                    {/* Clear Filters Button */}
                     {(location.pathname === '/products' && location.search) && (
                       <div className="p-3 border-t border-gray-100">
                         <button
@@ -418,12 +354,13 @@ const Navbar = () => {
             </div>
           )}
 
-          {/* Navigation Icons and User Menu */}
-          <div className="flex items-center space-x-3">
+          {/* Navigation Icons - Responsive */}
+          <div className="flex items-center space-x-2 sm:space-x-3">
             {/* Mobile Search Icon */}
             <button 
               onClick={() => navigate('/products')}
-              className="md:hidden p-2.5 text-gray-700 hover:text-black transition-colors rounded-lg hover:bg-gray-100"
+              className="md:hidden p-2 text-gray-700 hover:text-black transition-colors rounded-lg hover:bg-gray-100"
+              aria-label="Search"
             >
               <Search className="h-5 w-5" />
             </button>
@@ -431,7 +368,7 @@ const Navbar = () => {
             {/* Cart Icon */}
             <Link 
               to="/cart"
-              className="p-2.5 text-gray-700 hover:text-black transition-colors rounded-lg hover:bg-gray-100 relative group"
+              className="p-2 sm:p-2.5 text-gray-700 hover:text-black transition-colors rounded-lg hover:bg-gray-100 relative group"
             >
               <ShoppingCart className="h-5 w-5 group-hover:scale-110 transition-transform" />
               {cartCount > 0 && (
@@ -439,7 +376,7 @@ const Navbar = () => {
                   {cartCount > 99 ? '99+' : cartCount}
                 </span>
               )}
-              <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              <div className="hidden lg:block absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                 Cart ({cartCount})
               </div>
             </Link>
@@ -451,6 +388,7 @@ const Navbar = () => {
                   <button
                     onClick={() => setIsProfileOpen(!isProfileOpen)}
                     className="flex items-center space-x-2 p-2 text-gray-700 hover:text-black transition-colors rounded-lg hover:bg-gray-100 group"
+                    aria-label="User menu"
                   >
                     <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-semibold shadow-sm group-hover:shadow-md transition-shadow">
                       {user?.name?.charAt(0)?.toUpperCase() || 'U'}
@@ -459,8 +397,7 @@ const Navbar = () => {
                   </button>
 
                   {isProfileOpen && (
-                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50 animate-fadeIn">
-                      {/* User Info */}
+                    <div className="absolute right-0 mt-2 w-56 sm:w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
                       <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
                         <p className="text-sm font-semibold text-gray-900 truncate flex items-center">
                           <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-xs mr-2">
@@ -478,9 +415,7 @@ const Navbar = () => {
                         )}
                       </div>
                       
-                      {/* Menu Items */}
                       <div className="py-1">
-                        {/* Admin Dashboard Link */}
                         {isAdmin && (
                           <Link
                             to="/admin/dashboard"
@@ -502,7 +437,6 @@ const Navbar = () => {
                         </Link>
                       </div>
                       
-                      {/* Logout Button */}
                       <div className="border-t border-gray-100 pt-1">
                         <button
                           onClick={handleLogout}
@@ -522,13 +456,14 @@ const Navbar = () => {
                 <div className="flex items-center space-x-2">
                   <Link
                     to="/login"
-                    className="hidden sm:block bg-gradient-to-r from-gray-900 to-black text-white px-4 py-2.5 rounded-lg font-semibold hover:from-black hover:to-gray-900 transition-all duration-300 text-sm shadow-sm hover:shadow-md"
+                    className="hidden sm:block bg-gradient-to-r from-gray-900 to-black text-white px-3 sm:px-4 py-2 rounded-lg font-semibold hover:from-black hover:to-gray-900 transition-all duration-300 text-sm shadow-sm hover:shadow-md"
                   >
                     Sign In
                   </Link>
                   <Link
                     to="/login"
-                    className="sm:hidden p-2.5 text-gray-700 hover:text-black transition-colors rounded-lg hover:bg-gray-100"
+                    className="sm:hidden p-2 text-gray-700 hover:text-black transition-colors rounded-lg hover:bg-gray-100"
+                    aria-label="Sign in"
                   >
                     <User className="h-5 w-5" />
                   </Link>
@@ -571,7 +506,6 @@ const Navbar = () => {
                 </button>
               </div>
 
-              {/* Clear Filters Button for Mobile */}
               {(location.pathname === '/products' && location.search) && (
                 <button
                   onClick={handleClearFilters}
@@ -584,7 +518,7 @@ const Navbar = () => {
           </div>
         )}
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu - Responsive */}
         {isMenuOpen && (
           <div className="md:hidden border-t border-gray-200 pt-4 pb-4">
             <div className="flex flex-col space-y-1">
@@ -632,7 +566,6 @@ const Navbar = () => {
                 <span>Blogs</span>
               </Link>
 
-              {/* Cart in Mobile Menu */}
               <Link
                 to="/cart"
                 className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-black hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 transition-colors rounded-xl"
@@ -649,7 +582,6 @@ const Navbar = () => {
                 <span>Shopping Cart {cartCount > 0 && `(${cartCount})`}</span>
               </Link>
               
-              {/* Admin Dashboard Button in Mobile Menu */}
               {isAuthenticated && isAdmin && (
                 <Link 
                   to="/admin/dashboard" 
@@ -661,19 +593,18 @@ const Navbar = () => {
                 </Link>
               )}
               
-              {/* Auth Links */}
               {!isAuthenticated ? (
-                <div className="flex space-x-3 px-4 py-3">
+                <div className="grid grid-cols-2 gap-3 px-4 py-3">
                   <Link
                     to="/login"
-                    className="flex-1 text-center bg-gradient-to-r from-gray-900 to-black text-white px-4 py-3 rounded-xl font-semibold hover:from-black hover:to-gray-900 transition-all duration-300 text-sm shadow-sm"
+                    className="text-center bg-gradient-to-r from-gray-900 to-black text-white px-4 py-3 rounded-xl font-semibold hover:from-black hover:to-gray-900 transition-all duration-300 text-sm shadow-sm"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Sign In
                   </Link>
                   <Link
                     to="/register"
-                    className="flex-1 text-center border border-gray-300 text-gray-700 px-4 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-colors text-sm"
+                    className="text-center border border-gray-300 text-gray-700 px-4 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-colors text-sm"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Sign Up
