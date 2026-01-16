@@ -52,6 +52,7 @@ const ProductGrid = ({
             <img
               src={product.images?.[0]?.url || '/api/placeholder/300/300'}
               alt={product.title}
+              loading="lazy"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
           </div>

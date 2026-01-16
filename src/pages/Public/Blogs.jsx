@@ -49,6 +49,74 @@ const Blogs = () => {
   const currentBlogs = publishedBlogs.slice(indexOfFirstBlog, indexOfLastBlog);
   const totalPages = Math.ceil(publishedBlogs.length / blogsPerPage);
 
+  // Build JSON-LD schema for blogs
+  const blogSchema = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "Our Blog",
+    "url": typeof window !== 'undefined' ? window.location.href : '',
+    "blogPost": currentBlogs.map(blog => ({
+      "@type": "BlogPosting",
+      "headline": blog.title,
+      "image": blog.coverImage || "",
+      "datePublished": blog.createdAt,
+      "dateModified": blog.updatedAt || blog.createdAt,
+      "author": {
+        "@type": "Person",
+        "name": blog.author || "Admin"
+      },
+      "description": blog.excerpt || blog.description
+    }))
+  };
+
+  // Inject JSON-LD schema into document head
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.innerHTML = JSON.stringify(blogSchema);
+    document.head.appendChild(script);
+    return () => script.remove();
+  }, [blogSchema]);
+
+  // Update SEO meta tags
+  useEffect(() => {
+    const title = filters?.search
+      ? `Search "${filters.search}" | Blog`
+      : 'Blog – News, Tips & Insights';
+    document.title = title;
+
+    // Update meta description
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta');
+      metaDescription.name = 'description';
+      document.head.appendChild(metaDescription);
+    }
+    metaDescription.content = 'Read the latest blog posts, product guides, expert tips, and industry insights. Stay informed with our up-to-date articles.';
+
+    // Update canonical URL
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.rel = 'canonical';
+      document.head.appendChild(canonical);
+    }
+    canonical.href = typeof window !== 'undefined' ? window.location.href : '';
+
+    // Update robots meta tag for search pages
+    let robots = document.querySelector('meta[name="robots"]');
+    if (filters?.search) {
+      if (!robots) {
+        robots = document.createElement('meta');
+        robots.name = 'robots';
+        document.head.appendChild(robots);
+      }
+      robots.content = 'noindex, follow';
+    } else if (robots) {
+      robots.remove();
+    }
+  }, [filters?.search]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">

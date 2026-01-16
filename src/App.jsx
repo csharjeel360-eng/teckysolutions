@@ -58,12 +58,11 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/categories" element={<Categories />} />
                 <Route path="/products" element={<Products />} />
-                <Route path="/products/cart" element={<Cart />} />
+                <Route path="/category/:slug/products" element={<Products />} />
                 <Route path="/product/:slug" element={<ProductDetail />} />
-                <Route path="/category/:id/products" element={<Products />} />
+                <Route path="/cart" element={<Cart />} />
                 <Route path="/blogs" element={<Blogs />} />
                 <Route path="/blog/:slug" element={<BlogDetail />} />
-                <Route path="/cart" element={<Cart />} />
                 <Route path="/unauthorized" element={<Unauthorized />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/terms-of-service" element={<TermsOfService />} />
