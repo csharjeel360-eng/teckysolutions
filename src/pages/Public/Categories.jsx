@@ -80,11 +80,8 @@ const Categories = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <LoadingSpinner size="large" />
-          <p className="mt-4 text-gray-600">Loading categories...</p>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center">
+        <LoadingSpinner size="large" showBrand={true} brandText="TrendyBreeze" />
       </div>
     );
   }

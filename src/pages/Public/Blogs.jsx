@@ -1,12 +1,13 @@
- import React, { useEffect, useState } from 'react';
+ import React, { useEffect, useState, useMemo, lazy, Suspense } from 'react';
 import useBlogs from '../../hooks/useBlogs';
 import BlogGrid from '../../components/Blogs/BlogGrid';
-import SearchBar from '../../components/UI/SearchBar';
-import Pagination from '../../components/UI/Pagination';
 import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 import EmptyState from '../../components/Common/EmptyState';
 import { FileText, Search, RefreshCw } from 'lucide-react';
 import { setPageTitle } from '../../utils/slugify';
+
+// Lazy load SearchBar to reduce initial bundle size
+const SearchBar = lazy(() => import('../../components/UI/SearchBar'));
 
 const Blogs = () => {
   const { 
@@ -19,8 +20,8 @@ const Blogs = () => {
   } = useBlogs();
   
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [blogsPerPage] = useState(9);
+  const [displayCount, setDisplayCount] = useState(10);
+  const [loadMoreRef, setLoadMoreRef] = useState(null);
 
   // Handle search with debounce
   useEffect(() => {
@@ -33,29 +34,30 @@ const Blogs = () => {
     return () => clearTimeout(timeoutId);
   }, [searchTerm, setSearch]);
 
-  // Reset to page 1 when search changes
+  // Reset display count when search changes
   useEffect(() => {
-    setCurrentPage(1);
+    setDisplayCount(10);
   }, [searchTerm]);
 
   // Get only published blogs for public view
-  const publishedBlogs = blogs?.filter(blog => 
-    blog?.status === 'published' && blog?.isActive !== false
-  ) || [];
+  const publishedBlogs = useMemo(() => 
+    blogs?.filter(blog => 
+      blog?.status === 'published' && blog?.isActive !== false
+    ) || []
+  , [blogs]);
 
-  // Get current blogs for pagination
-  const indexOfLastBlog = currentPage * blogsPerPage;
-  const indexOfFirstBlog = indexOfLastBlog - blogsPerPage;
-  const currentBlogs = publishedBlogs.slice(indexOfFirstBlog, indexOfLastBlog);
-  const totalPages = Math.ceil(publishedBlogs.length / blogsPerPage);
+  // Get blogs to display (only first displayCount)
+  const displayedBlogs = useMemo(() => 
+    publishedBlogs.slice(0, displayCount)
+  , [publishedBlogs, displayCount]);
 
-  // Build JSON-LD schema for blogs
-  const blogSchema = {
+  // Memoize schema to prevent unnecessary re-renders - Only first 5 blogs for faster generation
+  const blogSchema = useMemo(() => ({
     "@context": "https://schema.org",
     "@type": "Blog",
     "name": "Our Blog",
     "url": typeof window !== 'undefined' ? window.location.href : '',
-    "blogPost": currentBlogs.map(blog => ({
+    "blogPost": displayedBlogs.slice(0, 5).map(blog => ({
       "@type": "BlogPosting",
       "headline": blog.title,
       "image": blog.coverImage || "",
@@ -63,19 +65,45 @@ const Blogs = () => {
       "dateModified": blog.updatedAt || blog.createdAt,
       "author": {
         "@type": "Person",
-        "name": blog.author || "Admin"
+        "name": blog.author?.name || "Admin"
       },
-      "description": blog.excerpt || blog.description
+      "description": blog.excerpt || blog.title
     }))
-  };
+  }), [displayedBlogs]);
 
-  // Inject JSON-LD schema into document head
+  // Intersection Observer for infinite scroll
   useEffect(() => {
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.innerHTML = JSON.stringify(blogSchema);
-    document.head.appendChild(script);
-    return () => script.remove();
+    if (!loadMoreRef) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && displayCount < publishedBlogs.length) {
+          // Load 5 more blogs when user scrolls to bottom
+          setDisplayCount(prev => Math.min(prev + 5, publishedBlogs.length));
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(loadMoreRef);
+    return () => observer.disconnect();
+  }, [loadMoreRef, displayCount, publishedBlogs.length]);
+
+  // Inject JSON-LD schema into document head (lazy load after 2 seconds to not block render)
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      const existingScript = document.querySelector('script[data-blog-schema]');
+      if (existingScript) existingScript.remove();
+      
+      const script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.setAttribute('data-blog-schema', 'true');
+      script.innerHTML = JSON.stringify(blogSchema);
+      document.head.appendChild(script);
+      return () => script.remove();
+    }, 2000); // Increased delay to 2s to prioritize content rendering
+    
+    return () => clearTimeout(timeoutId);
   }, [blogSchema]);
 
   // Update SEO meta tags
@@ -119,12 +147,8 @@ const Blogs = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-center items-center py-12">
-            <LoadingSpinner size="large" />
-          </div>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center">
+        <LoadingSpinner size="large" showBrand={true} brandText="TrendyBreeze" />
       </div>
     );
   }
@@ -180,16 +204,18 @@ const Blogs = () => {
 
         {/* Search Bar */}
         <div className="max-w-md mx-auto mb-8">
-          <SearchBar
-            placeholder="Search blog posts..."
-            value={searchTerm}
-            onChange={setSearchTerm}
-            icon={<Search className="w-5 h-5" />}
-          />
+          <Suspense fallback={<div className="h-10 bg-gray-200 rounded-lg animate-pulse" />}>
+            <SearchBar
+              placeholder="Search blog posts..."
+              value={searchTerm}
+              onChange={setSearchTerm}
+              icon={<Search className="w-5 h-5" />}
+            />
+          </Suspense>
         </div>
 
         {/* Blog Grid */}
-        {currentBlogs.length > 0 ? (
+        {publishedBlogs.length > 0 && !loading ? (
           <>
             {/* Search Results Info */}
             {filters?.search && (
@@ -202,24 +228,37 @@ const Blogs = () => {
 
             <div className="mb-8">
               <BlogGrid 
-                blogs={currentBlogs}
+                blogs={displayedBlogs}
+                loading={false}
                 className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
               />
             </div>
-            
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="mt-12 flex justify-center">
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={setCurrentPage}
-                  showPageNumbers={true}
-                />
+
+            {/* Load More Indicator */}
+            {displayCount < publishedBlogs.length && (
+              <div 
+                ref={setLoadMoreRef}
+                className="flex justify-center py-8"
+              >
+                <div className="text-center">
+                  <div className="inline-block">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  </div>
+                  <p className="mt-2 text-gray-600 text-sm">
+                    Showing {displayCount} of {publishedBlogs.length} blogs
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Reached End Message */}
+            {displayCount >= publishedBlogs.length && publishedBlogs.length > 10 && (
+              <div className="text-center py-8 text-gray-600">
+                <p className="font-medium">You've reached the end of our blog posts</p>
               </div>
             )}
           </>
-        ) : (
+        ) : !loading && publishedBlogs.length === 0 ? (
           <EmptyState
             title={
               filters?.search 
@@ -250,7 +289,7 @@ const Blogs = () => {
               ) : null
             }
           />
-        )}
+        ) : null}
 
         {/* Newsletter Signup removed per request */}
       </div>

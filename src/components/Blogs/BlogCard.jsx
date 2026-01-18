@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Clock, Heart, Eye, Bookmark, Share2, MoreVertical } from 'lucide-react';
 import { formatRelativeTime, generateExcerpt } from '../../utils/helpers';
@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import useBlogs from '../../hooks/useBlogs';
 import Notification from '../UI/Notification';
 
-const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, onEdit }) => {
+const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, onEdit, onClick }) => {
   const {
     _id,
     slug,
@@ -32,7 +32,20 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState({ show: false, message: '', type: '' });
 
-  const handleLike = async (e) => {
+  // Memoized values
+  const isDraft = useMemo(() => status === 'draft', [status]);
+  const safeSlug = useMemo(() => slug || _id || 'unknown', [slug, _id]);
+  
+  // Memoized image URL to prevent recalculation
+  const imageUrl = useMemo(() => {
+    if (featuredImage?.url) return featuredImage.url;
+    if (featuredImage) return featuredImage;
+    const colors = ['8B5CF6', '10B981', 'F59E0B', 'EF4444', '3B82F6'];
+    const color = colors[title?.length % colors.length] || '8B5CF6';
+    return `https://images.unsplash.com/photo-${Math.floor(15000000 + Math.random() * 9000000)}?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80&blend=${color}&blend-mode=multiply`;
+  }, [featuredImage, title]);
+
+  const handleLike = useCallback(async (e) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -64,16 +77,16 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
     } finally {
       setLoading(false);
     }
-  };
+  }, [isAuthenticated, isLiked, _id, likeBlog]);
 
-  const handleBookmark = (e) => {
+  const handleBookmark = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsBookmarked(!isBookmarked);
     // Add your bookmark logic here
-  };
+  }, [isBookmarked]);
 
-  const handleShare = async (e) => {
+  const handleShare = useCallback(async (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (navigator.share) {
@@ -81,36 +94,27 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
         await navigator.share({
           title: title,
           text: excerpt,
-          url: `${window.location.origin}/blog/${slug || _id}`,
+          url: `${window.location.origin}/blog/${safeSlug}`,
         });
       } catch (error) {
         console.log('Sharing cancelled');
       }
     } else {
-      navigator.clipboard.writeText(`${window.location.origin}/blog/${slug || _id}`);
+      navigator.clipboard.writeText(`${window.location.origin}/blog/${safeSlug}`);
       setNotification({
         show: true,
         message: 'Link copied to clipboard!',
         type: 'success'
       });
     }
-  };
+  }, [title, excerpt, safeSlug]);
 
-  const getImageUrl = () => {
-    if (featuredImage?.url) return featuredImage.url;
-    if (featuredImage) return featuredImage;
-    const colors = ['8B5CF6', '10B981', 'F59E0B', 'EF4444', '3B82F6'];
-    const color = colors[title?.length % colors.length] || '8B5CF6';
-    return `https://images.unsplash.com/photo-${Math.floor(15000000 + Math.random() * 9000000)}?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80&blend=${color}&blend-mode=multiply`;
-  };
+  const getImageUrl = useCallback(() => imageUrl, [imageUrl]);
 
   if (!blog) return null;
   if (!showDrafts && (!isPublished || status === 'draft')) {
     return null;
   }
-
-  const isDraft = status === 'draft';
-  const safeSlug = slug || _id || 'unknown';
 
   return (
     <>
@@ -159,7 +163,7 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
           <div className="relative w-full h-48 md:h-56 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-transparent to-pink-500/10 z-0"></div>
             <img
-              src={getImageUrl()}
+              src={imageUrl}
               alt={title}
               className="absolute inset-0 w-full h-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:rotate-1"
               loading="lazy"
@@ -313,4 +317,4 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
   );
 };
 
-export default BlogCard;
+export default React.memo(BlogCard);

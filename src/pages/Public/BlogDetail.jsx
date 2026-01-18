@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, Suspense, lazy } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import useBlogs from '../../hooks/useBlogs';
 import useSEO from '../../hooks/useSEO';
@@ -23,6 +23,7 @@ const BlogDetail = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [loadingRelated, setLoadingRelated] = useState(false);
 
+  // Fetch blog data with optimization
   useEffect(() => {
     const fetchBlogData = async () => {
       try {
@@ -51,8 +52,8 @@ const BlogDetail = () => {
             setIsLiked(userLiked);
           }
           
-          // Fetch related blogs
-          await fetchRelatedBlogs(blogData);
+          // Lazy load related blogs after initial render
+          setTimeout(() => fetchRelatedBlogs(blogData), 500);
         } else {
           const errorMsg = result?.error || 'Blog post not found';
           setError(errorMsg);
@@ -70,7 +71,7 @@ const BlogDetail = () => {
     }
   }, [slug, getBlogBySlug, user]);
 
-  const fetchRelatedBlogs = async (blogData) => {
+  const fetchRelatedBlogs = useCallback(async (blogData) => {
     try {
       setLoadingRelated(true);
       const tags = blogData.tags || [];
@@ -85,9 +86,9 @@ const BlogDetail = () => {
     } finally {
       setLoadingRelated(false);
     }
-  };
+  }, [getRelatedBlogs]);
 
-  // Generate structured data for the blog
+  // Generate structured data for the blog - memoized and lazy-loaded
   const structuredData = useMemo(() => {
     if (!blog) return null;
 
@@ -158,14 +159,28 @@ const BlogDetail = () => {
     };
   }, [blog]);
 
-  // Call useSEO hook at component level
-  useSEO({
-    title: blog ? `${blog.title} | Your Store Name` : 'Blog | Your Store Name',
-    description: blog ? (blog.excerpt || `${blog.title} - Read this informative article on Your Store Name.`) : '',
-    url: window.location.href,
-    image: blog?.featuredImage?.url,
-    schema: structuredData
-  });
+  // Inject schema into DOM only after initial render
+  useEffect(() => {
+    if (!structuredData) return;
+
+    const timeoutId = setTimeout(() => {
+      const existingScript = document.querySelector('[data-blog-schema="true"]');
+      if (existingScript) existingScript.remove();
+
+      const script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.setAttribute('data-blog-schema', 'true');
+      script.innerHTML = JSON.stringify(structuredData);
+      document.head.appendChild(script);
+
+      // Cleanup
+      return () => {
+        script.remove();
+      };
+    }, 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [structuredData]);
 
   const renderBlogContent = () => {
     if (!blog) {
@@ -230,7 +245,7 @@ const BlogDetail = () => {
     );
   };
 
-  const handleLike = async () => {
+  const handleLike = useCallback(async () => {
     if (!blog || !isAuthenticated) {
       showNotification('Please login to like blog posts', 'warning');
       return;
@@ -257,9 +272,9 @@ const BlogDetail = () => {
     } finally {
       setActionLoading(false);
     }
-  };
+  }, [blog, isAuthenticated, isLiked, likeBlog]);
 
-  const handleAddComment = async (commentText) => {
+  const handleAddComment = useCallback(async (commentText) => {
     if (!blog || !isAuthenticated) {
       showNotification('Please login to add comments', 'warning');
       return;
@@ -291,9 +306,9 @@ const BlogDetail = () => {
     } finally {
       setActionLoading(false);
     }
-  };
+  }, [blog, isAuthenticated, addComment]);
 
-  const handleShare = () => {
+  const handleShare = useCallback(() => {
     if (navigator.share) {
       navigator.share({
         title: blog?.title,
@@ -307,30 +322,30 @@ const BlogDetail = () => {
         })
         .catch(console.error);
     }
-  };
+  }, [blog?.title, blog?.excerpt]);
 
-  const showNotification = (message, type) => {
+  const showNotification = useCallback((message, type) => {
     setNotification({
       show: true,
       message,
       type
     });
-  };
+  }, []);
 
-  const getLikesCount = () => {
+  const getLikesCount = useCallback(() => {
     if (!blog) return 0;
     return blog.likesCount || blog.likes?.length || 0;
-  };
+  }, [blog]);
 
-  const getCommentsCount = () => {
+  const getCommentsCount = useCallback(() => {
     if (!blog) return 0;
     return blog.commentsCount || blog.comments?.length || 0;
-  };
+  }, [blog]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <LoadingSpinner size="large" />
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center">
+        <LoadingSpinner size="large" showBrand={true} brandText="TrendyBreeze" />
       </div>
     );
   }

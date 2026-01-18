@@ -416,8 +416,8 @@ const ProductDetail = () => {
 
   if (loading || productsLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <LoadingSpinner />
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center">
+        <LoadingSpinner size="large" showBrand={true} brandText="TrendyBreeze" />
       </div>
     );
   }

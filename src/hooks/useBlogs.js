@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import BlogService from '../services/blogService';
 
 const useBlogs = (initialFilters = {}) => {
@@ -6,6 +6,7 @@ const useBlogs = (initialFilters = {}) => {
   const [loading, setLoading] = useState(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const previousDataRef = useRef([]); // Prevent flickering
+  const cacheRef = useRef(null); // Cache blogs data
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
     search: '',
@@ -35,7 +36,7 @@ const useBlogs = (initialFilters = {}) => {
       commentsCount: blogData.commentsCount || blogData.comments?.length || 0,
       views: blogData.views || 0,
       status: blogData.status || 'draft',
-      isActive: blogData.isActive !== false, // default to true
+      isActive: blogData.isActive !== false,
       createdAt: blogData.createdAt || new Date().toISOString(),
       updatedAt: blogData.updatedAt || new Date().toISOString(),
       author: blogData.author || { name: 'Unknown Author' }
@@ -49,31 +50,49 @@ const useBlogs = (initialFilters = {}) => {
       }
       setError(null);
       
-      // Fetching blogs with filters
-      const result = await BlogService.getBlogs(filters);
+      // Return cached data if available for same filters
+      const cacheKey = JSON.stringify(filters);
+      if (cacheRef.current?.key === cacheKey && cacheRef.current?.data) {
+        setBlogs(cacheRef.current.data);
+        setLoading(false);
+        if (isInitialLoad) {
+          setIsInitialLoad(false);
+        }
+        return;
+      }
+      
+      // Fetch blogs with filters - Add limit for faster initial load
+      const result = await BlogService.getBlogs({ ...filters, limit: 30 });
       
       if (result.success) {
         const blogsData = result.blogs || result.data || [];
-        const normalizedBlogs = blogsData.map(normalizeBlogData).filter(blog => blog !== null);
+        const normalizedBlogs = blogsData
+          .map(normalizeBlogData)
+          .filter(blog => blog !== null);
+        
+        // Cache the result
+        cacheRef.current = { key: cacheKey, data: normalizedBlogs };
+        
         setBlogs(normalizedBlogs);
-        previousDataRef.current = normalizedBlogs; // Save for flickering prevention
+        previousDataRef.current = normalizedBlogs;
+        setLoading(false);
       } else {
         setError(result.error);
-        // Keep showing previous data on error
         if (previousDataRef.current.length === 0) {
           setBlogs([]);
         }
+        setLoading(false);
       }
     } catch (err) {
       console.error('❌ useBlogs: Fetch error:', err);
       setError('Failed to fetch blogs');
-      // Keep showing previous data instead of clearing
       if (previousDataRef.current.length === 0) {
         setBlogs([]);
       }
+      setLoading(false);
     } finally {
+      setLoading(false);
       if (isInitialLoad) {
-        setLoading(false);
         setIsInitialLoad(false);
       }
     }
