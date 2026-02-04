@@ -202,11 +202,9 @@ const Listings = () => {
             {!loading && !error && (!products || products.length === 0) && (
               <EmptyState 
                 title="No Listings Found"
-                description={searchTerm ? "No listings match your search. Try different keywords." : "No listings available in this category."}
-                action={{
-                  label: "Browse All Listings",
-                  onClick: () => navigate('/listings')
-                }}
+                message={searchTerm ? "No listings match your search. Try different keywords." : "No listings available in this category."}
+                actionText="Browse All Listings"
+                onAction={() => navigate('/listings')}
               />
             )}
 
