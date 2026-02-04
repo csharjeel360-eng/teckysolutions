@@ -50,14 +50,16 @@ const Listings = () => {
     return 'All Listings';
   }, [selectedCategory, searchTerm]);
 
+  // Set SEO metadata via hook (must be called at top-level)
+  useSEO({
+    title: pageTitle,
+    description: `Browse our ${pageTitle.toLowerCase()} collection`,
+    url: window.location.href
+  });
+
   useEffect(() => {
+    // Set page title with domain suffix
     setPageTitle(pageTitle);
-    // Set SEO metadata
-    useSEO({ 
-      title: pageTitle, 
-      description: `Browse our ${pageTitle.toLowerCase()} collection`,
-      canonical: window.location.href 
-    });
   }, [pageTitle]);
 
   // Update category filter
