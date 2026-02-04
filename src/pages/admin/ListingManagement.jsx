@@ -314,7 +314,26 @@ const ListingManagement = () => {
       const method = isEditing ? 'put' : 'post';
       const endpoint = `/admin/listings${isEditing ? `/${id}` : ''}`;
       
-      const response = await api[method](endpoint, formData);
+      // Prepare payload: clone and coerce/clean fields to avoid backend validation errors
+      const payload = { ...formData };
+
+      // Remove empty jobType so backend receives null/undefined instead of empty string
+      if (payload.jobType === '') delete payload.jobType;
+
+      // Coerce numeric fields if present, otherwise remove to avoid invalid empty strings
+      if (payload.price !== undefined && payload.price !== '') {
+        payload.price = Number(payload.price);
+      } else {
+        delete payload.price;
+      }
+
+      if (payload.stock !== undefined && payload.stock !== '') {
+        payload.stock = parseInt(payload.stock, 10);
+      } else {
+        delete payload.stock;
+      }
+
+      const response = await api[method](endpoint, payload);
       const data = response.data;
 
       if (data.success) {
