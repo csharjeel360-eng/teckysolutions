@@ -19,6 +19,9 @@ const ListingsGrid = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [sortBy, setSortBy] = useState('created');
 
+  // API base for admin routes (use Vite env or fallback to deployed API)
+  const API_BASE = import.meta.env.VITE_API_URL || 'https://e-commerce-server-two-snowy.vercel.app';
+
   // Load listings
   useEffect(() => {
     loadListings();
@@ -27,7 +30,9 @@ const ListingsGrid = () => {
   const loadListings = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/listings');
+      const response = await fetch(`${API_BASE}/api/admin/listings`, {
+        credentials: 'include'
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -87,8 +92,9 @@ const ListingsGrid = () => {
     }
 
     try {
-      const response = await fetch(`/api/admin/listings/${id}`, {
-        method: 'DELETE'
+      const response = await fetch(`${API_BASE}/api/admin/listings/${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
       });
       const data = await response.json();
 
