@@ -833,12 +833,12 @@ const AdminDashboard = () => {
           {/* Products Section - Responsive Grid */}
           <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
-              <h2 className="text-lg font-semibold">Products ({products.length})</h2>
+                <h2 className="text-lg font-semibold">Listings ({products.length})</h2>
               <div className="flex space-x-2">
                 <Button onClick={() => openProductModal()} size="small" className="text-xs sm:text-sm">
                   <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />Add
                 </Button>
-                <Link to="/admin/products">
+                  <Link to="/admin/listings">
                   <Button variant="outline" size="small" className="text-xs sm:text-sm">
                     <Eye className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />View All
                   </Button>

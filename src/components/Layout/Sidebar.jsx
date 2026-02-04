@@ -61,14 +61,14 @@ const Sidebar = ({ isOpen, onClose }) => {
       exact: true
     },
     {
-      name: 'Products',
-      path: '/products',
+      name: 'Listings',
+      path: '/listings',
       icon: ShoppingBag,
       submenu: [
-        { name: 'All Products', path: '/products' },
-        { name: 'Featured', path: '/products?featured=true' },
-        { name: 'On Sale', path: '/products?sale=true' },
-        { name: 'New Arrivals', path: '/products?new=true' }
+        { name: 'All Listings', path: '/listings' },
+        { name: 'Featured', path: '/listings?featured=true' },
+        { name: 'On Sale', path: '/listings?sale=true' },
+        { name: 'New Arrivals', path: '/listings?new=true' }
       ]
     },
     {
@@ -77,7 +77,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       icon: Tag,
       submenu: categories.slice(0, 8).map(category => ({
         name: category.name,
-        path: `/category/${category._id}/products`
+        path: `/category/${category._id}/listings`
       }))
     },
     {

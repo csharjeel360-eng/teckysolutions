@@ -36,7 +36,7 @@ const CategoryCard = ({
 
   return (
     <Link
-      to={`/category/${_id}/products`}
+      to={`/category/${_id}/listings`}
       className="group block"
     >
       <div className={`
@@ -75,9 +75,9 @@ const CategoryCard = ({
 
         {/* Product Count */}
         {showProductCount && (
-          <div className="flex items-center justify-center space-x-1 text-xs text-gray-500 mb-3">
+            <div className="flex items-center justify-center space-x-1 text-xs text-gray-500 mb-3">
             <span className="font-semibold text-black">{productCount}</span>
-            <span>products</span>
+            <span>listings</span>
           </div>
         )}
 

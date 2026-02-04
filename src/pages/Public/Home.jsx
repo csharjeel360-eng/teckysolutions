@@ -256,7 +256,7 @@ const Home = () => {
               
               {/* CTAs: Redesigned for Better Conversion */}
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Link to="/products">
+                <Link to="/listings">
                   <Button 
                     variant="primary" 
                     size="large"

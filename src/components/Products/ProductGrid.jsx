@@ -43,7 +43,7 @@ const ProductGrid = ({
       {products.map((product) => (
         <Link
           key={product._id}
-          to={`/product/${createSlug(product._id, product.title)}`}
+          to={`/listings/${createSlug(product._id, product.title)}`}
           className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 group block"
           onClick={(e) => handleProductClick(product._id, e)}
         >

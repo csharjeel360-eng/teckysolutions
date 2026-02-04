@@ -9,6 +9,7 @@ const ProductImages = ({
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
+  const [isMobile, setIsMobile] = useState(false);
 
   if (images.length === 0) {
     return (
@@ -18,23 +19,47 @@ const ProductImages = ({
     );
   }
 
-  const selectedImage = images[selectedImageIndex];
+  // Handle both string URLs and objects with .url property
+  const normalizedImages = images.map(img => typeof img === 'string' ? { url: img } : img);
+  const selectedImage = normalizedImages[selectedImageIndex];
 
   const nextImage = () => {
-    setSelectedImageIndex((prev) => (prev + 1) % images.length);
+    setSelectedImageIndex((prev) => (prev + 1) % normalizedImages.length);
   };
 
   const prevImage = () => {
-    setSelectedImageIndex((prev) => (prev - 1 + images.length) % images.length);
+    setSelectedImageIndex((prev) => (prev - 1 + normalizedImages.length) % normalizedImages.length);
+  };
+
+  const updateZoomPosition = (clientX, clientY, rect) => {
+    if (!showZoom) return;
+    
+    const x = ((clientX - rect.left) / rect.width) * 100;
+    const y = ((clientY - rect.top) / rect.height) * 100;
+    setZoomPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
   };
 
   const handleImageHover = (e) => {
-    if (!showZoom) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    updateZoomPosition(e.clientX, e.clientY, rect);
+  };
 
-    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - left) / width) * 100;
-    const y = ((e.clientY - top) / height) * 100;
-    setZoomPosition({ x, y });
+  const handleTouchMove = (e) => {
+    if (!showZoom || !isMobile) return;
+    
+    const touch = e.touches[0];
+    const rect = e.currentTarget.getBoundingClientRect();
+    updateZoomPosition(touch.clientX, touch.clientY, rect);
+  };
+
+  const handleTouchStart = (e) => {
+    setIsMobile(true);
+    setIsZoomed(true);
+    handleTouchMove(e);
+  };
+
+  const handleTouchEnd = () => {
+    setIsZoomed(false);
   };
 
   return (
@@ -42,20 +67,26 @@ const ProductImages = ({
       {/* Main Image */}
       <div className="relative bg-white rounded-2xl border border-gray-200 overflow-hidden">
         <div
-          className="relative h-96 md:h-[500px] cursor-zoom-in"
+          className="relative h-96 md:h-[500px] cursor-zoom-in touch-none select-none"
           onMouseEnter={() => setIsZoomed(true)}
           onMouseLeave={() => setIsZoomed(false)}
           onMouseMove={handleImageHover}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           <img
             src={selectedImage.url}
             alt={alt}
-            className={`w-full h-full object-contain transition-transform duration-200 ${
+            className={`w-full h-full object-contain transition-transform duration-200 pointer-events-none ${
               isZoomed ? 'scale-150' : 'scale-100'
             }`}
             style={{
-              transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`
+              transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
+              WebkitUserSelect: 'none',
+              userSelect: 'none'
             }}
+            draggable={false}
           />
           
           {/* Navigation Arrows */}
@@ -95,13 +126,13 @@ const ProductImages = ({
       {/* Thumbnail Gallery */}
       {images.length > 1 && (
         <div className="flex space-x-2 overflow-x-auto pb-2">
-          {images.map((image, index) => (
+          {normalizedImages.map((image, index) => (
             <button
               key={index}
               onClick={() => setSelectedImageIndex(index)}
               className={`flex-shrink-0 w-20 h-20 rounded-lg border-2 overflow-hidden transition-all ${
                 index === selectedImageIndex
-                  ? 'border-temu-red ring-2 ring-temu-red ring-opacity-50'
+                  ? 'border-blue-500 ring-2 ring-blue-500 ring-opacity-50'
                   : 'border-gray-200 hover:border-gray-300'
               }`}
             >

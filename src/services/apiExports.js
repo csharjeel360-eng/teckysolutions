@@ -54,26 +54,26 @@ export const categoriesAPI = {
 };
 
 export const productsAPI = {
-  getAll: (params = {}) => api.get('/products', { params }),
-  getById: (id) => api.get(`/products/${id}`),
+  getAll: (params = {}) => api.get('/listings', { params }),
+  getById: (id) => api.get(`/listings/${id}`),
   create: (productData) => {
     if (productData instanceof FormData) {
-      return api.post('/products', productData, {
+      return api.post('/listings', productData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
     }
-    return api.post('/products', productData);
+    return api.post('/listings', productData);
   },
   update: (id, productData) => {
     if (productData instanceof FormData) {
-      return api.put(`/products/${id}`, productData, {
+      return api.put(`/listings/${id}`, productData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
     }
-    return api.put(`/products/${id}`, productData);
+    return api.put(`/listings/${id}`, productData);
   },
-  delete: (id) => api.delete(`/products/${id}`),
-  deleteImage: (productId, imageId) => api.delete(`/products/${productId}/images/${imageId}`),
+  delete: (id) => api.delete(`/listings/${id}`),
+  deleteImage: (productId, imageId) => api.delete(`/listings/${productId}/images/${imageId}`),
 };
 
 export const bannersAPI = {

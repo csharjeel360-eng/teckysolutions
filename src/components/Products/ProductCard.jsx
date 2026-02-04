@@ -82,7 +82,7 @@ const ProductCard = ({
   if (layout === 'list') {
     return (
       <Link 
-        to={`/product/${createSlug(_id, title)}`}
+        to={`/listings/${createSlug(_id, title)}`}
         className="block bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-lg transition-all duration-300 hover:border-black/20"
       >
         <div className="flex gap-4">
@@ -145,9 +145,9 @@ const ProductCard = ({
     );
   }
 
-  return (
+    return (
     <Link 
-      to={`/product/${createSlug(_id, title)}`}
+      to={`/listings/${createSlug(_id, title)}`}
       className={`block bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 hover:border-black/20 group ${sizeConfig.container}`}
     >
       <div className="relative">

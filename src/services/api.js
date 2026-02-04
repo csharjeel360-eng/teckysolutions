@@ -238,12 +238,12 @@ export const blogsAPI = {
 
 // CATEGORIES API
 export const categoriesAPI = {
-  getAll: () => cachedGet('/categories'),
+  getAll: (params = {}) => cachedGet('/categories', params),
   getById: (id) => cachedGet(`/categories/${id}`),
   create: (categoryData) => {
     // Only clear category-related cache
     for (let key of requestCache.keys()) {
-      if (key.includes('/categories') || key.includes('/products')) {
+      if (key.includes('/categories') || key.includes('/listings')) {
         requestCache.delete(key);
       }
     }
@@ -252,7 +252,7 @@ export const categoriesAPI = {
   update: (id, categoryData) => {
     // Only clear category-related cache
     for (let key of requestCache.keys()) {
-      if (key.includes('/categories') || key.includes('/products')) {
+      if (key.includes('/categories') || key.includes('/listings')) {
         requestCache.delete(key);
       }
     }
@@ -261,7 +261,7 @@ export const categoriesAPI = {
   delete: (id) => {
     // Only clear category-related cache
     for (let key of requestCache.keys()) {
-      if (key.includes('/categories') || key.includes('/products')) {
+      if (key.includes('/categories') || key.includes('/listings')) {
         requestCache.delete(key);
       }
     }
@@ -269,134 +269,134 @@ export const categoriesAPI = {
   },
 };
 
-// PRODUCTS API - FIXED DUPLICATE getReviews
+  // LISTINGS API (formerly PRODUCTS)
 export const productsAPI = {
   // Basic CRUD
-  getAll: (params = {}) => cachedGet('/products', params),
-  getById: (id) => cachedGet(`/products/${id}`),
-  getBySlug: (slug) => cachedGet(`/products/slug/${slug}`),
+  getAll: (params = {}) => cachedGet('/listings', params),
+  getById: (id) => cachedGet(`/listings/${id}`),
+  getBySlug: (slug) => cachedGet(`/listings/slug/${slug}`),
   create: (productData) => {
     for (let key of requestCache.keys()) {
-      if (key.includes('/products') || key.includes('/categories')) {
+      if (key.includes('/listings') || key.includes('/categories')) {
         requestCache.delete(key);
       }
     }
-    return api.post('/products', productData);
+    return api.post('/listings', productData);
   },
   update: (id, productData) => {
     for (let key of requestCache.keys()) {
-      if (key.includes('/products') || key.includes('/categories')) {
+      if (key.includes('/listings') || key.includes('/categories')) {
         requestCache.delete(key);
       }
     }
-    return api.put(`/products/${id}`, productData);
+    return api.put(`/listings/${id}`, productData);
   },
   delete: (id) => {
     for (let key of requestCache.keys()) {
-      if (key.includes('/products') || key.includes('/categories')) {
+      if (key.includes('/listings') || key.includes('/categories')) {
         requestCache.delete(key);
       }
     }
-    return api.delete(`/products/${id}`);
+    return api.delete(`/listings/${id}`);
   },
   
   // Images Management
   deleteImage: (productId, imageId) => {
     for (let key of requestCache.keys()) {
-      if (key.includes(`/products/${productId}`)) {
+      if (key.includes(`/listings/${productId}`)) {
         requestCache.delete(key);
       }
     }
-    return api.delete(`/products/${productId}/images/${imageId}`);
+    return api.delete(`/listings/${productId}/images/${imageId}`);
   },
   uploadImages: (id, formData) => {
     for (let key of requestCache.keys()) {
-      if (key.includes(`/products/${id}`)) {
+      if (key.includes(`/listings/${id}`)) {
         requestCache.delete(key);
       }
     }
-    return api.post(`/products/${id}/images`, formData);
+    return api.post(`/listings/${id}/images`, formData);
   },
   
   // Analytics & Tracking
-  recordBuyClick: (id) => api.post(`/products/${id}/buy-click`),
-  recordView: (id) => api.post(`/products/${id}/view`),
-  getAnalytics: (id) => cachedGet(`/products/${id}/analytics`),
+  recordBuyClick: (id) => api.post(`/listings/${id}/buy-click`),
+  recordView: (id) => api.post(`/listings/${id}/view`),
+  getAnalytics: (id) => cachedGet(`/listings/${id}/analytics`),
   
   // Reviews System
   addReview: (id, review) => {
     for (let key of requestCache.keys()) {
-      if (key.includes(`/products/${id}`)) {
+      if (key.includes(`/listings/${id}`)) {
         requestCache.delete(key);
       }
     }
-    return api.post(`/products/${id}/reviews`, review);
+    return api.post(`/listings/${id}/reviews`, review);
   },
-  getReviews: (id) => cachedGet(`/products/${id}/reviews`),
+  getReviews: (id) => cachedGet(`/listings/${id}/reviews`),
   
   // Search & Filtering
-  search: (params = {}) => cachedGet('/products/search', params),
-  getByCategory: (categoryId, params = {}) => cachedGet(`/products/category/${categoryId}`, params),
-  getByTag: (tag, params = {}) => cachedGet(`/products/tag/${tag}`, params),
-  getRelated: (id) => cachedGet(`/products/${id}/related`),
-  getFeatured: (params = {}) => cachedGet('/products/featured', params),
-  getPopular: (params = {}) => cachedGet('/products/popular', params),
+  search: (params = {}) => cachedGet('/listings/search', params),
+  getByCategory: (categoryId, params = {}) => cachedGet(`/listings/category/${categoryId}`, params),
+  getByTag: (tag, params = {}) => cachedGet(`/listings/tag/${tag}`, params),
+  getRelated: (id) => cachedGet(`/listings/${id}/related`),
+  getFeatured: (params = {}) => cachedGet('/listings/featured', params),
+  getPopular: (params = {}) => cachedGet('/listings/popular', params),
   
   // Management
   updateStock: (id, stock) => {
     for (let key of requestCache.keys()) {
-      if (key.includes(`/products/${id}`) || key.includes('/products')) {
+      if (key.includes(`/listings/${id}`) || key.includes('/listings')) {
         requestCache.delete(key);
       }
     }
-    return api.patch(`/products/${id}/stock`, { stock });
+    return api.patch(`/listings/${id}/stock`, { stock });
   },
   toggleFeatured: (id) => {
     for (let key of requestCache.keys()) {
-      if (key.includes('/products')) {
+      if (key.includes('/listings')) {
         requestCache.delete(key);
       }
     }
-    return api.patch(`/products/${id}/featured`);
+    return api.patch(`/listings/${id}/featured`);
   },
   
   // Bulk Operations
   bulkUpdate: (products) => {
     for (let key of requestCache.keys()) {
-      if (key.includes('/products')) {
+      if (key.includes('/listings')) {
         requestCache.delete(key);
       }
     }
-    return api.patch('/products/bulk-update', { products });
+    return api.patch('/listings/bulk-update', { products });
   },
   bulkDelete: (ids) => {
     for (let key of requestCache.keys()) {
-      if (key.includes('/products')) {
+      if (key.includes('/listings')) {
         requestCache.delete(key);
       }
     }
-    return api.post('/products/bulk-delete', { ids });
+    return api.post('/listings/bulk-delete', { ids });
   },
   
   // Import/Export
-  exportProducts: (params = {}) => api.get('/products/export', { 
+  exportProducts: (params = {}) => api.get('/listings/export', { 
     params, 
     responseType: 'blob' 
   }),
   importProducts: (formData) => {
     for (let key of requestCache.keys()) {
-      if (key.includes('/products')) {
+      if (key.includes('/listings')) {
         requestCache.delete(key);
       }
     }
-    return api.post('/products/import', formData, {
+    return api.post('/listings/import', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
   
   // Statistics
-  getStatistics: () => cachedGet('/products/statistics'),
-  getCategoriesWithCounts: () => cachedGet('/products/categories/counts'),
+  getStatistics: () => cachedGet('/listings/statistics'),
+  getCategoriesWithCounts: () => cachedGet('/listings/categories/counts'),
 };
 
 // BANNERS API
@@ -498,10 +498,10 @@ export const adminAPI = {
   deleteOrder: (id) => api.delete(`/admin/orders/${id}`),
   
   // Product Management
-  getProducts: (params = {}) => api.get('/admin/products', { params }),
-  createProduct: (productData) => api.post('/admin/products', productData),
-  updateProduct: (id, productData) => api.put(`/admin/products/${id}`, productData),
-  deleteProduct: (id) => api.delete(`/admin/products/${id}`),
+  getProducts: (params = {}) => api.get('/admin/listings', { params }),
+  createProduct: (productData) => api.post('/admin/listings', productData),
+  updateProduct: (id, productData) => api.put(`/admin/listings/${id}`, productData),
+  deleteProduct: (id) => api.delete(`/admin/listings/${id}`),
   
   // Blog Management
   getBlogs: (params = {}) => api.get('/admin/blogs', { params }),
@@ -774,6 +774,60 @@ export const supportAPI = {
   addMessage: (ticketId, message) => api.post(`/support/tickets/${id}/messages`, { message }),
   closeTicket: (id) => api.patch(`/support/tickets/${id}/close`),
   getFaqs: () => api.get('/support/faqs'),
+};
+
+// OFFERS API - CPA/Affiliate Offers
+export const offersAPI = {
+  // Public endpoints
+  getAll: (params = {}) => cachedGet('/offers', params),
+  getById: (id) => cachedGet(`/offers/${id}`),
+  getByCategory: (categoryId) => cachedGet(`/offers/category/${categoryId}`),
+  getByType: (type) => cachedGet(`/offers/type/${type}`),
+  search: (params = {}) => cachedGet('/offers', params),
+  
+  // Admin endpoints
+  adminGetAll: (params = {}) => api.get('/offers/admin/all', { params }),
+  create: (offerData) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/offers')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.post('/offers/admin', offerData);
+  },
+  update: (id, offerData) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/offers')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.put(`/offers/admin/${id}`, offerData);
+  },
+  delete: (id) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/offers')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.delete(`/offers/admin/${id}`);
+  },
+  toggleFeatured: (id) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/offers')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.patch(`/offers/admin/${id}/toggle-featured`);
+  },
+  updateStatus: (id, status) => {
+    for (let key of requestCache.keys()) {
+      if (key.includes('/offers')) {
+        requestCache.delete(key);
+      }
+    }
+    return api.patch(`/offers/admin/${id}/status`, { status });
+  },
+  getStats: () => api.get('/offers/admin/stats')
 };
 
 // FIREBASE API (Utility functions for Firebase integration)

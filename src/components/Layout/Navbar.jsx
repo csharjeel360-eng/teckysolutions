@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { debounce } from '../../utils/helpers';
+import categoryService from '../../services/categoryService';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -30,6 +31,9 @@ const Navbar = () => {
     'Marketing',
     'Design Tools'
   ]);
+  const [categories, setCategories] = useState([]);
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+  const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
   
   const { user, isAuthenticated, logout } = useAuth();
   const [cartCount, setCartCount] = useState(0);
@@ -75,6 +79,21 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
+    let mounted = true;
+    const fetchCategories = async () => {
+      try {
+        const res = await categoryService.getAll();
+        const data = res?.data || res || [];
+        if (mounted) setCategories(data || []);
+      } catch (err) {
+        console.warn('Failed to fetch categories', err);
+      }
+    };
+    fetchCategories();
+    return () => { mounted = false; };
+  }, []);
+
+  useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setIsProfileOpen(false);
@@ -114,7 +133,7 @@ const Navbar = () => {
   const debouncedSearch = debounce((query) => {
     if (query.trim()) {
       saveToRecentSearches(query);
-      navigate(`/products?search=${encodeURIComponent(query)}`);
+      navigate(`/listings?search=${encodeURIComponent(query)}`);
       setShowSearchSuggestions(false);
     }
   }, 500);
@@ -135,7 +154,7 @@ const Navbar = () => {
     e.preventDefault();
     if (searchQuery.trim()) {
       saveToRecentSearches(searchQuery);
-      navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
+      navigate(`/listings?search=${encodeURIComponent(searchQuery)}`);
       setShowSearchSuggestions(false);
       setSearchQuery('');
     }
@@ -144,20 +163,20 @@ const Navbar = () => {
   const handleClearSearch = () => {
     setSearchQuery('');
     setShowSearchSuggestions(false);
-    if (location.pathname === '/products') {
-      navigate('/products');
+    if (location.pathname === '/listings') {
+      navigate('/listings');
     }
   };
 
   const handleSuggestionClick = (suggestion) => {
     setSearchQuery(suggestion);
     saveToRecentSearches(suggestion);
-    navigate(`/products?search=${encodeURIComponent(suggestion)}`);
+    navigate(`/listings?search=${encodeURIComponent(suggestion)}`);
     setShowSearchSuggestions(false);
   };
 
   const handleClearFilters = () => {
-    navigate('/products');
+    navigate('/listings');
     setSearchQuery('');
     setShowSearchSuggestions(false);
   };
@@ -211,24 +230,41 @@ const Navbar = () => {
             </Link>
             
             <Link 
-              to="/products" 
+              to="/listings" 
               className="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors font-medium group relative px-3 py-2 rounded-lg hover:bg-gray-50"
             >
               <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-green-50 flex items-center justify-center transition-colors">
                 <Package className="h-4 w-4 text-gray-600 group-hover:text-green-600" />
               </div>
-              <span className="group-hover:font-semibold whitespace-nowrap">Products</span>
+              <span className="group-hover:font-semibold whitespace-nowrap">Listings</span>
             </Link>
-            
-            <Link 
-              to="/categories" 
-              className="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors font-medium group relative px-3 py-2 rounded-lg hover:bg-gray-50"
-            >
-              <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-purple-50 flex items-center justify-center transition-colors">
-                <FolderOpen className="h-4 w-4 text-gray-600 group-hover:text-purple-600" />
-              </div>
-              <span className="group-hover:font-semibold whitespace-nowrap">Categories</span>
-            </Link>
+
+            <div className="relative" onMouseEnter={() => setIsCategoriesOpen(true)} onMouseLeave={() => setIsCategoriesOpen(false)}>
+              <button
+                onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
+                className="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors font-medium group relative px-3 py-2 rounded-lg hover:bg-gray-50"
+              >
+                <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-purple-50 flex items-center justify-center transition-colors">
+                  <FolderOpen className="h-4 w-4 text-gray-600 group-hover:text-purple-600" />
+                </div>
+                <span className="group-hover:font-semibold whitespace-nowrap">Categories</span>
+              </button>
+
+              {isCategoriesOpen && categories.length > 0 && (
+                <div className="absolute left-0 top-full w-56 bg-white rounded-xl shadow-lg border border-gray-200 z-50 py-2">
+                  {categories.map((cat) => (
+                    <Link
+                      key={cat._id || cat.id || cat.name}
+                      to={`/listings?category=${encodeURIComponent(cat.slug || cat.name)}`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      onClick={() => setIsCategoriesOpen(false)}
+                    >
+                      {cat.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
             
             <Link 
               to="/blogs" 
@@ -338,7 +374,7 @@ const Navbar = () => {
                       </div>
                     )}
 
-                    {(location.pathname === '/products' && location.search) && (
+                    {(location.pathname === '/listings' && location.search) && (
                       <div className="p-3 border-t border-gray-100">
                         <button
                           onClick={handleClearFilters}
@@ -358,7 +394,7 @@ const Navbar = () => {
           <div className="flex items-center space-x-2 sm:space-x-3">
             {/* Mobile Search Icon */}
             <button 
-              onClick={() => navigate('/products')}
+              onClick={() => navigate('/listings')}
               className="md:hidden p-2 text-gray-700 hover:text-black transition-colors rounded-lg hover:bg-gray-100"
               aria-label="Search"
             >
@@ -506,7 +542,7 @@ const Navbar = () => {
                 </button>
               </div>
 
-              {(location.pathname === '/products' && location.search) && (
+              {(location.pathname === '/listings' && location.search) && (
                 <button
                   onClick={handleClearFilters}
                   className="w-full mt-3 text-center py-2.5 text-sm text-gray-600 hover:text-black font-medium transition-colors bg-gray-50 rounded-lg hover:bg-gray-100"
@@ -534,26 +570,43 @@ const Navbar = () => {
               </Link>
               
               <Link
-                to="/products"
+                to="/listings"
                 className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-black hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-colors rounded-xl"
                 onClick={() => setIsMenuOpen(false)}
               >
                 <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
                   <Package className="h-4 w-4 text-green-600" />
                 </div>
-                <span>Products</span>
+                <span>Listings</span>
               </Link>
-              
-              <Link
-                to="/categories"
-                className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-black hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-colors rounded-xl"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
-                  <FolderOpen className="h-4 w-4 text-purple-600" />
-                </div>
-                <span>Categories</span>
-              </Link>
+
+              <div>
+                <button
+                  onClick={() => setMobileCategoriesOpen(!mobileCategoriesOpen)}
+                  className="w-full flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-black hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-colors rounded-xl"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                    <FolderOpen className="h-4 w-4 text-purple-600" />
+                  </div>
+                  <span>Categories</span>
+                  <span className="ml-auto text-sm text-gray-500">{mobileCategoriesOpen ? '−' : '+'}</span>
+                </button>
+
+                {mobileCategoriesOpen && categories.length > 0 && (
+                  <div className="pl-12 pr-4 pt-2 pb-2 space-y-1">
+                    {categories.map((cat) => (
+                      <Link
+                        key={cat._id || cat.id || cat.name}
+                        to={`/listings?category=${encodeURIComponent(cat.slug || cat.name)}`}
+                        className="block px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        {cat.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
               
               <Link
                 to="/blogs"

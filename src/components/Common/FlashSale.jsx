@@ -6,7 +6,7 @@ const FlashSale = ({
   title = "MONTHLY FLASH SALE",
   subtitle = "Limited time offers - Ends this month!",
   buttonText = "Shop Now",
-  buttonLink = "/products?flash=true"
+  buttonLink = "/listings?flash=true"
 }) => {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [saleProgress, setSaleProgress] = useState(0);

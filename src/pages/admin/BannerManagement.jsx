@@ -720,7 +720,7 @@ const BannerManagement = () => {
               <Input
                 label="Button Link"
                 {...register('buttonLink')}
-                placeholder="/products?category=electronics"
+                placeholder="/listings?category=electronics"
               />
             </div>
           </div>

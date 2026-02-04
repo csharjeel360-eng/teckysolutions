@@ -25,7 +25,7 @@ const CategorySidebar = ({
       <div className="space-y-2">
         {/* All Categories Link */}
         <Link
-          to="/products"
+          to="/listings"
           className={`block py-2 px-3 rounded-lg transition-colors ${
             !currentCategoryId
               ? 'bg-black text-white font-medium'
@@ -42,7 +42,7 @@ const CategorySidebar = ({
         {categories.map((category) => (
           <Link
             key={category._id}
-            to={`/category/${category._id}/products`}
+            to={`/category/${category._id}/listings`}
             className={`block py-2 px-3 rounded-lg transition-colors ${
               currentCategoryId === category._id
                 ? 'bg-black text-white font-medium'

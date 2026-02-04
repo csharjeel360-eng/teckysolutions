@@ -91,8 +91,8 @@ const Cart = () => {
             title="Your cart is empty"
             message="Add some amazing products to your cart and they will appear here."
             icon="🛒"
-            action={
-              <Link to="/products">
+              action={
+              <Link to="/listings">
                 <Button variant="primary" size="large">
                   Start Shopping
                 </Button>
@@ -111,7 +111,7 @@ const Cart = () => {
         <div className="flex items-center justify-between mb-6 sm:mb-8">
           <div className="flex items-center gap-3">
             <Link 
-              to="/products" 
+              to="/listings" 
               className="p-2 text-gray-600 hover:text-[black] transition-colors rounded-lg hover:bg-gray-100"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -137,7 +137,7 @@ const Cart = () => {
                     <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                       {/* Product Image */}
                       <Link 
-                        to={`/product/${createSlug(item.product._id, item.product.title)}`}
+                        to={`/listings/${createSlug(item.product._id, item.product.title)}`}
                         className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-lg overflow-hidden"
                       >
                         <img
@@ -151,7 +151,7 @@ const Cart = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
                           <Link
-                            to={`/product/${createSlug(item.product._id, item.product.title)}`}
+                            to={`/listings/${createSlug(item.product._id, item.product.title)}`}
                             className="text-lg sm:text-xl font-semibold text-gray-900 hover:text-[black] line-clamp-2"
                           >
                             {item.product.title || item.productTitle}
@@ -305,7 +305,7 @@ const Cart = () => {
               {/* Action Buttons - checkout and bulk external purchase removed per request */}
               <div className="space-y-3">
                 <Link
-                  to="/products"
+                  to="/listings"
                   className="w-full border border-gray-300 text-gray-700 hover:bg-gray-50 py-3 px-4 rounded-lg font-semibold text-center block transition-colors text-sm"
                 >
                   Continue Shopping

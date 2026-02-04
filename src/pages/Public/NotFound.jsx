@@ -26,9 +26,9 @@ const NotFound = () => {
               Go Back Home
             </Button>
           </Link>
-          <Link to="/products">
+          <Link to="/listings">
             <Button variant="outline" size="large">
-              Browse Products
+              Browse Listings
             </Button>
           </Link>
         </div>

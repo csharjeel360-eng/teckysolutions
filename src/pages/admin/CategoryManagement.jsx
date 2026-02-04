@@ -33,6 +33,7 @@ const CategoryManagement = () => {
   // Filter and sort states
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
   // React Hook Form - same as AdminDashboard
@@ -52,7 +53,14 @@ const CategoryManagement = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const response = await categoriesAPI.getAll();
+      
+      // Get filter params
+      const filterParams = {};
+      if (typeFilter !== 'all') {
+        filterParams.type = typeFilter;
+      }
+      
+      const response = await categoriesAPI.getAll(filterParams);
       let cats = response.data || [];
 
       // Try to get product counts per category from backend helper endpoint
@@ -127,6 +135,7 @@ const CategoryManagement = () => {
     if (category) {
       setValue('name', category.name || '');
       setValue('description', category.description || '');
+      setValue('type', category.type || 'product');
       setValue('isActive', category.isActive !== false);
       
       if (category.image) {
@@ -142,6 +151,7 @@ const CategoryManagement = () => {
       reset({
         name: '',
         description: '',
+        type: 'product',
         isActive: true
       });
       setCategoryImage([]);
@@ -189,6 +199,7 @@ const CategoryManagement = () => {
       const formData = new FormData();
       formData.append('name', data.name);
       formData.append('description', data.description || '');
+      formData.append('type', data.type || 'product');
       formData.append('isActive', data.isActive);
       
       if (categoryImage[0].file) {
@@ -412,6 +423,25 @@ const CategoryManagement = () => {
       }
     },
     {
+      key: 'type',
+      header: 'Type',
+      render: (value, item) => {
+        const category = item || value;
+        if (!category) return null;
+        const typeColors = {
+          product: 'bg-blue-100 text-blue-800',
+          offer: 'bg-purple-100 text-purple-800',
+          job: 'bg-green-100 text-green-800',
+          software: 'bg-orange-100 text-orange-800'
+        };
+        return (
+          <span className={`px-2 py-1 rounded text-xs font-medium ${typeColors[category.type] || 'bg-gray-100 text-gray-800'}`}>
+            {category.type?.charAt(0).toUpperCase() + category.type?.slice(1) || 'Product'}
+          </span>
+        );
+      }
+    },
+    {
       key: 'productCount',
       header: 'Products',
       sortable: true,
@@ -545,7 +575,7 @@ const CategoryManagement = () => {
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">
           {/* Filters and Search */}
           <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
               <div className="md:col-span-2">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -557,6 +587,21 @@ const CategoryManagement = () => {
                     className="pl-10"
                   />
                 </div>
+              </div>
+              <div>
+                <select
+                  value={typeFilter}
+                  onChange={(e) => {
+                    setTypeFilter(e.target.value);
+                  }}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All Types</option>
+                  <option value="product">Products</option>
+                  <option value="offer">Offers</option>
+                  <option value="job">Jobs</option>
+                  <option value="software">Software</option>
+                </select>
               </div>
               <div>
                 <select
@@ -638,6 +683,19 @@ const CategoryManagement = () => {
             {...register('description')} 
             error={errors.description} 
           />
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Category Type</label>
+            <select
+              {...register('type')}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="product">Product</option>
+              <option value="offer">Offer</option>
+              <option value="job">Job</option>
+              <option value="software">Software</option>
+            </select>
+          </div>
           
           <div className="flex items-center">
             <input
@@ -686,6 +744,15 @@ const CategoryManagement = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700">Name</label>
                 <p className="mt-1 text-sm text-gray-900">{viewModal.item.name}</p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Type</label>
+                <p className="mt-1 text-sm">
+                  <span className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                    {viewModal.item.type?.charAt(0).toUpperCase() + viewModal.item.type?.slice(1) || 'Product'}
+                  </span>
+                </p>
               </div>
               
               <div>

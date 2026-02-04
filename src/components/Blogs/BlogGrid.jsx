@@ -47,8 +47,8 @@ const BlogGrid = ({
         title="No Blog Posts Yet"
         message="We're working on creating amazing content for you. Check back soon for new blog posts!"
         icon="📝"
-        actionText="Browse Products"
-        onAction={() => window.location.href = '/products'}
+        actionText="Browse Listings"
+        onAction={() => window.location.href = '/listings'}
         {...emptyStateProps}
       />
     );

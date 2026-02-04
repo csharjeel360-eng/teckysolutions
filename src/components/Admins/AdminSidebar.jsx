@@ -7,6 +7,7 @@ import {
   FileText, 
   Image, 
   Users,
+  Gift,
   LogOut,
   Menu,
   X
@@ -24,7 +25,8 @@ const AdminSidebar = () => {
   const menuItems = [
     { path: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/admin/categories', icon: Tag, label: 'Categories' },
-    { path: '/admin/products', icon: ShoppingBag, label: 'Products' },
+    { path: '/admin/listings', icon: ShoppingBag, label: 'Listings' },
+    { path: '/admin/offers', icon: Gift, label: 'CPA Offers' },
     { path: '/admin/blogs', icon: FileText, label: 'Blogs' },
     { path: '/admin/banners', icon: Image, label: 'Banners' },
     { path: '/admin/users', icon: Users, label: 'Users' },

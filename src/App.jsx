@@ -9,8 +9,8 @@ import ScrollToTop from './components/Common/ScrollToTop';
 // Public Pages
 import Home from './pages/Public/Home';
 import Categories from './pages/Public/Categories';
-import Products from './pages/Public/Products';
-import ProductDetail from './pages/Public/ProductDetail';
+import Listings from './pages/Public/Listings';
+import ListingDetail from './pages/Public/ListingDetail';
 import Blogs from './pages/Public/Blogs';
 import BlogDetail from './pages/Public/BlogDetail';
 import Cart from './pages/Public/Cart';
@@ -31,10 +31,12 @@ import CreateAdmin from './pages/admin/CreateAdmin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import BannerManagement from './pages/admin/BannerManagement';
 import CategoryManagement from './pages/admin/CategoryManagement';
-import ProductManagement from './pages/admin/ProductManagement';
+import ListingsGrid from './pages/admin/ListingsGrid';
+import ListingManagement from './pages/admin/ListingManagement';
 import UserManagement from './pages/admin/UserManagement';
 import BlogManagement from './pages/admin/BlogManagement';
 import BlogEditor from './pages/admin/BlogEditor';
+import OffersManagement from './pages/admin/OffersManagement';
 import Settings from './pages/admin/Settings';
 import AdminLayout from './components/Admins/AdminLayout';
 
@@ -57,9 +59,9 @@ function App() {
                 {/* ===== PUBLIC ROUTES ===== */}
                 <Route path="/" element={<Home />} />
                 <Route path="/categories" element={<Categories />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/category/:slug/products" element={<Products />} />
-                <Route path="/product/:slug" element={<ProductDetail />} />
+                <Route path="/listings" element={<Listings />} />
+                <Route path="/category/:slug/listings" element={<Listings />} />
+                <Route path="/listings/:slug" element={<ListingDetail />} />
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/blogs" element={<Blogs />} />
                 <Route path="/blog/:slug" element={<BlogDetail />} />
@@ -97,7 +99,10 @@ function App() {
                   <Route index element={<AdminDashboard />} />
                   <Route path="dashboard" element={<AdminDashboard />} />
                   <Route path="categories" element={<CategoryManagement />} />
-                  <Route path="products" element={<ProductManagement />} />
+                  <Route path="listings" element={<ListingsGrid />} />
+                  <Route path="listings/new" element={<ListingManagement />} />
+                  <Route path="listings/:id/edit" element={<ListingManagement />} />
+                  <Route path="offers" element={<OffersManagement />} />
                   <Route path="blogs" element={<BlogManagement />} />
                   <Route path="blogs/new" element={<BlogEditor />} />
                   <Route path="blogs/edit/:id" element={<BlogEditor />} />
