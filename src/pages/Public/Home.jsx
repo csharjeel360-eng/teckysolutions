@@ -355,10 +355,10 @@ const Home = () => {
 
               {/* CTAs: stacked on mobile, horizontal on desktop */}
               <div className="flex flex-col sm:flex-row gap-4 pt-6">
-                <Link to="/listings" className="w-full sm:w-auto">
+                <Link to="/listings" className="w-full sm:w-auto cursor-pointer">
                   <Button
                     size="large"
-                    className="bg-[#FF6600] hover:bg-[#e65500] text-white border-0 px-8 py-4 rounded-2xl shadow-lg w-full sm:w-auto"
+                    className="bg-[#FF6600] hover:bg-[#e65500] text-white border-0 px-8 py-4 rounded-2xl shadow-lg w-full sm:w-auto cursor-pointer transition-all"
                   >
                     <span className="flex items-center gap-3">
                       <span className="text-2xl">🛒</span>
@@ -367,10 +367,10 @@ const Home = () => {
                   </Button>
                 </Link>
 
-                <Link to="/services" className="w-full sm:w-auto">
+                <Link to="/services" className="w-full sm:w-auto cursor-pointer">
                   <Button
                     size="large"
-                    className="bg-[#20C997] hover:bg-[#1aa07f] text-white border-0 px-8 py-4 rounded-2xl shadow-sm w-full sm:w-auto"
+                    className="bg-[#20C997] hover:bg-[#1aa07f] text-white border-0 px-8 py-4 rounded-2xl shadow-sm w-full sm:w-auto cursor-pointer transition-all"
                   >
                     <span className="flex items-center gap-3">
                       <span className="text-2xl">🚀</span>
@@ -379,11 +379,11 @@ const Home = () => {
                   </Button>
                 </Link>
 
-                <Link to="/blogs" className="w-full sm:w-auto">
+                <Link to="/blogs" className="w-full sm:w-auto cursor-pointer">
                   <Button
                     size="large"
                     variant="ghost"
-                    className="text-gray-100 hover:text-white bg-transparent px-6 py-3 rounded-2xl w-full sm:w-auto"
+                    className="text-gray-100 hover:text-white bg-transparent px-6 py-3 rounded-2xl w-full sm:w-auto cursor-pointer transition-all"
                   >
                     <span className="flex items-center gap-3">
                       <span className="text-2xl">📖</span>
@@ -477,10 +477,10 @@ const Home = () => {
           )}
 
           <div className="text-center mt-12">
-            <Link to="/listings">
+            <Link to="/listings" className="cursor-pointer">
               <Button 
                 variant="primary"
-                className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 px-8 py-4 rounded-xl font-bold text-lg"
+                className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 px-8 py-4 rounded-xl font-bold text-lg cursor-pointer transition-all"
               >
                 View All Listings
               </Button>
@@ -538,10 +538,10 @@ const Home = () => {
           </div>
 
           <div className="text-center mt-12">
-            <Link to="/services">
+            <Link to="/services" className="cursor-pointer">
               <Button 
                 variant="primary"
-                className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 px-8 py-4 rounded-xl font-bold text-lg"
+                className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 px-8 py-4 rounded-xl font-bold text-lg cursor-pointer transition-all"
               >
                 View All Services
               </Button>
@@ -602,10 +602,10 @@ const Home = () => {
           </Suspense>
 
           <div className="text-center mt-12">
-            <Link to="/blogs">
+            <Link to="/blogs" className="cursor-pointer">
               <Button 
                 variant="primary"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-4 rounded-xl font-bold text-lg"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-4 rounded-xl font-bold text-lg cursor-pointer transition-all"
               >
                 Read All Articles
               </Button>
@@ -780,11 +780,11 @@ const Home = () => {
             </div>
             
             <div className="space-y-6">
-              <Link to="/signup">
+              <Link to="/signup" className="cursor-pointer">
                 <Button 
                   variant="primary" 
                   size="large"
-                  className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 shadow-2xl hover:shadow-cyan-500/25 px-12 py-6 rounded-2xl text-xl font-bold transform hover:scale-105 transition-all duration-300"
+                  className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 shadow-2xl hover:shadow-cyan-500/25 px-12 py-6 rounded-2xl text-xl font-bold transform hover:scale-105 transition-all duration-300 cursor-pointer"
                 >
                   Start Shopping & Reading Today
                 </Button>

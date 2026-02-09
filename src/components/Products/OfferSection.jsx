@@ -108,7 +108,7 @@ const OfferSection = ({ categoryId, listingId, offers: initialOffers, showExplor
                 href={offer.trackingUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105"
+                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 cursor-pointer"
               >
                 Visit Now
                 <ExternalLink size={18} />
@@ -120,8 +120,8 @@ const OfferSection = ({ categoryId, listingId, offers: initialOffers, showExplor
 
       {showExploreButton && (
         <div className="text-center mt-8">
-          <Link to="/category/offers/listings">
-            <Button variant="primary" className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500">
+          <Link to="/category/offers/listings" className="cursor-pointer">
+            <Button variant="primary" className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 cursor-pointer transition-all">
               Explore Offers
             </Button>
           </Link>
