@@ -90,7 +90,10 @@ export const useCart = () => {
   const addToCart = useCallback(async (product, quantity = 1) => {
     try {
       // Don't set loading here - ProductDetail component handles with isAddingToCart state
-      const response = await CartService.addToCart(product._id, quantity);
+      // Accept either a product object or a product id string
+      const productId = typeof product === 'string' ? product : (product?._id || product?.id);
+      if (!productId) throw new Error('Invalid product identifier');
+      const response = await CartService.addToCart(productId, quantity);
       
       if (response.success) {
         // ✅ ADDED: Normalize cart data
@@ -105,7 +108,7 @@ export const useCart = () => {
         setError(null);
         
         // ✅ ADDED: Update external products if added product is external
-        if (product.productLink) {
+        if (product && product.productLink) {
           await fetchExternalProducts();
         }
       }

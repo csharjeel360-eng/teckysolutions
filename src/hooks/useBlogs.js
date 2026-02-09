@@ -1,12 +1,15 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import BlogService from '../services/blogService';
 
+// Global cache that persists across component mounts/unmounts
+const globalBlogCache = new Map();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache lifespan
+
 const useBlogs = (initialFilters = {}) => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const previousDataRef = useRef([]); // Prevent flickering
-  const cacheRef = useRef(null); // Cache blogs data
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
     search: '',
@@ -45,24 +48,27 @@ const useBlogs = (initialFilters = {}) => {
 
   const fetchBlogs = useCallback(async () => {
     try {
+      // Return cached data if available for same filters (skip refetch)
+      const cacheKey = JSON.stringify(filters);
+      const cached = globalBlogCache.get(cacheKey);
+      
+      if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+        // Cache is fresh, use it
+        setBlogs(cached.data);
+        setLoading(false);
+        if (isInitialLoad) {
+          setIsInitialLoad(false);
+        }
+        return; // Skip API call if already cached and fresh
+      }
+      
       if (isInitialLoad) {
         setLoading(true);
       }
       setError(null);
       
-      // Return cached data if available for same filters
-      const cacheKey = JSON.stringify(filters);
-      if (cacheRef.current?.key === cacheKey && cacheRef.current?.data) {
-        setBlogs(cacheRef.current.data);
-        setLoading(false);
-        if (isInitialLoad) {
-          setIsInitialLoad(false);
-        }
-        return;
-      }
-      
-      // Fetch blogs with filters - Add limit for faster initial load
-      const result = await BlogService.getBlogs({ ...filters, limit: 30 });
+      // Fetch blogs with filters - Minimal limit for super fast load
+      const result = await BlogService.getBlogs({ ...filters, limit: 8, page: 1 });
       
       if (result.success) {
         const blogsData = result.blogs || result.data || [];
@@ -70,8 +76,11 @@ const useBlogs = (initialFilters = {}) => {
           .map(normalizeBlogData)
           .filter(blog => blog !== null);
         
-        // Cache the result
-        cacheRef.current = { key: cacheKey, data: normalizedBlogs };
+        // Cache the result in global cache
+        globalBlogCache.set(cacheKey, { 
+          data: normalizedBlogs,
+          timestamp: Date.now()
+        });
         
         setBlogs(normalizedBlogs);
         previousDataRef.current = normalizedBlogs;
@@ -91,16 +100,16 @@ const useBlogs = (initialFilters = {}) => {
       }
       setLoading(false);
     } finally {
-      setLoading(false);
       if (isInitialLoad) {
         setIsInitialLoad(false);
       }
     }
   }, [filters, normalizeBlogData, isInitialLoad]);
 
+  // Only refetch when filters change, not on every render
   useEffect(() => {
     fetchBlogs();
-  }, [fetchBlogs]);
+  }, [JSON.stringify(filters)]);  // Only depend on stringified filters to prevent infinite loops
 
   const setSearch = useCallback((searchTerm) => {
     setFilters(prev => ({ ...prev, search: searchTerm }));

@@ -3,7 +3,7 @@ import useBlogs from '../../hooks/useBlogs';
 import BlogGrid from '../../components/Blogs/BlogGrid';
 import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 import EmptyState from '../../components/Common/EmptyState';
-import { FileText, Search, RefreshCw } from 'lucide-react';
+import { Search, RefreshCw } from 'lucide-react';
 import { setPageTitle } from '../../utils/slugify';
 
 // Lazy load SearchBar to reduce initial bundle size
@@ -20,7 +20,7 @@ const Blogs = () => {
   } = useBlogs();
   
   const [searchTerm, setSearchTerm] = useState('');
-  const [displayCount, setDisplayCount] = useState(10);
+  const [displayCount, setDisplayCount] = useState(2); // Reduced to 2 for ultra-fast initial load
   const [loadMoreRef, setLoadMoreRef] = useState(null);
 
   // Handle search with debounce
@@ -57,19 +57,18 @@ const Blogs = () => {
     "@type": "Blog",
     "name": "Our Blog",
     "url": typeof window !== 'undefined' ? window.location.href : '',
-    "blogPost": displayedBlogs.slice(0, 5).map(blog => ({
+    "blogPost": publishedBlogs.slice(0, 3).map(blog => ({
       "@type": "BlogPosting",
-      "headline": blog.title,
-      "image": blog.coverImage || "",
-      "datePublished": blog.createdAt,
-      "dateModified": blog.updatedAt || blog.createdAt,
+      "headline": blog.title || '',
+      "image": blog.featuredImage?.url || blog.featuredImage || "",
+      "datePublished": blog.createdAt || '',
+      "dateModified": blog.updatedAt || blog.createdAt || '',
       "author": {
         "@type": "Person",
         "name": blog.author?.name || "Admin"
-      },
-      "description": blog.excerpt || blog.title
+      }
     }))
-  }), [displayedBlogs]);
+  }), [publishedBlogs]);
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -78,8 +77,8 @@ const Blogs = () => {
     const observer = new IntersectionObserver(
       entries => {
         if (entries[0].isIntersecting && displayCount < publishedBlogs.length) {
-          // Load 5 more blogs when user scrolls to bottom
-          setDisplayCount(prev => Math.min(prev + 5, publishedBlogs.length));
+          // Load 4 more blogs when user scrolls to bottom
+          setDisplayCount(prev => Math.min(prev + 4, publishedBlogs.length));
         }
       },
       { threshold: 0.1 }
@@ -89,8 +88,10 @@ const Blogs = () => {
     return () => observer.disconnect();
   }, [loadMoreRef, displayCount, publishedBlogs.length]);
 
-  // Inject JSON-LD schema into document head (lazy load after 2 seconds to not block render)
+  // Inject JSON-LD schema into document head (lazy - only when schema actually changes)
   useEffect(() => {
+    if (publishedBlogs.length === 0) return; // Skip if no blogs
+    
     const timeoutId = setTimeout(() => {
       const existingScript = document.querySelector('script[data-blog-schema]');
       if (existingScript) existingScript.remove();
@@ -100,55 +101,34 @@ const Blogs = () => {
       script.setAttribute('data-blog-schema', 'true');
       script.innerHTML = JSON.stringify(blogSchema);
       document.head.appendChild(script);
-      return () => script.remove();
-    }, 2000); // Increased delay to 2s to prioritize content rendering
+      return () => {
+        if (script && script.parentNode) {
+          script.parentNode.removeChild(script);
+        }
+      };
+    }, 1000); // Defer to 1s to prioritize initial render
     
     return () => clearTimeout(timeoutId);
-  }, [blogSchema]);
+  }, [blogSchema, publishedBlogs.length]);
 
-  // Update SEO meta tags
+  // Update SEO meta tags (deferred to avoid blocking)
   useEffect(() => {
-    const title = filters?.search
-      ? `Search "${filters.search}" | Blog`
-      : 'Blog – News, Tips & Insights';
-    document.title = title;
-
-    // Update meta description
-    let metaDescription = document.querySelector('meta[name="description"]');
-    if (!metaDescription) {
-      metaDescription = document.createElement('meta');
-      metaDescription.name = 'description';
-      document.head.appendChild(metaDescription);
-    }
-    metaDescription.content = 'Read the latest blog posts, product guides, expert tips, and industry insights. Stay informed with our up-to-date articles.';
-
-    // Update canonical URL
-    let canonical = document.querySelector('link[rel="canonical"]');
-    if (!canonical) {
-      canonical = document.createElement('link');
-      canonical.rel = 'canonical';
-      document.head.appendChild(canonical);
-    }
-    canonical.href = typeof window !== 'undefined' ? window.location.href : '';
-
-    // Update robots meta tag for search pages
-    let robots = document.querySelector('meta[name="robots"]');
-    if (filters?.search) {
-      if (!robots) {
-        robots = document.createElement('meta');
-        robots.name = 'robots';
-        document.head.appendChild(robots);
-      }
-      robots.content = 'noindex, follow';
-    } else if (robots) {
-      robots.remove();
-    }
-  }, [filters?.search]);
+    if (publishedBlogs.length === 0) return;
+    
+    const timeoutId = setTimeout(() => {
+      const title = filters?.search
+        ? `Search "${filters.search}" | Blog`
+        : 'Blog – News, Tips & Insights';
+      document.title = title;
+    }, 100);
+    
+    return () => clearTimeout(timeoutId);
+  }, [filters?.search, publishedBlogs.length]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center">
-        <LoadingSpinner size="large" showBrand={true} brandText="TrendyBreeze" />
+        <LoadingSpinner size="large" showBrand={true} />
       </div>
     );
   }
@@ -176,32 +156,33 @@ const Blogs = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4">
-        {/* Page Header */}
-        <div className="text-center mb-12">
-          <div className="flex justify-center mb-4">
-            <div className="bg-gray-100 p-3 rounded-full">
-              <FileText className="w-8 h-8 text-black" />
-            </div>
-          </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Our Blog</h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section with banner background */}
+      <section
+        className="relative overflow-hidden text-white py-16 sm:py-20"
+        style={{
+          backgroundImage: `url('/homeherobanner/futuristic-tech-hero-banner-dark-blue-teal.jpeg')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        {/* Dark overlay */}
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.45))' }}
+        />
+        <div className="container relative mx-auto px-4 text-center">
+          <h1 className="text-4xl sm:text-5xl font-bold mb-4">
+            Our Blog
+          </h1>
+          <p className="text-xl text-blue-100 max-w-2xl mx-auto">
             Discover the latest news, tips, and insights about our products and industry.
             Stay updated with expert advice and shopping guides.
           </p>
-          
-          {/* Blog Stats */}
-          <div className="mt-6 text-sm text-gray-500">
-            Showing {publishedBlogs.length} of {blogs?.length || 0} blog post{publishedBlogs.length !== 1 ? 's' : ''}
-            {publishedBlogs.length !== blogs?.length && (
-              <span className="text-orange-600 ml-2">
-                ({blogs?.length - publishedBlogs.length} drafts hidden)
-              </span>
-            )}
-          </div>
         </div>
+      </section>
 
+      <div className="container mx-auto px-4 py-8">
         {/* Search Bar */}
         <div className="max-w-md mx-auto mb-8">
           <Suspense fallback={<div className="h-10 bg-gray-200 rounded-lg animate-pulse" />}>

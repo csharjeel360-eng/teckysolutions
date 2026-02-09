@@ -40,63 +40,47 @@ const ProductGrid = ({
 
   return (
     <div className={`grid ${gridClasses[columns] || gridClasses[4]} gap-4 ${className}`}>
-      {products.map((product) => (
-        <Link
-          key={product._id}
-          to={`/listings/${createSlug(product._id, product.title)}`}
-          className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 group block"
-          onClick={(e) => handleProductClick(product._id, e)}
-        >
-          {/* Product Image */}
-          <div className="relative aspect-square overflow-hidden">
-            <img
-              src={product.images?.[0]?.url || '/api/placeholder/300/300'}
-              alt={product.title}
-              loading="lazy"
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-          </div>
+      {products.map((product) => {
+        // Determine destination based on type
+        const type = product.type || 'product';
+        let dest = `/product/${product.slug || createSlug(product._id, product.title)}`;
+        if (type === 'tool') dest = `/software/${product.slug || createSlug(product._id, product.title)}`;
+        if (type === 'job') dest = `/job/${product.slug || createSlug(product._id, product.title)}`;
+        if (type === 'offer') dest = `/offer/${product._id}`;
 
-          {/* Product Info */}
-          <div className="p-4">
-            <h3 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-2 group-hover:text-blue-600 transition-colors">
-              {product.title}
-            </h3>
-            
-            {showDescription && product.description && (
-              <p className="text-gray-600 text-xs mb-2 line-clamp-2">
-                {product.description}
-              </p>
-            )}
-            
-            <div className="flex items-center justify-between">
-              <span className="text-lg font-bold text-gray-900">
-                ${product.price?.toFixed(2)}
-              </span>
-              
-              {product.averageRating && (
-                <div className="flex items-center text-xs text-gray-600">
-                  <span>★</span>
-                  <span className="ml-1">{product.averageRating.toFixed(1)}</span>
-                </div>
-              )}
+        return (
+          <Link
+            key={product._id}
+            to={dest}
+            className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 group block h-full flex flex-col border border-white/10"
+            onClick={(e) => handleProductClick(product._id, e)}
+          >
+            {/* Thumbnail */}
+            <div className="h-40 bg-gray-700 overflow-hidden flex-shrink-0">
+              <img
+                src={product.images?.[0]?.url || '/api/placeholder/300/300'}
+                alt={product.title}
+                loading="lazy"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
             </div>
-            
-            {/* Stock Status */}
-            {product.stock !== undefined && (
-              <div className="mt-2">
-                {product.stock > 0 ? (
-                  <span className="text-xs text-green-600">
-                    In Stock ({product.stock})
-                  </span>
-                ) : (
-                  <span className="text-xs text-red-600">Out of Stock</span>
+
+            <div className="p-4 flex-1 flex flex-col justify-between">
+              <div>
+                <h3 className="font-semibold text-gray-100 text-base mb-2 line-clamp-2 group-hover:text-blue-400 transition-colors">
+                  {product.title}
+                </h3>
+
+                {showDescription && product.description && (
+                  <p className="text-gray-300 text-sm line-clamp-3">
+                    {product.description}
+                  </p>
                 )}
               </div>
-            )}
-          </div>
-        </Link>
-      ))}
+            </div>
+          </Link>
+        );
+      })}
     </div>
   );
 };

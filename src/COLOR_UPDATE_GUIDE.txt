@@ -1,0 +1,90 @@
+// Color Update Guide for Website Redesign
+// Use this guide to update all components to the new color scheme
+
+/*
+COLOR PALETTE:
+- Primary (Blue): #007BFF → Use for headers, navigation, main CTAs
+- Secondary (Teal): #20C997 → Use for highlights, badges, icons  
+- Accent (Orange): #FF6600 → Use for offers, promotions, urgent CTAs
+- Neutral: White (#FFFFFF) & Dark Gray (#343A40) → backgrounds, text, cards
+
+TAILWIND CLASS REPLACEMENTS:
+*/
+
+// ❌ OLD → ✅ NEW (Common replacements)
+
+// Blue Variants
+// From: blue-500, blue-600, blue-700 → To: blue-600 (primary)
+OLD_bg-blue-500 → NEW_bg-blue-600
+OLD_text-blue-600 → NEW_text-blue-600
+OLD_hover:bg-blue-700 → NEW_hover:bg-blue-700
+
+// Teal/Cyan Variants (Secondary - Teal #20C997)
+OLD_bg-cyan-600 → NEW_bg-teal-500
+OLD_text-cyan-600 → NEW_text-teal-500
+OLD_hover:bg-cyan-700 → NEW_hover:bg-teal-600
+OLD_border-cyan-200 → NEW_border-teal-200
+OLD_from-cyan-50 to-cyan-50 → NEW_from-teal-50 to-teal-50
+
+// Orange/Red Variants (Accent - Orange #FF6600)
+OLD_bg-red-500 → NEW_bg-orange-600 (for urgent/promotional items)
+OLD_text-red-600 → NEW_text-orange-600
+OLD_hover:bg-red-700 → NEW_hover:bg-orange-700
+
+// Green for Success (Keep but use with primary theme)
+OLD_bg-green-500 → NEW_bg-teal-500 (matches secondary)
+OLD_text-green-600 → NEW_text-teal-600
+OLD_border-green-200 → NEW_border-teal-200
+
+// Purple/Gradient (Use Primary/Secondary combo)
+OLD_from-purple-600 to-pink-600 → NEW_from-blue-600 to-teal-500
+
+// COMPONENT-SPECIFIC UPDATES:
+
+// 1. Navigation/Header
+// ❌ OLD: bg-gradient-to-r from-blue-600 to-cyan-600
+// ✅ NEW: bg-gradient-to-r from-blue-600 to-teal-500
+
+// 2. Buttons - Primary CTA
+// ❌ OLD: bg-blue-500 hover:bg-blue-700
+// ✅ NEW: bg-blue-600 hover:bg-blue-700
+
+// 3. Buttons - Promotional/Urgent
+// ❌ OLD: bg-red-500 hover:bg-red-600
+// ✅ NEW: bg-orange-600 hover:bg-orange-700
+
+// 4. Badges & Highlights
+// ❌ OLD: bg-cyan-100 text-cyan-800
+// ✅ NEW: bg-teal-100 text-teal-800
+
+// 5. Cards - Info/Highlight
+// ❌ OLD: border-blue-200 bg-blue-50
+// ✅ NEW: border-blue-200 bg-blue-50 (keep as accent background)
+
+// 6. Icons - Secondary
+// ❌ OLD: text-cyan-600
+// ✅ NEW: text-teal-500
+
+// 7. Success States (WhatsApp button, confirmations)
+// ❌ OLD: bg-green-500 hover:bg-green-600
+// ✅ NEW: bg-teal-500 hover:bg-teal-600 (use secondary)
+
+// 8. Text - Primary Headers
+// ❌ OLD: text-gray-900
+// ✅ NEW: text-gray-900 (keep as is - dark gray for text)
+
+// FILES TO UPDATE (Priority Order):
+// 1. src/components/Layout/Navbar.jsx - Navigation bar
+// 2. src/components/Layout/Footer.jsx - Footer section
+// 3. src/pages/Public/Home.jsx - Home page
+// 4. src/pages/Public/ServiceDetail.jsx - Service detail pages
+// 5. src/components/Layout/Sidebar.jsx - Mobile sidebar
+// 6. All button components throughout the app
+
+// Tailwind Gradient Combinations using new palette:
+// Primary to Teal: from-blue-600 to-teal-500
+// Primary to Orange: from-blue-600 to-orange-600
+// Teal to Orange: from-teal-500 to-orange-600
+// Light Background: from-blue-50 to-teal-50
+
+console.log("Color Update Guide loaded. Use these mappings to update all components.");

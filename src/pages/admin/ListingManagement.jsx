@@ -10,6 +10,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Plus, Save, X, ChevronDown, AlertCircle, CheckCircle, Loader, Upload, ArrowUp, ArrowDown } from 'lucide-react';
 import { categoriesAPI } from '../../services/api';
 import api from '../../services/api';
+import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 
 const ListingManagement = () => {
   const navigate = useNavigate();
@@ -207,7 +208,8 @@ const ListingManagement = () => {
     for (const file of files) {
       try {
         const formDataUpload = new FormData();
-        formDataUpload.append('file', file);
+        // Use 'image' field to match uploads API and server middleware
+        formDataUpload.append('image', file);
 
         const response = await api.post('/uploads/image', formDataUpload, {
           headers: { 'Content-Type': 'multipart/form-data' }
@@ -333,6 +335,11 @@ const ListingManagement = () => {
         delete payload.stock;
       }
 
+      // Remove empty affiliate-related fields so backend enum validation doesn't fail
+      if (payload.affiliateSource === '') delete payload.affiliateSource;
+      if (payload.affiliateId === '') delete payload.affiliateId;
+      if (payload.externalLink === '') delete payload.externalLink;
+
       const response = await api[method](endpoint, payload);
       const data = response.data;
 
@@ -357,8 +364,8 @@ const ListingManagement = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader className="w-8 h-8 animate-spin text-blue-600" />
+      <div className="flex-1 flex items-center justify-center">
+        <LoadingSpinner size="large" text="Loading listing..." />
       </div>
     );
   }
@@ -377,6 +384,22 @@ const ListingManagement = () => {
           <p className="text-gray-600 mt-2">
             {isEditing ? 'Update your listing details' : 'Add a new product, tool, or job listing'}
           </p>
+          {isEditing && (
+            <div className="mt-3">
+              <button
+                type="button"
+                onClick={() => {
+                  const cid = formData.category || '';
+                  const title = encodeURIComponent(formData.title || '');
+                  // Navigate to offers admin with prefill params
+                  window.location.href = `/admin/offers?prefillListing=${id}&category=${cid}&title=${title}`;
+                }}
+                className="inline-flex items-center gap-2 px-3 py-2 bg-amber-500 text-white rounded hover:bg-amber-600"
+              >
+                Create Offer from this Listing
+              </button>
+            </div>
+          )}
         </div>
 
         {error && (
@@ -657,6 +680,51 @@ const ListingManagement = () => {
                 />
                 <span className="text-sm font-medium text-gray-700">Cart Enabled</span>
               </label>
+
+              {/* Affiliate link support for products */}
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">External Link (Affiliate URL)</label>
+                <input
+                  type="url"
+                  name="externalLink"
+                  value={formData.externalLink}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="https://example.com/?ref=..."
+                />
+                <p className="text-xs text-gray-600 mt-1">Optional affiliate/referral link (will show on listing)</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Affiliate Source</label>
+                  <select
+                    name="affiliateSource"
+                    value={formData.affiliateSource}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Select Source</option>
+                    <option value="producthunt">Product Hunt</option>
+                    <option value="appsumo">AppSumo</option>
+                    <option value="capterra">Capterra</option>
+                    <option value="company_website">Company Website</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Affiliate ID</label>
+                  <input
+                    type="text"
+                    name="affiliateId"
+                    value={formData.affiliateId}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Optional tracking ID"
+                  />
+                </div>
+              </div>
             </div>
           )}
 

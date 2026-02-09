@@ -1,11 +1,12 @@
 import React from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { generateSlug } from '../../utils/slugify';
 
 const CategorySidebar = ({ 
   categories = [], 
   onCategorySelect
 }) => {
-  const { id: currentCategoryId } = useParams();
+  const { slug: currentCategorySlug } = useParams();
 
   const handleCategoryClick = (category) => {
     if (onCategorySelect) {
@@ -27,7 +28,7 @@ const CategorySidebar = ({
         <Link
           to="/listings"
           className={`block py-2 px-3 rounded-lg transition-colors ${
-            !currentCategoryId
+            !currentCategorySlug
               ? 'bg-black text-white font-medium'
               : 'text-gray-700 hover:bg-gray-50 hover:text-black'
           }`}
@@ -39,17 +40,19 @@ const CategorySidebar = ({
         </Link>
 
         {/* Categories List */}
-        {categories.map((category) => (
-          <Link
-            key={category._id}
-            to={`/category/${category._id}/listings`}
-            className={`block py-2 px-3 rounded-lg transition-colors ${
-              currentCategoryId === category._id
-                ? 'bg-black text-white font-medium'
-                : 'text-gray-700 hover:bg-gray-50 hover:text-black'
-            }`}
-            onClick={() => handleCategoryClick(category)}
-          >
+        {categories.map((category) => {
+          const slug = generateSlug(category.name);
+          return (
+            <Link
+              key={category._id}
+              to={`/category/${slug}/listings`}
+              className={`block py-2 px-3 rounded-lg transition-colors ${
+                currentCategorySlug === slug
+                  ? 'bg-black text-white font-medium'
+                  : 'text-gray-700 hover:bg-gray-50 hover:text-black'
+              }`}
+              onClick={() => handleCategoryClick(slug)}
+            >
             <div className="flex items-center space-x-3">
               <img
                 src={category.image?.url || '/api/placeholder/24/24'}
@@ -58,8 +61,9 @@ const CategorySidebar = ({
               />
               <span className="truncate">{category.name}</span>
             </div>
-          </Link>
-        ))}
+            </Link>
+            );
+          })}
       </div>
 
       {/* No Categories Message */}

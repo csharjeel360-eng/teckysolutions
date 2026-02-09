@@ -8,6 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Edit, Trash2, Eye, Plus, Filter, Search, Loader, AlertCircle } from 'lucide-react';
+import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 
 const ListingsGrid = () => {
   const navigate = useNavigate();
@@ -30,11 +31,20 @@ const ListingsGrid = () => {
   const loadListings = async () => {
     try {
       setLoading(true);
+      const token = localStorage.getItem('token');
       const response = await fetch(`${API_BASE}/api/admin/listings`, {
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        }
       });
       
       if (!response.ok) {
+        if (response.status === 401) {
+          // Unauthorized - likely missing/invalid token
+          window.location.href = '/login';
+          return;
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
@@ -92,9 +102,13 @@ const ListingsGrid = () => {
     }
 
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(`${API_BASE}/api/admin/listings/${id}`, {
         method: 'DELETE',
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        }
       });
       const data = await response.json();
 
@@ -139,8 +153,8 @@ const ListingsGrid = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader className="w-8 h-8 animate-spin text-blue-600" />
+      <div className="flex-1 flex items-center justify-center">
+        <LoadingSpinner size="large" text="Loading listings..." />
       </div>
     );
   }

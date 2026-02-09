@@ -22,7 +22,7 @@ class BlogService {
 
   // Get all blog posts
   async getBlogs(filters = {}) {
-    // Fetching blogs with filters
+    // Fetching blogs with filters - add timeout for slow APIs
     
     // Check if blogsAPI.getAll exists
     if (!blogsAPI || typeof blogsAPI.getAll !== 'function') {
@@ -36,7 +36,12 @@ class BlogService {
     }
     
     try {
-      const response = await blogsAPI.getAll(filters);
+      // Create abort controller with 15 second timeout to allow slow backends
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      
+      const response = await blogsAPI.getAll({ ...filters, signal: controller.signal });
+      clearTimeout(timeoutId);
       
       // Handle different response structures
       const responseData = response.data;
@@ -51,6 +56,15 @@ class BlogService {
       // Returning blog service result
       return result;
     } catch (error) {
+      if (error.name === 'AbortError') {
+        console.error('❌ BlogService.getBlogs timeout - API too slow');
+        return {
+          success: false,
+          error: 'API request timeout - please try again',
+          blogs: [],
+          data: null
+        };
+      }
       console.error('❌ BlogService.getBlogs error:', error);
       return {
         success: false,

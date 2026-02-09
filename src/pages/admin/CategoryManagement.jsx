@@ -11,7 +11,7 @@ import Modal from '../../components/UI/Modal';
 import Input from '../../components/UI/Input';
 import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 import useNotification from '../../hooks/useNotification';
-import { categoriesAPI, productsAPI } from '../../services/api';
+import { categoriesAPI, productsAPI, adminAPI } from '../../services/api';
 
 const CategoryManagement = () => {
   const { addNotification } = useNotification();
@@ -60,7 +60,7 @@ const CategoryManagement = () => {
         filterParams.type = typeFilter;
       }
       
-      const response = await categoriesAPI.getAll(filterParams);
+      const response = await adminAPI.getCategories();
       let cats = response.data || [];
 
       // Try to get product counts per category from backend helper endpoint
@@ -200,22 +200,22 @@ const CategoryManagement = () => {
       formData.append('name', data.name);
       formData.append('description', data.description || '');
       formData.append('type', data.type || 'product');
-      formData.append('isActive', data.isActive);
+      formData.append('isActive', data.isActive === true ? 'true' : 'false');
       
-      if (categoryImage[0].file) {
+      if (categoryImage[0]?.file) {
         formData.append('image', categoryImage[0].file);
       }
 
       let result;
       if (editingItem) {
-        result = await categoriesAPI.update(editingItem._id, formData);
+        result = await adminAPI.updateCategory(editingItem._id, formData);
         addNotification({ 
           type: 'success', 
           title: 'Success', 
           message: 'Category updated successfully' 
         });
       } else {
-        result = await categoriesAPI.create(formData);
+        result = await adminAPI.createCategory(formData);
         addNotification({ 
           type: 'success', 
           title: 'Success', 
@@ -227,10 +227,30 @@ const CategoryManagement = () => {
       await refreshData();
     } catch (error) {
       console.error('Category operation error:', error);
+      
+      // Extract detailed error message from server
+      let errorMessage = 'Operation failed';
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.data?.errors) {
+        errorMessage = error.response.data.errors
+          .map(e => `${e.field}: ${e.message}`)
+          .join(', ');
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      // Log full error for debugging
+      console.error('Detailed error:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: errorMessage
+      });
+      
       addNotification({ 
         type: 'error', 
         title: 'Error', 
-        message: error.response?.data?.message || 'Operation failed' 
+        message: errorMessage
       });
     } finally {
       setSubmitting(false);
@@ -243,7 +263,7 @@ const CategoryManagement = () => {
 
     try {
       setSubmitting(true);
-      await categoriesAPI.delete(deleteModal.item._id);
+      await adminAPI.deleteCategory(deleteModal.item._id);
       
       addNotification({ 
         type: 'success', 
@@ -272,15 +292,11 @@ const CategoryManagement = () => {
       const formData = new FormData();
       formData.append('name', category.name);
       formData.append('description', category.description || '');
-      formData.append('isActive', !category.isActive);
+      formData.append('isActive', !category.isActive ? 'true' : 'false');
       
-      if (category.image) {
-        // For existing images, we might need to handle differently
-        // This is a simplified approach
-        formData.append('image', category.image);
-      }
+      // Don't resend image for status toggle - backend will use existing image
 
-      await categoriesAPI.update(category._id, formData);
+      await adminAPI.updateCategory(category._id, formData);
       addNotification({ 
         type: 'success', 
         title: 'Success', 

@@ -30,9 +30,9 @@ const SearchBar = ({
   };
 
   const variantClasses = {
-    default: 'bg-white border-gray-300 focus-within:border-temu-red focus-within:ring-2 focus-within:ring-temu-red',
-    filled: 'bg-gray-100 border-transparent focus-within:bg-white focus-within:border-temu-red focus-within:ring-2 focus-within:ring-temu-red',
-    outline: 'bg-transparent border-gray-300 focus-within:border-temu-red focus-within:ring-2 focus-within:ring-temu-red'
+    default: 'bg-white border-gray-300 text-gray-900 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500',
+    filled: 'bg-gray-50 border-transparent text-gray-900 focus-within:bg-white focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500',
+    outline: 'bg-transparent border-gray-300 text-gray-900 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500'
   };
 
   // Debounced search function
@@ -180,7 +180,7 @@ const SearchBar = ({
           {showFilters && (
             <button
               type="button"
-              className="flex-shrink-0 px-3 border-l border-gray-300 text-black-400 hover:text-gray-600 transition-colors"
+              className="flex-shrink-0 px-3 border-l border-gray-300 text-gray-400 hover:text-gray-600 transition-colors"
             >
               <Filter className="w-4 h-4" />
             </button>
@@ -190,7 +190,7 @@ const SearchBar = ({
         {/* Search Button (for mobile) */}
         <button
           type="submit"
-          className="absolute right-2 top-1/2 transform -translate-y-1/2 sm:hidden bg-temu-red text-white p-1 rounded-lg hover:bg-red-600 transition-colors"
+          className="absolute right-2 top-1/2 transform -translate-y-1/2 sm:hidden bg-blue-500 text-white p-1 rounded-lg hover:bg-blue-600 transition-colors"
         >
           <Search className="w-4 h-4" />
         </button>
@@ -268,7 +268,7 @@ const SearchBar = ({
                 <button
                   key={category}
                   onClick={() => handleSuggestionClick(category)}
-                  className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-temu-red hover:text-white transition-colors"
+                  className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-blue-500 hover:text-white transition-colors"
                 >
                   {category}
                 </button>

@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Heart, Star, ShoppingCart } from 'lucide-react';
 import { createSlug } from '../../utils/slugify';
+import { useAuth } from '../../context/AuthContext';
 
 const ProductCard = ({ 
   product, 
@@ -74,6 +75,13 @@ const ProductCard = ({
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    // Require authentication before adding to cart
+    const { isAuthenticated } = useAuth();
+    if (!isAuthenticated) {
+      navigate('/signup');
+      return;
+    }
+
     if (onAddToCart) {
       onAddToCart(product);
     }

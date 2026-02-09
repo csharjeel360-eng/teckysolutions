@@ -77,7 +77,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       icon: Tag,
       submenu: categories.slice(0, 8).map(category => ({
         name: category.name,
-        path: `/category/${category._id}/listings`
+        path: `/category/${encodeURIComponent(category.name ? category.name.toLowerCase().replace(/[^a-z0-9 -]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-') : category._id)}/listings`
       }))
     },
     {

@@ -1,6 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { categoriesAPI } from '../services/api';
 
+// Global cache that persists across component mounts/unmounts
+const globalCategoryCache = { data: null, timestamp: 0 };
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes cache lifespan for categories (rarely change)
+
 export const useCategories = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -9,11 +13,23 @@ export const useCategories = () => {
 
   const fetchCategories = useCallback(async () => {
     try {
+      // Check global cache first
+      if (globalCategoryCache.data && Date.now() - globalCategoryCache.timestamp < CACHE_TTL) {
+        setCategories(globalCategoryCache.data);
+        return;
+      }
+      
       setLoading(true);
       setError(null);
       
       const response = await categoriesAPI.getAll();
-      setCategories(response.data || []);
+      const data = response.data || [];
+      
+      // Cache in global cache
+      globalCategoryCache.data = data;
+      globalCategoryCache.timestamp = Date.now();
+      
+      setCategories(data);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch categories');
       setCategories([]);

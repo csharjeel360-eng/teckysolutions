@@ -110,7 +110,7 @@ export default function convertMarkdownToHtml(markdown = '', contentImages = [],
       .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
       .replace(/_(.*?)_/g, '<em class="italic">$1</em>')
       .replace(/`(.*?)`/g, '<code class="bg-gray-100 px-2 py-1 rounded text-sm font-mono border">$1</code>')
-      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-black hover:text-gray-700 underline">$1</a>');
+      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-gray-100 hover:text-gray-200 underline">$1</a>');
     
     // Process color tags LAST to preserve them through other formatting
     processedLine = processedLine.replace(/\{color:(#[0-9A-Fa-f]{6}|[a-zA-Z]+)\}(.*?)\{\/color\}/g, '<span style="color: $1 !important;">$2</span>');
@@ -159,7 +159,7 @@ export default function convertMarkdownToHtml(markdown = '', contentImages = [],
       text = text.replace(/\{color:(#[0-9A-Fa-f]{6}|[a-zA-Z]+)\}(.*?)\{\/color\}/g, '<span style="color: $1;">$2</span>');
       const sizes = ['text-4xl','text-3xl','text-2xl','text-xl','text-lg','text-base'];
       const sizeClass = sizes[Math.min(level-1, sizes.length-1)];
-      processedLines.push(`<h${level} class="${sizeClass} font-bold mt-8 mb-4 text-gray-900">${text}</h${level}>`);
+      processedLines.push(`<h${level} class="${sizeClass} font-bold mt-8 mb-4 text-gray-100">${text}</h${level}>`);
       continue;
     }
 

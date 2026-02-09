@@ -5,19 +5,28 @@ import useBanners from '../../hooks/useBanners';
 import useProducts from '../../hooks/useProducts';
 import useCategories from '../../hooks/useCategories';
 import useSEO from '../../hooks/useSEO';
+import productService from '../../services/productService';
+import { offersAPI, blogsAPI } from '../../services/api';
 import Notification from '../../components/Common/Notification';
 import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 import Button from '../../components/UI/Button';
 import { setPageTitle } from '../../utils/slugify';
+import servicesData from '../../data/servicesData';
+
+// Global cache for home page blogs to prevent re-fetching
+const homePageBlogsCache = { data: null, timestamp: 0 };
+const HOME_BLOGS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 // Lazy load heavy components
 const HeroBanner = lazy(() => import('../../components/Common/HeroBanner'));
 const ProductGrid = lazy(() => import('../../components/Products/ProductGrid'));
-const CategoryGrid = lazy(() => import('../../components/Categories/CategoryGrid'));
+const CategoryGridFullImage = lazy(() => import('../../components/Categories/CategoryGridFullImage'));
+const OfferSection = lazy(() => import('../../components/Products/OfferSection'));
+const BlogGrid = lazy(() => import('../../components/Blogs/BlogGrid'));
 
 const Home = () => {
   // SEO Metadata (unchanged, but optimized for sales/content focus)
-  const metaTitle = 'TrendyBreeze - Best AI Tools, Software & Tech Resources for Digital Growth';
+  const metaTitle = 'TeckySolutions - Best AI Tools, Software & Tech Resources for Digital Growth';
   const metaDescription = 'Discover curated AI tools, productivity software, SaaS platforms & expert tech blogs. Compare software solutions, read honest reviews & boost your business growth. Trusted by 10,000+ users.';
   const canonicalUrl = window.location.origin;
   
@@ -25,14 +34,14 @@ const Home = () => {
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "name": "TrendyBreeze",
+    "name": "TeckySolutions",
     "url": canonicalUrl,
     "logo": "https://yourdomain.com/logo.png",
     "description": "Curated AI tools, software reviews, and tech resources for digital growth",
     "sameAs": [
-      "https://twitter.com/trendybreeze",
-      "https://linkedin.com/company/trendybreeze",
-      "https://facebook.com/trendybreeze"
+      "https://twitter.com/teckysolutions",
+      "https://linkedin.com/company/teckysolutions",
+      "https://facebook.com/teckysolutions"
     ]
   };
 
@@ -45,7 +54,7 @@ const Home = () => {
         "name": "What are the best AI tools for business?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "TrendyBreeze curates the best AI tools for businesses including automation software, content creation tools, analytics platforms, and productivity boosters. Our experts test and review each tool to ensure quality."
+          "text": "TeckySolutions curates the best AI tools for businesses including automation software, content creation tools, analytics platforms, and productivity boosters. Our experts test and review each tool to ensure quality."
         }
       },
       {
@@ -61,7 +70,7 @@ const Home = () => {
         "name": "How do I choose the right software for my needs?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Use our comparison features, read expert reviews, and check user ratings on TrendyBreeze. We provide detailed breakdowns of features, pricing, and use cases to help you make informed decisions."
+          "text": "Use our comparison features, read expert reviews, and check user ratings on TeckySolutions. We provide detailed breakdowns of features, pricing, and use cases to help you make informed decisions."
         }
       }
     ]
@@ -100,6 +109,8 @@ const Home = () => {
   // Local state (unchanged)
   const [notification, setNotification] = useState({ show: false, message: '', type: '' });
   const [isMobile, setIsMobile] = useState(false);
+  const [generalOffers, setGeneralOffers] = useState([]);
+  const [recentBlogs, setRecentBlogs] = useState([]);
   
   // Combined loading state for better UX
   // Only show loading spinner if critical data is loading (exclude blogs if not displayed)
@@ -120,9 +131,58 @@ const Home = () => {
           .slice(0, 6)
       : []
   , [products]);
-  const featuredCategories = useMemo(() => 
-    Array.isArray(categories) ? categories.slice(0, 6) : []
-  , [categories]);
+  const [categoryCounts, setCategoryCounts] = useState({});
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        // Fetch product counts
+        const prodResp = await productService.getCategoriesWithCounts();
+        const prodCounts = {};
+        if (prodResp.success) {
+          (prodResp.categories || prodResp.data || []).forEach(c => {
+            const id = c.category || c._id || c.categoryId;
+            if (id) prodCounts[id] = c.count || 0;
+          });
+        }
+
+        // Fetch all offers and count by category
+        const offersResp = await offersAPI.getAll({ limit: 10000 });
+        const offerCounts = {};
+        const offersList = offersResp.data?.data || offersResp.data || [];
+        offersList.forEach(offer => {
+          const catId = offer?.category?._id || offer?.category || null;
+          if (!catId) return;
+          const key = String(catId);
+          offerCounts[key] = (offerCounts[key] || 0) + 1;
+        });
+
+        if (!mounted) return;
+
+        // Merge counts: products + offers
+        const merged = {};
+        const allIds = new Set([...Object.keys(prodCounts).map(String), ...Object.keys(offerCounts).map(String)]);
+        allIds.forEach(id => {
+          merged[id] = (Number(prodCounts[id]) || 0) + (Number(offerCounts[id]) || 0);
+        });
+        
+        setCategoryCounts(merged);
+      } catch (err) {
+        console.warn('Failed to load category counts:', err);
+        setCategoryCounts({});
+      }
+    })();
+    return () => { mounted = false; };
+  }, [categories]);
+
+  const featuredCategories = useMemo(() => {
+    if (!Array.isArray(categories)) return [];
+    return categories.slice(0, 6).map(cat => ({
+      ...cat,
+      productCount: categoryCounts[String(cat._id)] || 0
+    }));
+  }, [categories, categoryCounts]);
 
   // Effects (unchanged)
   useEffect(() => {
@@ -133,7 +193,7 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    setPageTitle('TrendyBreeze – Best AI Tools, Software & Tech Resources for Digital Growth');
+    setPageTitle('TeckySolutions – Best AI Tools, Software & Tech Resources for Digital Growth');
     
     const errors = [];
     if (bannersError) errors.push(`Banners: ${bannersError}`);
@@ -149,11 +209,55 @@ const Home = () => {
     }
   }, [bannersError, productsError, categoriesError]);
 
+  // Fetch recent blogs with persistent caching
+  useEffect(() => {
+    let mounted = true;
+    
+    // Check cache first
+    if (homePageBlogsCache.data && Date.now() - homePageBlogsCache.timestamp < HOME_BLOGS_CACHE_TTL) {
+      if (mounted) {
+        setRecentBlogs(homePageBlogsCache.data);
+      }
+      return;
+    }
+    
+    (async () => {
+      try {
+        const response = await blogsAPI.getAll({ 
+          limit: 100,
+          pageSize: 100
+        });
+        const blogs = response?.data?.blogs || [];
+        
+        if (mounted) {
+          // Sort by creation date descending (most recent first)
+          const sorted = [...blogs].sort((a, b) => {
+            const dateA = new Date(a.createdAt || 0).getTime();
+            const dateB = new Date(b.createdAt || 0).getTime();
+            return dateB - dateA;
+          });
+          
+          // Cache the result
+          homePageBlogsCache.data = sorted;
+          homePageBlogsCache.timestamp = Date.now();
+          
+          setRecentBlogs(sorted);
+        }
+      } catch (err) {
+        console.error('Failed to fetch blogs:', err);
+        if (mounted) {
+          setRecentBlogs([]);
+        }
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
   // Loading and error handling (unchanged)
   if (isPageLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-white to-blue-50">
-        <LoadingSpinner size="large" showBrand={true} brandText="TrendyBreeze" />
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="large" showBrand={true} />
       </div>
     );
   }
@@ -185,7 +289,7 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Notification (unchanged) */}
       {notification.show && (
         <Notification
@@ -196,300 +300,150 @@ const Home = () => {
         />
       )}
 
-      {/* Restructured Hero Section: More Professional and Visually Appealing */}
-      {/* Changes: Cleaner layout, better spacing, enhanced animations, stronger CTAs for sales/articles */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-black to-blue-950 text-white min-h-screen flex items-center">
-        {/* Background Enhancements: Added more dynamic elements for visual appeal */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(59,130,246,0.1),transparent_50%)]"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(147,51,234,0.1),transparent_50%)]"></div>
-          <div className="absolute top-1/4 left-10 w-32 h-32 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-1/3 right-20 w-40 h-40 bg-gradient-to-l from-cyan-500/10 to-pink-500/10 rounded-full blur-3xl animate-pulse"></div>
-        </div>
-        
-        {/* Grid Pattern (unchanged but more subtle) */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:80px_80px]"></div>
-        
+      {/* Hero Section with background image */}
+      <section
+        className="relative overflow-hidden text-white min-h-screen flex items-center"
+        style={{
+          backgroundImage: `url('/homeherobanner/futuristic-tech-hero-banner-dark-blue-teal.jpeg')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        {/* Dark overlay to ensure strong contrast with text */}
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.45))' }}
+        />
+
         <div className="container relative mx-auto px-4 py-16 lg:py-24">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Left Column: Enhanced Text Content with Better Hierarchy */}
-            <div className="space-y-8">
-              {/* Trust Badge: More Prominent */}
-              <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm rounded-full border border-white/20">
-                <span className="text-2xl">⭐</span>
+            {/* Left Column: All hero text lives here for strong left alignment */}
+            <div className="lg:col-span-1 max-w-2xl space-y-6">
+              {/* Small trust badge */}
+              <div className="inline-flex items-center gap-3 px-4 py-2 bg-black/30 rounded-full border border-white/10 text-sm">
+                <span className="text-lg">⭐</span>
                 <span className="font-semibold">Trusted by 10,000+ Professionals</span>
               </div>
-              
-              {/* Headline: Improved Typography and Animation */}
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-tight tracking-tight">
-                <span className="block bg-gradient-to-r from-white via-blue-100 to-cyan-200 bg-clip-text text-transparent animate-fade-in">
-                  Sell & Discover
-                </span>
-                <span className="block bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-400 bg-clip-text text-transparent animate-fade-in delay-200">
-                  Top AI Tools
-                </span>
-                <span className="block text-white animate-fade-in delay-400">
-                  for Business Growth
-                </span>
+
+              {/* Headline - split into three lines */}
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight">
+                <span className="block">Discover & Shop</span>
+                <span className="block">Software, Services</span>
+                <span className="block">& Professional Solutions</span>
               </h1>
-              
-              {/* Description: More Compelling for Sales/Content */}
-              <p className="text-xl text-gray-300 leading-relaxed max-w-lg">
-                Buy premium AI software, read expert articles on tools & services, and accelerate your digital transformation with TrendyBreeze's curated marketplace.
+
+              {/* Supporting paragraph */}
+              <p className="text-lg text-gray-300 leading-relaxed">
+                Explore top AI tools, curated software, exclusive offers, and professional services. Compare products and read expert guides to grow your business.
               </p>
-              
-              {/* Trust Signals: Expanded for Credibility */}
-              <div className="flex flex-wrap gap-4">
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
-                  <span className="text-green-400">✓</span>
-                  <span className="text-sm">Expert Reviews & Articles</span>
-                </div>
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
-                  <span className="text-green-400">✓</span>
-                  <span className="text-sm">Secure Software Purchases</span>
-                </div>
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
-                  <span className="text-green-400">✓</span>
-                  <span className="text-sm">Daily Tool Updates</span>
-                </div>
-              </div>
-              
-              {/* CTAs: Redesigned for Better Conversion */}
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Link to="/listings">
-                  <Button 
-                    variant="primary" 
+
+              {/* Feature list in one column */}
+              <ul className="mt-2 space-y-3 text-gray-200">
+                <li className="flex items-start gap-3">
+                  <span className="text-teal-400 mt-0.5">✓</span>
+                  <span>Expert Reviews & Articles</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-teal-400 mt-0.5">✓</span>
+                  <span>Secure Software Purchases</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-teal-400 mt-0.5">✓</span>
+                  <span>Daily Tool Updates</span>
+                </li>
+              </ul>
+
+              {/* CTAs: stacked on mobile, horizontal on desktop */}
+              <div className="flex flex-col sm:flex-row gap-4 pt-6">
+                <Link to="/listings" className="w-full sm:w-auto">
+                  <Button
                     size="large"
-                    className="group bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 px-8 py-4 rounded-2xl transform hover:scale-105"
+                    className="bg-[#FF6600] hover:bg-[#e65500] text-white border-0 px-8 py-4 rounded-2xl shadow-lg w-full sm:w-auto"
                   >
                     <span className="flex items-center gap-3">
-                      <span className="text-2xl group-hover:rotate-12 transition-transform">🛒</span>
-                      <span className="font-bold text-lg">Shop AI Tools Now</span>
+                      <span className="text-2xl">🛒</span>
+                      <span className="font-bold text-lg">Shop Now</span>
                     </span>
                   </Button>
                 </Link>
-                
-                <Link to="/blogs">
-                  <Button 
-                    variant="outline" 
+
+                <Link to="/services" className="w-full sm:w-auto">
+                  <Button
                     size="large"
-                    className="border-2 border-white/30 text-white hover:bg-white/10 hover:border-white/50 backdrop-blur-sm transition-all duration-300 px-8 py-4 rounded-2xl"
+                    className="bg-[#20C997] hover:bg-[#1aa07f] text-white border-0 px-8 py-4 rounded-2xl shadow-sm w-full sm:w-auto"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="text-2xl">🚀</span>
+                      <span className="font-bold text-lg">Services</span>
+                    </span>
+                  </Button>
+                </Link>
+
+                <Link to="/blogs" className="w-full sm:w-auto">
+                  <Button
+                    size="large"
+                    variant="ghost"
+                    className="text-gray-100 hover:text-white bg-transparent px-6 py-3 rounded-2xl w-full sm:w-auto"
                   >
                     <span className="flex items-center gap-3">
                       <span className="text-2xl">📖</span>
-                      <span className="font-bold text-lg">Explore Articles</span>
+                      <span className="font-medium">Articles</span>
                     </span>
                   </Button>
                 </Link>
               </div>
             </div>
-            
-            {/* Right Column: Enhanced Dashboard Mockup */}
-            <div className="relative">
-              <div className="relative max-w-lg mx-auto transform hover:scale-105 transition-transform duration-500">
-                {/* Main Card: More Interactive and Professional */}
-                <div className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 backdrop-blur-lg rounded-3xl p-8 border border-white/10 shadow-2xl hover:shadow-blue-500/20 transition-shadow">
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg">
-                      <span className="text-2xl">🤖</span>
-                    </div>
-                    <div>
-                      <h3 className="text-white font-bold text-xl">AI Tools Marketplace</h3>
-                      <p className="text-gray-400 text-sm">Buy, Compare & Grow</p>
-                    </div>
-                  </div>
-                  
-                  {/* Stats: Updated for Sales Focus */}
-                  <div className="grid grid-cols-2 gap-4 mb-6">
-                    {[
-                      { label: "Tools Sold", value: "500+", icon: "🛒", color: "from-green-500 to-emerald-500" },
-                      { label: "Articles Read", value: "10K+", icon: "📖", color: "from-yellow-500 to-orange-500" },
-                      { label: "Categories", value: "24", icon: "📁", color: "from-blue-500 to-cyan-500" },
-                      { label: "Happy Buyers", value: "98%", icon: "😊", color: "from-purple-500 to-pink-500" }
-                    ].map((stat, idx) => (
-                      <div key={idx} className="bg-gray-900/50 rounded-2xl p-4 hover:bg-gray-800/50 transition-colors">
-                        <div className={`inline-flex p-2 rounded-lg bg-gradient-to-r ${stat.color} mb-2 shadow-lg`}>
-                          <span>{stat.icon}</span>
-                        </div>
-                        <div className="text-2xl font-bold text-white">{stat.value}</div>
-                        <div className="text-xs text-gray-400">{stat.label}</div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {/* Logos: Professional Branding */}
-                  <div className="pt-6 border-t border-white/10">
-                    <p className="text-gray-400 text-sm mb-3">Featured in Articles & Trusted by:</p>
-                    <div className="flex flex-wrap gap-3">
-                      {["Shopify", "Stripe", "OpenAI", "Notion", "Figma", "Adobe"].map((logo, idx) => (
-                        <div key={idx} className="px-4 py-2 bg-white/5 rounded-lg text-sm text-gray-300 hover:bg-white/10 transition-colors">
-                          {logo}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Floating Elements: More Dynamic */}
-                <div className="absolute -top-8 -right-8 w-24 h-24 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-3xl backdrop-blur-sm border border-white/10 animate-bounce"></div>
-                <div className="absolute -bottom-8 -left-8 w-20 h-20 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-3xl backdrop-blur-sm border border-white/10 animate-pulse"></div>
-              </div>
-            </div>
-          </div>
-          
-                     {/* Stats Section: Moved Below for Better Flow */}
-          <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
-            {[
-              { value: "500+", label: "Tools Available", icon: "🛠️", gradient: "from-blue-500 to-cyan-500" },
-              { value: "AI", label: "Powered Marketplace", icon: "🤖", gradient: "from-purple-500 to-pink-500" },
-              { value: "1000+", label: "Expert Articles", icon: "📚", gradient: "from-cyan-500 to-blue-500" },
-              { value: "10K+", label: "Satisfied Customers", icon: "👥", gradient: "from-pink-500 to-purple-500" }
-            ].map((stat, index) => (
-              <div key={index} className="text-center p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105">
-                <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${stat.gradient} mb-3 shadow-lg`}>
-                  <span className="text-2xl">{stat.icon}</span>
-                </div>
-                <div className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                  {stat.value}
-                </div>
-                <div className="text-sm text-gray-300">{stat.label}</div>
-              </div>
-            ))}
+
+            {/* Right Column: keep mostly empty to preserve balance with background */}
+            <div className="hidden lg:block" aria-hidden="true"></div>
+
           </div>
         </div>
         
         {/* Scroll Indicator: Enhanced */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <div className="w-8 h-14 border-2 border-white/30 rounded-full flex justify-center backdrop-blur-sm">
-            <div className="w-1 h-4 bg-gradient-to-b from-blue-400 to-cyan-300 mt-2 rounded-full"></div>
+            <div className="w-8 h-14 border-2 border-white/30 rounded-full flex justify-center backdrop-blur-sm">
+            <div className="w-1 h-4 bg-gradient-to-b from-blue-400 to-teal-300 mt-2 rounded-full"></div>
           </div>
         </div>
         
         {/* Bottom Transition: Smoother */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-50 to-transparent"></div>
-      </section>
-
-      {/* Popular Tools Section: Enhanced for Sales Focus */}
-      <section className="py-16 sm:py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
-              🔥 <span className="bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">Trending</span> Tools & Services
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Discover top-selling software, read reviews, and buy with confidence
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-            {popularProducts.slice(0, 3).map((product, index) => (
-              <div key={product.id || index} className="bg-gradient-to-br from-gray-50 to-white rounded-3xl p-8 border border-gray-200 hover:shadow-2xl hover:border-blue-200 transition-all duration-300 hover:-translate-y-2">
-                <div className="flex items-start justify-between mb-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-2xl flex items-center justify-center shadow-lg">
-                      <span className="text-3xl">🛠️</span>
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-gray-900 text-xl">{product.name}</h3>
-                      <div className="flex items-center gap-2 mt-2">
-                        <span className="flex items-center gap-1 text-sm bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-medium">
-                          ⭐ 4.8 Rating
-                        </span>
-                        <span className="flex items-center gap-1 text-sm bg-red-100 text-red-800 px-3 py-1 rounded-full font-medium">
-                          🔥 {Math.floor(Math.random() * 20) + 1}K Sales
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <p className="text-gray-600 text-base mb-8 line-clamp-3">
-                  {product.description || "Premium AI tool for automation, productivity, and business growth. Buy now and read expert reviews."}
-                </p>
-                <div className="flex gap-3">
-                  <Link to="/blogs" className="flex-1">
-                    <Button variant="primary" className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-xl font-semibold">
-                      Buy Now
-                    </Button>
-                  </Link>
-                  <Link to="/blogs">
-                    <Button variant="outline" className="px-6 py-3 border-blue-200 text-blue-600 hover:bg-blue-50 rounded-xl font-semibold">
-                      Read Review
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          {/* Category Tags: More Interactive */}
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
-            {[
-              { icon: "🤖", label: "AI Tools", count: "142", color: "bg-purple-100 text-purple-700 hover:bg-purple-200" },
-              { icon: "⚡", label: "Productivity", count: "89", color: "bg-green-100 text-green-700 hover:bg-green-200" },
-              { icon: "🏢", label: "Business SaaS", count: "67", color: "bg-blue-100 text-blue-700 hover:bg-blue-200" },
-              { icon: "🎨", label: "Design Tools", count: "45", color: "bg-pink-100 text-pink-700 hover:bg-pink-200" },
-              { icon: "📊", label: "Analytics", count: "38", color: "bg-orange-100 text-orange-700 hover:bg-orange-200" }
-            ].map((tag, index) => (
-              <Link key={index} to="/categories" className="group transition-all duration-300">
-                <div className={`inline-flex items-center gap-3 px-6 py-4 ${tag.color} rounded-2xl text-sm font-semibold shadow-lg hover:shadow-xl hover:scale-105`}>
-                  <span className="text-xl">{tag.icon}</span>
-                  <span>{tag.label}</span>
-                  <span className="text-xs bg-white/60 px-2 py-1 rounded-full">{tag.count}+</span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent"></div>
       </section>
 
       {/* Categories Section: Streamlined */}
-      <section className="py-16 sm:py-20 bg-gradient-to-b from-gray-50 to-white">
+      <section className="py-16 sm:py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-100 mb-4">
               Shop by <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">Category</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
               Find the perfect software for your needs across our curated categories
             </p>
           </div>
           
           {featuredCategories.length > 0 && (
-            <CategoryGrid 
+            <CategoryGridFullImage 
               categories={featuredCategories}
-              className="grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6"
-              cardClassName="group hover:shadow-2xl hover:scale-105 transition-all duration-300 rounded-2xl"
+              columns={4}
+              imageHeight="h-40"
+              showDescription={true}
+              showProductCount={true}
+              mobileSize="small"
+              horizontal={true}
+              autoRotate={true}
+              rotationInterval={4000}
             />
+            
           )}
         </div>
       </section>
 
-      {/* Products Section: Focused on Sales */}
-      <section className="py-16 sm:py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
-              Top <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Selling</span> AI Tools
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Browse our best-selling software, read detailed reviews, and purchase with ease
-            </p>
-          </div>
-          
-          {featuredProducts.length > 0 && (
-            <ProductGrid 
-              products={featuredProducts}
-              className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
-              cardClassName="hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 rounded-3xl"
-            />
-          )}
-        </div>
-      </section>
-
-      {/* Lazy-loaded Banners: Unchanged but Integrated */}
+      {/* Top Banner Section */}
       <Suspense fallback={<LoadingSpinner size="medium" />}>
         {topBanners.length > 0 && (
-          <section className="py-12 sm:py-16 bg-gradient-to-r from-gray-50 to-white">
+          <section className="py-12 sm:py-16">
             <div className="container mx-auto px-4">
               <div className="relative overflow-hidden rounded-3xl shadow-2xl">
                 <HeroBanner 
@@ -500,9 +454,106 @@ const Home = () => {
             </div>
           </section>
         )}
+      </Suspense>
 
+      {/* Popular Listings: 9 Items */}
+      <section className="py-16 sm:py-20 bg-gradient-to-br from-gray-900/50 via-blue-900/10 to-cyan-900/10 border border-blue-500/20 rounded-3xl mx-4 sm:mx-0">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-100 mb-4">
+              Top <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">Trending</span> Listings
+            </h2>
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+              Explore premium software, job opportunities, professional services, and products. Compare features, read reviews, and find the right solution for your needs.
+            </p>
+          </div>
+          
+          {featuredProducts.length > 0 && (
+            <ProductGrid 
+              products={featuredProducts.slice(0, 9)}
+              className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+              cardClassName="hover:shadow-2xl hover:shadow-cyan-500/50 hover:-translate-y-2 transition-all duration-300 rounded-3xl bg-gradient-to-br from-gray-800/80 to-gray-900/80 border border-cyan-500/20 hover:border-cyan-400/60"
+            />
+          )}
+
+          <div className="text-center mt-12">
+            <Link to="/listings">
+              <Button 
+                variant="primary"
+                className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 px-8 py-4 rounded-xl font-bold text-lg"
+              >
+                View All Listings
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Services Section: 6 Services */}
+      <section className="py-16 sm:py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-100 mb-4">
+              Our <span className="bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">Professional Services</span>
+            </h2>
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+              Beyond tools, we offer expert services to help your business grow
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {servicesData.slice(0, 4).map((service) => (
+              <Link key={service.id} to={`/services/${service.slug}`} className="group">
+                <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden h-full flex flex-col hover:scale-105 border border-white/10">
+                  {/* Service Image */}
+                  <div className="flex justify-center items-center bg-gradient-to-br from-gray-700 to-gray-800 p-4 h-56">
+                    <img
+                      src={service.image}
+                      alt={service.name}
+                      className="max-w-md w-full h-56 object-contain group-hover:scale-105 transition-transform duration-500 rounded-lg"
+                    />
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-4 flex flex-col flex-grow justify-between">
+                    <div>
+                      <div className="text-3xl mb-3">{service.icon}</div>
+                      <h3 className="text-base font-bold text-gray-100 group-hover:text-blue-400 transition-colors mb-2 line-clamp-2">
+                        {service.name}
+                      </h3>
+                      <p className="text-gray-300 text-sm mb-3 line-clamp-2">
+                        {service.shortDescription}
+                      </p>
+                    </div>
+
+                    {/* CTA */}
+                    <div className="flex items-center gap-2 text-blue-400 font-semibold text-sm group-hover:gap-3 transition-all">
+                      Learn More
+                      <span>→</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Link to="/services">
+              <Button 
+                variant="primary"
+                className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 px-8 py-4 rounded-xl font-bold text-lg"
+              >
+                View All Services
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Middle Banner Section */}
+      <Suspense fallback={<LoadingSpinner size="medium" />}>
         {middleBanners.length > 0 && (
-          <section className="py-12 sm:py-16 bg-gradient-to-r from-blue-50 to-cyan-50">
+          <section className="py-12 sm:py-16">
             <div className="container mx-auto px-4">
               <div className="relative overflow-hidden rounded-3xl shadow-2xl">
                 <HeroBanner 
@@ -515,16 +566,80 @@ const Home = () => {
         )}
       </Suspense>
 
+      {/* Offers Section: 6 Offers */}
+      <section className="py-16 sm:py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-6">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-100 mb-4">
+              🎁 Exclusive Offers
+            </h2>
+
+            <p className="text-lg text-gray-400 max-w-2xl mx-auto mb-6">
+              Hand-picked deals across listings—software, services, and products. Find limited-time discounts and exclusive partner offers.
+            </p>
+
+            <Suspense fallback={<LoadingSpinner size="medium" />}>
+              <OfferSection offers={Array.isArray(generalOffers) ? generalOffers.slice(0, 6) : []} showExploreButton={true} />
+            </Suspense>
+          </div>
+        </div>
+      </section>
+
+      {/* Blogs Section: 6 Blogs */}
+      <section className="py-16 sm:py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-100 mb-4">
+              📖 Latest <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">Articles</span>
+            </h2>
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+              Expert insights on tools, technology, and digital growth
+            </p>
+          </div>
+
+          <Suspense fallback={<LoadingSpinner size="medium" />}>
+            <BlogGrid blogs={recentBlogs.slice(0, 4)} columns={4} limit={4} />
+          </Suspense>
+
+          <div className="text-center mt-12">
+            <Link to="/blogs">
+              <Button 
+                variant="primary"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-4 rounded-xl font-bold text-lg"
+              >
+                Read All Articles
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Bottom Banner Section */}
+      <Suspense fallback={<LoadingSpinner size="medium" />}>
+        {bottomBanners.length > 0 && (
+          <section className="py-12 sm:py-16">
+            <div className="container mx-auto px-4">
+              <div className="relative overflow-hidden rounded-3xl shadow-2xl">
+                <HeroBanner 
+                  banners={bottomBanners}
+                  {...commonBannerProps}
+                />
+              </div>
+            </div>
+          </section>
+        )}
+      </Suspense>
+
       {/* SEO Content Block: Enhanced for Articles/Sales */}
-      <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+      <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto text-center">
-            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-8">
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-100 mb-8">
               Buy Software & Read Expert Articles
             </h2>
-            <div className="prose prose-xl mx-auto text-gray-600 mb-12">
+            <div className="prose prose-xl mx-auto text-gray-400 mb-12">
               <p className="text-2xl mb-8">
-                <strong>TrendyBreeze</strong> is your go-to marketplace for premium AI tools, software solutions, and in-depth articles on digital services. Compare prices, read unbiased reviews, and make informed purchases to accelerate your business.
+                <strong>TeckySolutions</strong> is your go-to marketplace for premium AI tools, software solutions, and in-depth articles on digital services. Compare prices, read unbiased reviews, and make informed purchases to accelerate your business.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left mt-16">
                 <div className="bg-white p-8 rounded-3xl shadow-xl border border-gray-200 hover:shadow-2xl transition-shadow">
@@ -550,15 +665,15 @@ const Home = () => {
       </section>
 
       {/* FAQ Section: Expanded for Sales/Content */}
-      <section className="py-20 bg-white">
+      <section className="py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl sm:text-5xl font-bold text-center text-gray-900 mb-16">
+          <h2 className="text-4xl sm:text-5xl font-bold text-center text-gray-100 mb-16">
             Frequently Asked Questions
           </h2>
           <div className="max-w-4xl mx-auto space-y-8">
             {[
               {
-                question: "How do I buy software on TrendyBreeze?",
+                question: "How do I buy software on TeckySolutions?",
                 answer: "Browse our marketplace, compare tools, read reviews, and purchase securely. We offer multiple payment options and buyer protection."
               },
               {
@@ -579,7 +694,7 @@ const Home = () => {
                   <span className="text-blue-500 text-3xl">?</span>
                   {faq.question}
                 </h3>
-                <p className="text-gray-600 text-lg pl-12">{faq.answer}</p>
+                <p className="text-gray-300 text-lg pl-12">{faq.answer}</p>
               </div>
             ))}
           </div>
@@ -587,41 +702,41 @@ const Home = () => {
       </section>
 
       {/* Editorial Authority: Enhanced */}
-      <section className="py-20 bg-gradient-to-r from-gray-50 to-blue-50">
+      <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto text-center">
-            <div className="inline-flex items-center gap-4 px-8 py-4 bg-white rounded-2xl shadow-xl mb-12">
+            <div className="inline-flex items-center gap-4 px-8 py-4 bg-gradient-to-r from-gray-800 to-gray-700 rounded-2xl shadow-xl mb-12 border border-white/10">
               <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center">
                 <span className="text-white text-2xl">✍️</span>
               </div>
-              <span className="font-bold text-gray-900 text-xl">Curated by TrendyBreeze Experts</span>
+              <span className="font-bold text-gray-100 text-xl">Curated by TeckySolutions Experts</span>
             </div>
-            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-8">
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-100 mb-8">
               Trusted Reviews & Articles for Smart Purchases
             </h2>
-            <p className="text-2xl text-gray-600 mb-12 max-w-4xl mx-auto">
+            <p className="text-2xl text-gray-300 mb-12 max-w-4xl mx-auto">
               Our team of tech experts tests every tool, writes detailed articles, and ensures you get honest insights for better buying decisions.
             </p>
             <div className="flex flex-wrap justify-center gap-8 mt-16">
-              <div className="flex items-center gap-4 bg-white px-8 py-6 rounded-2xl shadow-xl">
+              <div className="flex items-center gap-4 bg-gradient-to-r from-gray-800 to-gray-700 px-8 py-6 rounded-2xl shadow-xl border border-white/10">
                 <span className="text-3xl">🎯</span>
                 <div className="text-left">
-                  <div className="font-bold text-gray-900 text-lg">In-Depth Reviews</div>
-                  <div className="text-sm text-gray-600">Hands-on testing before you buy</div>
+                  <div className="font-bold text-gray-100 text-lg">In-Depth Reviews</div>
+                  <div className="text-sm text-gray-400">Hands-on testing before you buy</div>
                 </div>
               </div>
-              <div className="flex items-center gap-4 bg-white px-8 py-6 rounded-2xl shadow-xl">
+              <div className="flex items-center gap-4 bg-gradient-to-r from-gray-800 to-gray-700 px-8 py-6 rounded-2xl shadow-xl border border-white/10">
                 <span className="text-3xl">📈</span>
                 <div className="text-left">
-                  <div className="font-bold text-gray-900 text-lg">Data-Driven Articles</div>
-                  <div className="text-sm text-gray-600">Performance metrics & comparisons</div>
+                  <div className="font-bold text-gray-100 text-lg">Data-Driven Articles</div>
+                  <div className="text-sm text-gray-400">Performance metrics & comparisons</div>
                 </div>
               </div>
-              <div className="flex items-center gap-4 bg-white px-8 py-6 rounded-2xl shadow-xl">
+              <div className="flex items-center gap-4 bg-gradient-to-r from-gray-800 to-gray-700 px-8 py-6 rounded-2xl shadow-xl border border-white/10">
                 <span className="text-3xl">🤝</span>
                 <div className="text-left">
-                  <div className="font-bold text-gray-900 text-lg">Buyer-First Approach</div>
-                  <div className="text-sm text-gray-600">No sponsored content, just facts</div>
+                  <div className="font-bold text-gray-100 text-lg">Buyer-First Approach</div>
+                  <div className="text-sm text-gray-400">No sponsored content, just facts</div>
                 </div>
               </div>
             </div>

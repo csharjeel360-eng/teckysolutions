@@ -227,11 +227,11 @@ const BlogDetail = () => {
 
     if (blog.content && blog.content.trim()) {
       return (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-          <pre className="whitespace-pre-wrap text-gray-700 font-sans">
+        <div className="card-contrast border border-gray-200 rounded-lg p-6">
+          <pre className="whitespace-pre-wrap text-gray-200 font-sans">
             {blog.content}
           </pre>
-          <p className="text-sm text-gray-500 mt-4 italic">
+          <p className="text-sm text-gray-400 mt-4 italic">
             Note: This content is displaying in raw format. The formatted version should be available soon.
           </p>
         </div>
@@ -344,18 +344,18 @@ const BlogDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center">
-        <LoadingSpinner size="large" showBrand={true} brandText="TrendyBreeze" />
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="large" showBrand={true} brandText="TeckySolutions" />
       </div>
     );
   }
 
   if (error || !blog) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen py-8">
         <div className="container mx-auto px-4 text-center">
-          <div className="text-red-600 text-xl mb-4">{error || 'Blog post not found'}</div>
-          <Link to="/blogs" className="inline-flex items-center text-blue-600 hover:text-blue-700">
+          <div className="text-red-500 text-xl mb-4">{error || 'Blog post not found'}</div>
+          <Link to="/blogs" className="inline-flex items-center text-blue-400 hover:text-blue-300">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Blogs
           </Link>
@@ -366,7 +366,7 @@ const BlogDetail = () => {
 
   return (
     <>
-      <main className="min-h-screen bg-gray-50 py-8">
+      <main className="min-h-screen py-8">
         <div className="container mx-auto px-4 max-w-4xl">
           {/* Notification */}
           {notification.show && (
@@ -380,11 +380,11 @@ const BlogDetail = () => {
 
           {/* Breadcrumb Navigation */}
           <nav className="mb-6" aria-label="Breadcrumb">
-            <ol className="flex flex-wrap items-center gap-2 text-sm text-gray-600">
+            <ol className="flex flex-wrap items-center gap-2 text-sm text-gray-400">
               <li>
                 <Link 
                   to="/" 
-                  className="flex items-center gap-1 hover:text-gray-900 transition-colors"
+                  className="flex items-center gap-1 hover:text-gray-100 transition-colors"
                   aria-label="Home"
                 >
                   <Home className="w-4 h-4" />
@@ -395,7 +395,7 @@ const BlogDetail = () => {
               <li>
                 <Link 
                   to="/blogs" 
-                  className="hover:text-gray-900 transition-colors"
+                  className="hover:text-gray-100 transition-colors"
                   aria-label="Blogs"
                 >
                   Blogs
@@ -403,7 +403,7 @@ const BlogDetail = () => {
               </li>
               <li aria-hidden="true" className="text-gray-400">/</li>
               <li 
-                className="text-gray-900 font-medium truncate max-w-[200px] md:max-w-none"
+                className="text-gray-100 font-medium truncate max-w-[200px] md:max-w-none"
                 aria-current="page"
               >
                 {blog.title}
@@ -420,7 +420,7 @@ const BlogDetail = () => {
           </div>
 
           {/* Blog Article */}
-          <article className="bg-white rounded-lg shadow-lg overflow-hidden">
+          <article className="card card-contrast rounded-lg shadow overflow-hidden">
             {/* Featured Image with SEO optimization */}
             {blog.featuredImage?.url && (
               <div className="w-full h-64 md:h-96 overflow-hidden" aria-label="Featured image">
@@ -440,7 +440,7 @@ const BlogDetail = () => {
 
             <div className="p-6 md:p-8">
               {/* Meta Information */}
-              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
+              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400 mb-4">
                 <div className="flex items-center gap-1" aria-label="Publication date">
                   <Calendar className="w-4 h-4" />
                   <time dateTime={blog.createdAt}>
@@ -468,13 +468,13 @@ const BlogDetail = () => {
               </div>
 
               {/* Title */}
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-100 mb-4">
                 {blog.title}
               </h1>
 
               {/* Excerpt */}
               {blog.excerpt && (
-                <p className="text-lg text-gray-600 mb-6 leading-relaxed">
+                <p className="text-lg text-gray-400 mb-6 leading-relaxed">
                   {blog.excerpt}
                 </p>
               )}
@@ -523,7 +523,7 @@ const BlogDetail = () => {
                 
                 <button 
                   onClick={handleShare}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-400 rounded-lg hover:bg-gray-100 transition-colors"
                   aria-label="Share this post"
                 >
                   <Share2 className="w-5 h-5" />
@@ -548,15 +548,15 @@ const BlogDetail = () => {
           {/* Related Articles Section - Important for Internal Linking */}
           {relatedBlogs.length > 0 && (
             <section className="mt-12" aria-labelledby="related-articles-heading">
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 id="related-articles-heading" className="text-2xl font-bold text-gray-900 mb-6">
+              <div className="card card-contrast rounded-lg shadow p-6">
+                <h2 id="related-articles-heading" className="text-2xl font-bold text-gray-100 mb-6">
                   Related Articles
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {relatedBlogs.map((relatedBlog) => (
                     <article 
                       key={relatedBlog._id} 
-                      className="bg-gray-50 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                      className="card card-contrast rounded-lg overflow-hidden hover:shadow-md transition-shadow"
                     >
                       {relatedBlog.featuredImage?.url && (
                         <Link 
@@ -577,13 +577,13 @@ const BlogDetail = () => {
                         <h3 className="font-semibold text-lg mb-2">
                           <Link 
                             to={`/blogs/${relatedBlog.slug}`}
-                            className="text-gray-900 hover:text-blue-600 transition-colors"
+                            className="text-gray-100 hover:text-blue-400 transition-colors"
                             aria-label={`Read: ${relatedBlog.title}`}
                           >
                             {relatedBlog.title}
                           </Link>
                         </h3>
-                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                        <p className="text-sm text-gray-400 mb-3 line-clamp-2">
                           {relatedBlog.excerpt || relatedBlog.content?.substring(0, 100) + '...'}
                         </p>
                         <div className="flex items-center text-xs text-gray-500">
@@ -602,7 +602,7 @@ const BlogDetail = () => {
           <section className="mt-8 text-center">
             <Link
               to="/blogs"
-              className="inline-flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
+              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
               aria-label="Browse all blog posts"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -615,7 +615,7 @@ const BlogDetail = () => {
         <style>{`
           .blog-content {
             line-height: 1.8;
-            color: #374151;
+            color: var(--color-gray-100);
           }
           
           .blog-content h1 {
@@ -623,7 +623,7 @@ const BlogDetail = () => {
             font-weight: bold;
             margin-top: 3rem;
             margin-bottom: 1.5rem;
-            color: #111827;
+            color: var(--color-white);
             line-height: 1.2;
           }
           
@@ -632,7 +632,7 @@ const BlogDetail = () => {
             font-weight: bold;
             margin-top: 2.5rem;
             margin-bottom: 1rem;
-            color: #111827;
+            color: var(--color-white);
             line-height: 1.3;
           }
           
@@ -641,7 +641,7 @@ const BlogDetail = () => {
             font-weight: bold;
             margin-top: 2rem;
             margin-bottom: 0.75rem;
-            color: #111827;
+            color: var(--color-white);
             line-height: 1.4;
           }
           
@@ -650,7 +650,7 @@ const BlogDetail = () => {
             font-weight: bold;
             margin-top: 1.5rem;
             margin-bottom: 0.5rem;
-            color: #374151;
+            color: var(--color-gray-100);
             line-height: 1.4;
           }
           
@@ -677,35 +677,35 @@ const BlogDetail = () => {
           }
           
           .blog-content blockquote {
-            border-left: 4px solid #3b82f6;
+            border-left: 4px solid var(--color-primary);
             padding-left: 1.5rem;
             margin: 1.5rem 0;
             font-style: italic;
-            color: #6b7280;
-            background-color: #eff6ff;
+            color: var(--color-gray-300);
+            background-color: rgba(0,123,255,0.04);
             padding: 1.5rem;
             border-radius: 0 1rem 1rem 0;
             font-size: 1.125rem;
           }
           
           .blog-content code:not(pre code) {
-            background-color: #f3f4f6;
+            background-color: rgba(255,255,255,0.03);
             padding: 0.25rem 0.5rem;
             border-radius: 0.375rem;
             font-size: 0.875rem;
             font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-            border: 1px solid #e5e7eb;
-            color: #1f2937;
+            border: 1px solid rgba(255,255,255,0.04);
+            color: var(--color-gray-100);
           }
           
           .blog-content pre {
-            background-color: #1f2937;
+            background-color: #0f1720;
             color: #f9fafb;
             padding: 1.5rem;
             border-radius: 0.75rem;
             overflow-x: auto;
             margin: 1.5rem 0;
-            border: 1px solid #374151;
+            border: 1px solid rgba(255,255,255,0.04);
           }
           
           .blog-content pre code {
@@ -717,31 +717,31 @@ const BlogDetail = () => {
           }
           
           .blog-content a {
-            color: black;
+            color: var(--color-primary);
             text-decoration: underline;
             transition: color 0.2s ease;
           }
           
           .blog-content a:hover {
-            color: #1d4ed8;
+            color: var(--color-primary-dark);
           }
           
           .blog-content img {
             max-width: 100%;
             height: auto;
             border-radius: 0.75rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.6);
             loading: lazy;
           }
           
           .blog-content strong {
             font-weight: 700;
-            color: #111827;
+            color: var(--color-white);
           }
           
           .blog-content em {
             font-style: italic;
-            color: #4b5563;
+            color: var(--color-gray-300);
           }
           
           .blog-content span[style*="color"] {

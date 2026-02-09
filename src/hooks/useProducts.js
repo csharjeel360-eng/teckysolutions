@@ -3,6 +3,10 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import productService from '../services/productService';
 import { debounce } from '../utils/helpers';
 
+// Global cache that persists across component mounts/unmounts
+const globalProductCache = new Map();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache lifespan
+
 export const useProducts = (initialFilters = {}) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -39,13 +43,28 @@ export const useProducts = (initialFilters = {}) => {
 
   const fetchProducts = useCallback(async (customFilters = {}) => {
     try {
+      const mergedFilters = { ...filters, ...customFilters };
+      const cacheKey = JSON.stringify(mergedFilters);
+      
+      // Check global cache first
+      const cached = globalProductCache.get(cacheKey);
+      if (cached && Date.now() - cached.timestamp < CACHE_TTL && !customFilters.page) {
+        // Use cache if fresh and not doing pagination
+        setProducts(cached.products);
+        setPagination(cached.pagination);
+        setLoading(false);
+        if (isInitialLoad) {
+          setIsInitialLoad(false);
+        }
+        return;
+      }
+      
       // Only show loading spinner on initial load; for updates, keep showing previous data
       if (isInitialLoad) {
         setLoading(true);
       }
       setError(null);
       
-      const mergedFilters = { ...filters, ...customFilters };
       const params = {
         pageNumber: mergedFilters.page,
         pageSize: mergedFilters.pageSize,
@@ -65,18 +84,34 @@ export const useProducts = (initialFilters = {}) => {
         }
       });
 
-      const result = await productService.getAll(params);
+      let result;
+      if (mergedFilters.category) {
+        const categoryParams = { ...params };
+        // Remove category from query params when using category-specific endpoint
+        delete categoryParams.category;
+        result = await productService.getByCategory(mergedFilters.category, categoryParams);
+      } else {
+        result = await productService.getAll(params);
+      }
       
       if (result.success) {
-        setProducts(result.products);
-        previousDataRef.current = result.products; // Save for flickering prevention
-        
-        setPagination({
+        const paginationData = {
           page: result.pagination.page || result.pagination.currentPage || 1,
           pages: result.pagination.pages || result.pagination.totalPages || 1,
           total: result.pagination.total || result.pagination.totalCount || result.products.length,
           hasNext: (result.pagination.page || 1) < (result.pagination.pages || 1),
           hasPrev: (result.pagination.page || 1) > 1
+        };
+        
+        setProducts(result.products);
+        previousDataRef.current = result.products; // Save for flickering prevention
+        setPagination(paginationData);
+        
+        // Cache the result in global cache
+        globalProductCache.set(cacheKey, {
+          products: result.products,
+          pagination: paginationData,
+          timestamp: Date.now()
         });
       } else {
         throw new Error(result.error);

@@ -5,10 +5,13 @@ import useProducts from '../../hooks/useProducts';
 import useCategories from '../../hooks/useCategories';
 import useSEO from '../../hooks/useSEO';
 import ProductGrid from '../../components/Products/ProductGrid';
+import MixedGrid from '../../components/Products/MixedGrid';
 import CategorySidebar from '../../components/Categories/CategorySidebar';
+import { offersAPI } from '../../services/api';
+import OfferSection from '../../components/Products/OfferSection';
 import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 import EmptyState from '../../components/Common/EmptyState';
-import { X, Search, Filter, Home } from 'lucide-react';
+import { X, Search, Home } from 'lucide-react';
 import { setPageTitle, generateSlug } from '../../utils/slugify';
 
 const Listings = () => {
@@ -23,6 +26,11 @@ const Listings = () => {
     setCategory,
     setSearch 
   } = useProducts();
+
+  const [offers, setOffers] = useState([]);
+  const [offersLoading, setOffersLoading] = useState(false);
+  const [generalOffers, setGeneralOffers] = useState([]);
+  const [generalOffersLoading, setGeneralOffersLoading] = useState(false);
   
   const { categories, loading: categoriesLoading } = useCategories();
   
@@ -62,12 +70,48 @@ const Listings = () => {
     setPageTitle(pageTitle);
   }, [pageTitle]);
 
-  // Update category filter
+  // Update category filter and load offers for this category
   useEffect(() => {
-    if (selectedCategory) {
-      setCategory(selectedCategory._id || selectedCategory.id);
+    const cid = selectedCategory ? (selectedCategory._id || selectedCategory.id) : null;
+    if (cid) {
+      setCategory(cid);
+      // load offers for category (separate section)
+      (async () => {
+        try {
+          setOffersLoading(true);
+          const res = await offersAPI.getByCategory(cid);
+          const data = res.data?.data || [];
+          console.log(`📦 Offers loaded for category ${cid}:`, {
+            categoryName: selectedCategory.name,
+            offerCount: data.length,
+            offers: data
+          });
+          setOffers(data);
+        } catch (err) {
+          console.error('❌ Failed to load offers for listings page:', err);
+          setOffers([]);
+        } finally {
+          setOffersLoading(false);
+        }
+      })();
     } else {
       setCategory(null);
+      setOffers([]);
+      // Load general offers for the all-listings page
+      (async () => {
+        try {
+          setGeneralOffersLoading(true);
+          const res = await offersAPI.getAll({ limit: 24 });
+          const data = res.data?.data || [];
+          console.log('📦 General offers loaded:', { count: data.length, offers: data });
+          setGeneralOffers(data);
+        } catch (err) {
+          console.error('Failed to load general offers:', err);
+          setGeneralOffers([]);
+        } finally {
+          setGeneralOffersLoading(false);
+        }
+      })();
     }
   }, [selectedCategory, setCategory]);
 
@@ -97,10 +141,14 @@ const Listings = () => {
     setLocalFilters(prev => ({ ...prev, search: '' }));
   };
 
-  if (categoriesLoading) return <LoadingSpinner />;
+  // Determine empty-state conditions (consider offers)
+  const noProductResults = !loading && !error && (!products || products.length === 0);
+  const hasOffersToShow = selectedCategory ? (offers && offers.length > 0) : (generalOffers && generalOffers.length > 0);
+
+  if (categoriesLoading) return <LoadingSpinner showBrand={true} />;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Breadcrumb */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-4 flex items-center gap-2 text-sm">
@@ -116,7 +164,7 @@ const Listings = () => {
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
+            {/* Sidebar */}
           <aside className="lg:col-span-1">
             <CategorySidebar 
               categories={categories}
@@ -151,28 +199,28 @@ const Listings = () => {
               </div>
 
               {/* Search Form */}
-              <form onSubmit={handleSearch} className="mt-4 flex gap-2">
+              <form onSubmit={handleSearch} className="mt-4 flex flex-col sm:flex-row gap-2">
                 <div className="flex-1 relative">
-                  <Search size={18} className="absolute left-3 top-3 text-gray-400" />
+                  <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     type="text"
                     name="search"
-                    placeholder="Search listings..."
+                    placeholder="Search products, brands, categories..."
                     defaultValue={searchTerm}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-12 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white transition-all duration-200"
                   />
                 </div>
                 <button 
                   type="submit"
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+                  className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center gap-2 font-medium whitespace-nowrap"
                 >
-                  <Filter size={18} /> Search
+                  <Search size={18} /> Search
                 </button>
                 {searchTerm && (
                   <button
                     type="button"
                     onClick={clearSearch}
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition flex items-center gap-2"
+                    className="px-4 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 flex items-center justify-center gap-2 font-medium whitespace-nowrap"
                   >
                     <X size={18} /> Clear
                   </button>
@@ -180,13 +228,21 @@ const Listings = () => {
               </form>
             </div>
 
+
             {/* Search Results Info */}
             {searchTerm && (
-              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-gray-700">
-                  Search results for: <span className="font-semibold text-blue-600">"{searchTerm}"</span>
-                  {products?.length > 0 && <span className="ml-2">({products.length} result{products.length !== 1 ? 's' : ''})</span>}
-                </p>
+              <div className="mb-6 p-4 bg-gradient-to-r from-blue-100 to-blue-50 border-l-4 border-blue-600 rounded-lg shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <p className="text-gray-900 text-base">
+                    <span className="font-semibold text-blue-700">Search results for: </span>
+                    <span className="text-blue-700 font-bold">"{searchTerm}"</span>
+                  </p>
+                  {products?.length > 0 && (
+                    <span className="inline-block px-3 py-1 bg-blue-600 text-white rounded-full text-sm font-medium">
+                      {products.length} result{products.length !== 1 ? 's' : ''} found
+                    </span>
+                  )}
+                </div>
               </div>
             )}
 
@@ -195,13 +251,13 @@ const Listings = () => {
 
             {/* Error State */}
             {error && !loading && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+              <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg text-orange-700">
                 Error loading listings: {error}
               </div>
             )}
 
             {/* Empty State */}
-            {!loading && !error && (!products || products.length === 0) && (
+            {!noProductResults || hasOffersToShow ? null : (
               <EmptyState 
                 title="No Listings Found"
                 message={searchTerm ? "No listings match your search. Try different keywords." : "No listings available in this category."}
@@ -210,12 +266,79 @@ const Listings = () => {
               />
             )}
 
-            {/* Products Grid */}
-            {!loading && !error && products && products.length > 0 && (
+            {/* Interleaved Mixed Grid: Both offers and products for all listings */}
+            {!loading && !error && !selectedCategory && generalOffers && generalOffers.length > 0 && products && products.length > 0 && (
+              <MixedGrid 
+                products={products || []}
+                offers={generalOffers || []}
+                className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
+                onProductClick={(product) => {
+                  const type = product.type || 'product';
+                  if (type === 'tool') {
+                    navigate(`/software/${product.slug}`);
+                  } else if (type === 'job') {
+                    navigate(`/job/${product.slug}`);
+                  } else if (type === 'offer') {
+                    navigate(`/offer/${product._id}`);
+                  } else {
+                    navigate(`/product/${product.slug}`);
+                  }
+                }}
+              />
+            )}
+
+            {/* Display offers only if all-listings has offers but no products */}
+            {!loading && !error && !selectedCategory && generalOffers && generalOffers.length > 0 && (!products || products.length === 0) && (
+              <div className="mb-12">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">Available Offers</h3>
+                <OfferSection categoryId={null} offers={generalOffers} />
+              </div>
+            )}
+
+            {/* Mixed Grid: Both offers and products for category listings */}
+            {!loading && !error && selectedCategory && offers && offers.length > 0 && products && products.length > 0 && (
+              <MixedGrid 
+                products={products || []}
+                offers={offers || []}
+                className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
+                onProductClick={(product) => {
+                  const type = product.type || 'product';
+                  if (type === 'tool') {
+                    navigate(`/software/${product.slug}`);
+                  } else if (type === 'job') {
+                    navigate(`/job/${product.slug}`);
+                  } else if (type === 'offer') {
+                    navigate(`/offer/${product._id}`);
+                  } else {
+                    navigate(`/product/${product.slug}`);
+                  }
+                }}
+              />
+            )}
+
+            {/* Display offers only if category has offers but no products */}
+            {!loading && !error && selectedCategory && offers && offers.length > 0 && (!products || products.length === 0) && (
+              <div className="mb-12">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">Available Offers</h3>
+                <OfferSection categoryId={selectedCategory?._id || selectedCategory?.id} offers={offers} />
+              </div>
+            )}
+
+            {/* Display products only (when no offers to mix with) */}
+            {!loading && !error && products && products.length > 0 && !((generalOffers && generalOffers.length > 0 && !selectedCategory) || (selectedCategory && offers && offers.length > 0)) && (
               <ProductGrid 
                 products={products}
                 onProductClick={(product) => {
-                  navigate(`/listings/${product.slug}`);
+                  const type = product.type || 'product';
+                  if (type === 'tool') {
+                    navigate(`/software/${product.slug}`);
+                  } else if (type === 'job') {
+                    navigate(`/job/${product.slug}`);
+                  } else if (type === 'offer') {
+                    navigate(`/offer/${product._id}`);
+                  } else {
+                    navigate(`/product/${product.slug}`);
+                  }
                 }}
               />
             )}

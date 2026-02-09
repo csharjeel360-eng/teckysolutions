@@ -18,6 +18,13 @@ import NotFound from './pages/Public/NotFound';
 import Unauthorized from './pages/Public/Unauthorized';
 import PrivacyPolicy from './pages/Public/PrivacyPolicy';
 import TermsOfService from './pages/Public/TermsOfService';
+import ProductDetail from './pages/Public/ProductDetail';
+import SoftwareDetail from './pages/Public/SoftwareDetail';
+import JobDetail from './pages/Public/JobDetail';
+import OfferDetail from './pages/Public/OfferDetail';
+import Services from './pages/Public/Services';
+import ServiceDetail from './pages/Public/ServiceDetail';
+import Contact from './pages/Public/Contact';
 // Auth Pages (Updated for Firebase)
 import UserLogin from './pages/auth/UserLogin';
 import UserSignup from './pages/auth/UserSignup';
@@ -51,7 +58,7 @@ function App() {
     <AuthProvider>
       <AppProvider>
         <Router>
-          <div className="App min-h-screen bg-gray-50 flex flex-col">
+          <div className="App min-h-screen flex flex-col">
             <ScrollToTop />
             <Navbar />
             <main className="flex-1">
@@ -62,12 +69,19 @@ function App() {
                 <Route path="/listings" element={<Listings />} />
                 <Route path="/category/:slug/listings" element={<Listings />} />
                 <Route path="/listings/:slug" element={<ListingDetail />} />
+                <Route path="/product/:slug" element={<ProductDetail />} />
+                <Route path="/software/:slug" element={<SoftwareDetail />} />
+                <Route path="/job/:slug" element={<JobDetail />} />
+                <Route path="/offer/:id" element={<OfferDetail />} />
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/blogs" element={<Blogs />} />
                 <Route path="/blog/:slug" element={<BlogDetail />} />
                 <Route path="/unauthorized" element={<Unauthorized />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/terms-of-service" element={<TermsOfService />} />
+                <Route path="/services" element={<Services />} />
+                <Route path="/services/:slug" element={<ServiceDetail />} />
+                <Route path="/contact" element={<Contact />} />
                 {/* ===== AUTHENTICATION ROUTES ===== */}
                 {/* User Authentication (Firebase + Backend) */}
                 <Route path="/login" element={<UserLogin />} />

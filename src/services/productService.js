@@ -539,13 +539,31 @@ class ProductService {
         categories: response.data?.categories || response.data
       };
     } catch (error) {
-      console.error('❌ ProductService.getCategoriesWithCounts error:', error);
-      return {
-        success: false,
-        error: error.response?.data?.message || error.message || 'Failed to fetch categories with counts',
-        data: null,
-        categories: []
-      };
+      console.warn('⚠️ ProductService.getCategoriesWithCounts failed, falling back to local calculation:', error.message || error);
+
+      // If the dedicated endpoint is not available on the deployed backend (404),
+      // fall back to fetching all listings and computing counts client-side.
+      try {
+        const resp = await this.getAll({ fields: 'category', limit: 10000 });
+        const products = resp.products || [];
+        const countsMap = {};
+        products.forEach(p => {
+          const catId = p.category?._id || p.category || null;
+          if (!catId) return;
+          countsMap[catId] = (countsMap[catId] || 0) + 1;
+        });
+
+        const categories = Object.keys(countsMap).map(id => ({ category: id, count: countsMap[id] }));
+        return { success: true, data: categories, categories };
+      } catch (fallbackErr) {
+        console.error('❌ Fallback getCategoriesWithCounts failed:', fallbackErr);
+        return {
+          success: false,
+          error: error.response?.data?.message || error.message || 'Failed to fetch categories with counts',
+          data: null,
+          categories: []
+        };
+      }
     }
   }
 

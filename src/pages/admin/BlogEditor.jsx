@@ -9,6 +9,7 @@ import RichTextEditor from '../../components/Admins/RichTextEditor';
 import ImageUpload from '../../components/Admins/ImageUpload';
 import Button from '../../components/UI/Button';
 import Notification from '../../components/Common/Notification';
+import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 import { blogsAPI, uploadsAPI } from '../../services/api';
 
 const BlogEditor = ({ blog = null, onSave, categories = [] }) => {
@@ -304,11 +305,8 @@ const BlogEditor = ({ blog = null, onSave, categories = [] }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading blog editor...</p>
-        </div>
+      <div className="flex-1 flex items-center justify-center">
+        <LoadingSpinner size="large" text="Loading blog editor..." />
       </div>
     );
   }

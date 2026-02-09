@@ -123,14 +123,13 @@ const Cart = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6">
           {/* Cart Items - Main Content */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 divide-y divide-gray-200">
               {cartItems.map((item) => {
                 const isExternal = isExternalProduct(item);
                 const productLink = getProductLink(item);
-                const itemTotal = ((item.price || item.product.price || 0) * item.quantity).toFixed(2);
                 
                 return (
                   <div key={item._id || item.product._id} className="p-4 sm:p-6">
@@ -149,98 +148,55 @@ const Cart = () => {
 
                       {/* Product Info */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
-                          <Link
-                            to={`/listings/${createSlug(item.product._id, item.product.title)}`}
-                            className="text-lg sm:text-xl font-semibold text-gray-900 hover:text-[black] line-clamp-2"
-                          >
-                            {item.product.title || item.productTitle}
-                          </Link>
-                          <div className="text-lg font-bold text-gray-900 sm:text-right">
-                            ${itemTotal}
-                          </div>
-                        </div>
-                        
-                        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                          {item.product.description}
-                        </p>
-                        
-                        {/* Stock Status */}
-                        <div className="mb-4">
-                          {item.product.stock < item.quantity && (
-                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                              <p className="text-red-600 text-xs sm:text-sm font-medium">
-                                Only {item.product.stock} left in stock
-                              </p>
-                            </div>
+                        <div className="flex flex-col gap-2 mb-2">
+                          {/* Title */}
+                          {productLink ? (
+                            <a
+                              href={productLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-lg sm:text-xl font-semibold text-gray-900 hover:text-[black] line-clamp-2"
+                            >
+                              {item.product?.title || item.productTitle}
+                            </a>
+                          ) : (
+                            <Link
+                              to={`/listings/${createSlug(item.product?._id, item.product?.title || item.productTitle)}`}
+                              className="text-lg sm:text-xl font-semibold text-gray-900 hover:text-[black] line-clamp-2"
+                            >
+                              {item.product?.title || item.productTitle}
+                            </Link>
                           )}
-                          {item.product.stock > 0 && item.product.stock >= item.quantity && (
-                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                              <p className="text-green-600 text-xs sm:text-sm font-medium">
-                                In stock
-                              </p>
-                            </div>
-                          )}
-                          {(!item.product.stock || item.product.stock === 0) && (
-                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                              <p className="text-red-600 text-xs sm:text-sm font-medium">
-                                Out of stock
-                              </p>
-                            </div>
-                          )}
-                        </div>
 
-                        {/* Quantity Controls and Actions */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                          {/* Quantity Controls */}
-                          <div className="flex items-center gap-3 bg-gray-50 rounded-lg px-3 py-2 w-fit">
-                            <span className="text-xs sm:text-sm font-medium text-gray-700">Qty:</span>
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => updateQuantity(item.product._id, item.quantity - 1)}
-                                disabled={item.quantity <= 1}
-                                className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:border-gray-400 transition-colors"
-                              >
-                                <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
-                              </button>
-                              <span className="w-6 sm:w-8 text-center font-semibold text-gray-900 text-sm sm:text-base">
-                                {item.quantity}
-                              </span>
-                              <button
-                                onClick={() => updateQuantity(item.product._id, item.quantity + 1)}
-                                disabled={item.quantity >= (item.product.stock || 0)}
-                                className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:border-gray-400 transition-colors"
-                              >
-                                <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
-                              </button>
-                            </div>
-                          </div>
+                          {/* Short description */}
+                          <p className="text-gray-600 text-sm mb-1 line-clamp-2">
+                            {item.product?.description || item.productDescription || item.productTitle}
+                          </p>
 
-                          {/* Actions */}
                           <div className="flex items-center gap-2">
-                            {isExternal ? (
-                              <button
-                                onClick={() => handleBuyNow(item)}
-                                className="flex items-center gap-1 sm:gap-2 bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors"
+                            {/* Open / Redirect Button */}
+                            {productLink ? (
+                              <a
+                                href={productLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors"
                               >
                                 <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4" />
-                                Buy Now
-                              </button>
+                                Open
+                              </a>
                             ) : (
-                              <button
-                                className="flex items-center gap-1 sm:gap-2 bg-gray-100 text-gray-600 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium cursor-not-allowed opacity-50"
-                                disabled
+                              <Link
+                                to={`/listings/${createSlug(item.product?._id, item.product?.title || item.productTitle)}`}
+                                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors"
                               >
-                                <ShoppingBag className="w-3 h-3 sm:w-4 sm:h-4" />
-                                Internal
-                              </button>
+                                <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4" />
+                                Open
+                              </Link>
                             )}
 
                             <button
-                              onClick={() => removeFromCart(item.product._id)}
+                              onClick={() => removeFromCart(item._id || item.product?._id)}
                               className="flex items-center gap-1 sm:gap-2 text-red-600 hover:text-red-800 text-xs sm:text-sm transition-colors p-2 rounded-lg hover:bg-red-50"
                             >
                               <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -271,48 +227,7 @@ const Cart = () => {
             </div>
           </div>
 
-          {/* Cart Summary - Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 sticky top-4">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Order Summary</h2>
-              
-              <div className="space-y-3 mb-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm sm:text-base text-gray-600">Items:</span>
-                  <span className="text-sm sm:text-base font-medium text-gray-900">{cartItems.length}</span>
-                </div>
-                
-                {externalProductsCount > 0 && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm sm:text-base text-gray-600">External Products:</span>
-                    <span className="text-sm sm:text-base font-medium text-[black]">{externalProductsCount}</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="border-t border-gray-200 pt-4 mb-6">
-                <div className="flex justify-between items-center">
-                  <span className="text-base sm:text-lg font-bold text-gray-900">Total:</span>
-                  <span className="text-base sm:text-lg font-bold text-gray-900">
-                    $
-                    {cartItems
-                      .reduce((total, item) => total + (item.price || item.product.price || 0) * item.quantity, 0)
-                      .toFixed(2)}
-                  </span>
-                </div>
-              </div>
-
-              {/* Action Buttons - checkout and bulk external purchase removed per request */}
-              <div className="space-y-3">
-                <Link
-                  to="/listings"
-                  className="w-full border border-gray-300 text-gray-700 hover:bg-gray-50 py-3 px-4 rounded-lg font-semibold text-center block transition-colors text-sm"
-                >
-                  Continue Shopping
-                </Link>
-              </div>
-            </div>
-          </div>
+          {/* Sidebar removed per request (Order Summary hidden) */}
         </div>
       </div>
     </div>

@@ -1,8 +1,100 @@
-/* styles/blog-content.css or add to your main CSS file */
-/* Custom range slider styles */
 @import "tailwindcss";
 
- /* Add to your global CSS file */
+/* Custom Color Variables */
+:root {
+  /* Primary Color - Blue */
+  --color-primary: #007BFF;
+  --color-primary-light: #E3F2FD;
+  --color-primary-dark: #0056B3;
+  
+  /* Secondary Color - Teal */
+  --color-secondary: #20C997;
+  --color-secondary-light: #E0F2F1;
+  --color-secondary-dark: #1a9b7d;
+  
+  /* Accent Color - Orange */
+  --color-accent: #FF6600;
+  --color-accent-light: #FFF3E0;
+  --color-accent-dark: #E55A00;
+  
+  /* Neutral Colors */
+  --color-white: #FFFFFF;
+    --color-dark: #000000;
+  --color-gray-100: #F8F9FA;
+  --color-gray-200: #E9ECEF;
+  --color-gray-300: #DEE2E6;
+  --color-gray-400: #CED4DA;
+  --color-gray-500: #ADB5BD;
+  --color-gray-600: #6C757D;
+  --color-gray-700: #495057;
+  --color-gray-800: #343A40;
+  --color-gray-900: #212529;
+}
+
+/* Global dark mode mapping: apply #343A40 as primary neutral for backgrounds/cards
+   and adjust default text to be light for readability. These CSS rules override
+   common utility classes so existing markup adopts the new neutral palette. */
+
+body {
+  background-color: var(--color-dark);
+  color: var(--color-gray-100);
+}
+
+/* Cards and primary surfaces that previously used white */
+.card, .card-bg, .bg-white {
+  background-color: var(--color-dark) !important;
+  color: var(--color-gray-100) !important;
+}
+
+/* Lighter surfaces */
+.bg-gray-50, .bg-gray-100 {
+  background-color: rgba(255,255,255,0.03) !important;
+}
+
+/* Text adjustments: map dark text classes to light text on dark background */
+.text-gray-900, .text-gray-800, .text-gray-700 {
+  color: var(--color-gray-100) !important;
+}
+
+/* Border adjustments for cards and panels */
+.border-gray-200, .border-gray-100 {
+  border-color: rgba(255,255,255,0.06) !important;
+}
+
+/* Alerts and error mapping: keep orange/red accents intact but tuned for dark bg */
+.bg-red-50 { background-color: rgba(255,100,80,0.06) !important; }
+.text-red-600 { color: var(--color-accent) !important; }
+
+/* Helper card class to opt-in where stronger contrast is needed */
+.card-contrast { background-color: rgba(255,255,255,0.04); color: var(--color-gray-100); border-color: rgba(255,255,255,0.06); }
+
+/* Normalize any Tailwind-generated classes that include white/gray surfaces
+   to subtle translucent surfaces on the dark background so existing markup
+   does not require editing every occurrence. */
+[class*="bg-white"] {
+  background-color: rgba(255,255,255,0.03) !important;
+  color: var(--color-gray-100) !important;
+}
+
+[class*="bg-white/"] {
+  background-color: rgba(255,255,255,0.03) !important;
+  color: var(--color-gray-100) !important;
+}
+
+[class*="bg-gray-50"] {
+  background-color: rgba(255,255,255,0.02) !important;
+}
+
+[class*="bg-gray-100"] {
+  background-color: rgba(255,255,255,0.02) !important;
+}
+
+/* Ensure border utilities for light panels appear faint on dark backgrounds */
+[class*="border-gray-200"] {
+  border-color: rgba(255,255,255,0.06) !important;
+}
+
+/* Add to your global CSS file */
 @keyframes blob {
   0% {
     transform: translate(0px, 0px) scale(1);
@@ -29,7 +121,3 @@
 .animation-delay-4000 {
   animation-delay: 4s;
 }
-
- 
-
- 

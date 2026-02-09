@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { generateSlug } from '../../utils/slugify';
 
 const CategoryCard = ({ 
   category, 
@@ -34,9 +35,11 @@ const CategoryCard = ({
     large: 'text-lg'
   };
 
+  const slug = generateSlug(name);
+
   return (
     <Link
-      to={`/category/${_id}/listings`}
+      to={`/category/${slug}/listings`}
       className="group block"
     >
       <div className={`

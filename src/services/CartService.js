@@ -1,9 +1,18 @@
 import { cartAPI } from './api';
 
 class CartService {
+  // Quick auth check to avoid unnecessary server calls that return 401
+  hasAuthToken() {
+    return !!localStorage.getItem('token');
+  }
+
   // Get cart items
   async getCart() {
     try {
+      // If not authenticated, return local cart immediately to avoid 401 logs
+      if (!this.hasAuthToken()) {
+        return { success: true, data: this.getLocalCart() };
+      }
       const response = await cartAPI.getCart();
       // Unwrap nested `data` if server returns { success: true, data: { ...cart } }
       const data = response.data?.data ?? response.data;
@@ -21,7 +30,39 @@ class CartService {
   // Add item to cart
   async addToCart(productId, quantity = 1) {
     try {
-      const response = await cartAPI.addToCart(productId, quantity);
+      // If not authenticated, add to local cart immediately and avoid server 401
+      if (!this.hasAuthToken()) {
+        // Preserve original object payload when provided
+        const originalProduct = (typeof productId === 'object' && productId !== null) ? productId : null;
+        return this.addToLocalCart(typeof productId === 'object' ? productId._id || productId : productId, quantity, originalProduct);
+      }
+      // If caller provided a product object (external item) without an _id, send object payload
+      if (typeof productId === 'object' && productId !== null && !(productId._id || productId.id)) {
+        try {
+          console.debug('CartService.addToCart external payload:', productId, quantity);
+        } catch (e) {}
+        const response = await cartAPI.addToCart(productId, quantity);
+        const data = response.data?.data ?? response.data;
+        return { success: true, data };
+      }
+
+      // Accept either a product id string or a product object with an id
+      let pid = productId;
+      if (typeof productId === 'object' && productId !== null) {
+        pid = productId._id || productId.id || (productId.product && (productId.product._id || productId.product.id));
+      }
+
+      if (!pid) {
+        console.error('CartService.addToCart called with invalid productId:', productId);
+        return { success: false, error: 'Invalid product identifier' };
+      }
+
+      // Log outgoing payload for easier debugging
+      try {
+        console.debug('CartService.addToCart payload:', { productId: pid, quantity });
+      } catch (e) {}
+
+      const response = await cartAPI.addToCart(pid, quantity);
       const data = response.data?.data ?? response.data;
       return { success: true, data };
     } catch (error) {
@@ -29,7 +70,19 @@ class CartService {
       if (error.response?.status === 401) {
         return this.addToLocalCart(productId, quantity);
       }
-      console.error('CartService.addToCart error', error);
+
+      // If server rejects (400) for reasons like product not found or invalid id,
+      // fallback to local cart to allow "Save/Bookmark" behavior for jobs/tools/offers.
+      if (error.response?.status === 400) {
+        try {
+          console.warn('CartService.addToCart server returned 400, falling back to local cart. Server response:', error.response.data);
+        } catch (e) {}
+        // If original input was an object, pass it to local cart so UI shows title/image
+        const originalProduct = (typeof productId === 'object' && productId !== null) ? productId : null;
+        return this.addToLocalCart(typeof productId === 'object' ? productId : pid, quantity, originalProduct);
+      }
+
+      console.error('CartService.addToCart error', error.response?.data || error);
       return { success: false, error: this.handleError(error).message };
     }
   }
@@ -37,6 +90,10 @@ class CartService {
   // Update cart item quantity
   async updateCartItem(productId, quantity) {
     try {
+      // If not authenticated, update local cart immediately
+      if (!this.hasAuthToken()) {
+        return this.updateLocalCartItem(productId, quantity);
+      }
       const response = await cartAPI.updateCartItem(productId, quantity);
       const data = response.data?.data ?? response.data;
       return { success: true, data };
@@ -53,6 +110,10 @@ class CartService {
   // Remove item from cart
   async removeFromCart(productId) {
     try {
+      // If not authenticated, remove from local cart immediately
+      if (!this.hasAuthToken()) {
+        return this.removeFromLocalCart(productId);
+      }
       const response = await cartAPI.removeFromCart(productId);
       const data = response.data?.data ?? response.data;
       return { success: true, data };
@@ -69,6 +130,10 @@ class CartService {
   // Clear cart
   async clearCart() {
     try {
+      // If not authenticated, clear local cart immediately
+      if (!this.hasAuthToken()) {
+        return this.clearLocalCart();
+      }
       const response = await cartAPI.clearCart();
       const data = response.data?.data ?? response.data;
       return { success: true, data };
@@ -222,6 +287,18 @@ class CartService {
   // Get cart count
   async getCartCount() {
     try {
+      // If not authenticated, return counts from local cart to avoid 401 logs
+      if (!this.hasAuthToken()) {
+        const localCart = this.getLocalCart();
+        return {
+          success: true,
+          data: {
+            count: localCart.items.reduce((total, item) => total + item.quantity, 0),
+            externalProductsCount: this.getLocalExternalProductsCount(localCart),
+            hasExternalProducts: this.getLocalExternalProductsCount(localCart) > 0
+          }
+        };
+      }
       const response = await cartAPI.getCartCount();
       return { success: true, data: response.data };
     } catch (error) {

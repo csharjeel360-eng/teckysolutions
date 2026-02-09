@@ -11,6 +11,7 @@ const Input = forwardRef(({
   className = '',
   size = 'medium',
   variant = 'default',
+  dark = false,
   ...props
 }, ref) => {
   const [showPassword, setShowPassword] = React.useState(false);
@@ -34,7 +35,7 @@ const Input = forwardRef(({
 
     if (icon && iconProps[icon]) {
       const IconComponent = iconProps[icon];
-      return <IconComponent className="w-4 h-4 text-gray-400" />;
+      return <IconComponent className={`w-4 h-4 ${dark ? 'text-gray-500' : 'text-gray-400'}`} />;
     }
     return null;
   };
@@ -46,15 +47,17 @@ const Input = forwardRef(({
   };
 
   const variantClasses = {
-    default: 'border-gray-300 focus:border-temu-red focus:ring-temu-red',
+    default: dark 
+      ? 'border-blue-500/30 focus:border-blue-500 focus:ring-blue-500' 
+      : 'border-gray-300 focus:border-temu-red focus:ring-temu-red',
     error: 'border-red-500 focus:border-red-500 focus:ring-red-500',
     success: 'border-green-500 focus:border-green-500 focus:ring-green-500'
   };
 
   const baseClasses = `
-    block rounded-2xl border bg-white placeholder-gray-400 
+    block rounded-2xl border ${dark ? 'bg-gray-800 text-white placeholder-gray-500' : 'bg-white placeholder-gray-400'} 
     focus:outline-none focus:ring-2 transition-colors duration-200
-    disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50
+    disabled:${dark ? 'bg-gray-700 text-gray-400' : 'bg-gray-100'} disabled:cursor-not-allowed disabled:opacity-50
     ${fullWidth ? 'w-full' : ''}
     ${sizeClasses[size]}
     ${variantClasses[error ? 'error' : variant]}
@@ -68,7 +71,7 @@ const Input = forwardRef(({
       {label && (
         <label 
           htmlFor={props.id} 
-          className="block text-sm font-medium text-gray-700 mb-2"
+          className={`block text-sm font-medium ${dark ? 'text-white' : 'text-gray-700'} mb-2`}
         >
           {label}
           {props.required && <span className="text-red-500 ml-1">*</span>}
@@ -101,7 +104,7 @@ const Input = forwardRef(({
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+            className={`absolute inset-y-0 right-0 pr-3 flex items-center ${dark ? 'text-gray-500 hover:text-gray-400' : 'text-gray-400 hover:text-gray-600'} transition-colors`}
           >
             {showPassword ? (
               <EyeOff className="w-4 h-4" />
@@ -124,7 +127,7 @@ const Input = forwardRef(({
       {/* Helper Text & Error Message */}
       {(helperText || error) && (
         <p className={`mt-2 text-sm ${
-          error ? 'text-red-600' : 'text-gray-500'
+          error ? 'text-red-600' : dark ? 'text-gray-400' : 'text-gray-500'
         }`}>
           {error || helperText}
         </p>

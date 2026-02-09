@@ -147,4 +147,4 @@ const BlogGrid = ({
   );
 };
 
-export default BlogGrid;
+export default React.memo(BlogGrid);

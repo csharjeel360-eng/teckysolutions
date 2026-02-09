@@ -49,7 +49,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000,
+  timeout: 30000, // Increased to 30s to handle slow backends
 });
 
 // Debug flag (set to false to disable verbose logging)
@@ -543,7 +543,21 @@ export const cartAPI = {
         requestCache.delete(key);
       }
     }
-    return api.post('/cart/items', { productId, quantity });
+    // Support passing either a productId or an external product object
+    if (typeof productId === 'string' || typeof productId === 'number') {
+      return api.post('/cart/items', { productId, quantity });
+    }
+
+    // productId is an object describing an external item
+    const productObj = productId || {};
+    const body = {
+      quantity,
+      productTitle: productObj.title || productObj.productTitle || productObj.name || null,
+      price: productObj.price || productObj.itemPrice || 0,
+      productLink: productObj.externalLink || productObj.productLink || null,
+      productImage: (productObj.images && productObj.images[0] && productObj.images[0].url) || productObj.productImage || null
+    };
+    return api.post('/cart/items', body);
   },
   updateCartItem: (productId, quantity) => {
     for (let key of requestCache.keys()) {
@@ -701,22 +715,20 @@ export const reviewsAPI = {
 export const uploadsAPI = {
   // Single image upload
   uploadImage: (formData) => api.post('/uploads/image', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 30000,
   }),
   // Multiple images upload
   uploadImages: (formData) => api.post('/uploads/images', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 60000,
   }),
   // Delete image
   deleteImage: (publicId) => api.delete(`/uploads/image/${publicId}`),
   // File upload (generic)
   uploadFile: (formData) => api.post('/uploads/files', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
   }),
   deleteFile: (fileId) => api.delete(`/uploads/files/${fileId}`),
   // Avatar upload
   uploadAvatar: (formData) => api.post('/uploads/avatar', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
   }),
 };
 

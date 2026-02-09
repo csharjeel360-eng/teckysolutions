@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Plus, Edit, Trash2, Eye, Search, Upload, X } from 'lucide-react';
 import { offersAPI, categoriesAPI, uploadsAPI } from '../../services/api';
 import useNotification from '../../hooks/useNotification';
@@ -29,21 +30,56 @@ const OffersManagement = () => {
     description: '',
     category: '',
     trackingUrl: '',
-    thumbnail: ''
+    thumbnail: '',
+    type: 'cpa',
+    network: '',
+    commission: 0,
+    commissionType: 'fixed',
+    status: 'active'
   });
 
   // Load offers and categories
   useEffect(() => {
-    loadOffers();
-    loadCategories();
+    loadData();
   }, []);
+
+  const loadData = async () => {
+    await loadCategories();
+    await loadOffers();
+    
+    // Check for prefill params (e.g., from listing admin)
+    const params = new URLSearchParams(window.location.search);
+    const prefillListing = params.get('prefillListing');
+    const prefillCategory = params.get('category');
+    const prefillTitle = params.get('title');
+    if (prefillListing || prefillCategory) {
+      setFormData(prev => ({
+        ...prev,
+        title: prefillTitle ? decodeURIComponent(prefillTitle) : prev.title,
+        category: prefillCategory || prev.category
+      }));
+      setOfferModalOpen(true);
+    }
+  };
 
   const loadCategories = async () => {
     try {
       const response = await categoriesAPI.getAll({ type: 'offer', limit: 100 });
-      setCategories(response.data.data || response.data || []);
+      const categoryList = response.data.data || response.data || [];
+      
+      console.log('📦 Categories loaded for offers:', {
+        count: categoryList.length,
+        categories: categoryList.map(c => ({ _id: c._id, name: c.name }))
+      });
+      
+      if (categoryList.length === 0) {
+        addNotification('No categories found. Create an offer category first!', 'warning');
+      }
+      
+      setCategories(categoryList);
     } catch (error) {
       console.error('Error loading categories:', error);
+      addNotification('Failed to load categories', 'error');
     }
   };
 
@@ -83,7 +119,8 @@ const OffersManagement = () => {
     try {
       setUploadingImage(true);
       const formDataUpload = new FormData();
-      formDataUpload.append('file', file);
+      // Use 'image' field to match uploads API and server middleware
+      formDataUpload.append('image', file);
 
       const response = await uploadsAPI.uploadImage(formDataUpload);
       const imageUrl = response.data.data.url || response.data.data.secure_url;
@@ -112,20 +149,34 @@ const OffersManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.title || !formData.description || !formData.trackingUrl || !formData.category) {
-      addNotification('Please fill in all required fields', 'error');
+    if (!formData.title || !formData.description || !formData.trackingUrl || !formData.category || !formData.network) {
+      addNotification('Please fill in all required fields: Title, Description, Category, Tracking URL, and Network', 'error');
+      return;
+    }
+
+    // Verify category is a valid ID
+    if (!formData.category || formData.category.trim() === '') {
+      addNotification('Please select a valid category', 'error');
       return;
     }
 
     try {
       setSubmitting(true);
 
+      // Log data being sent for debugging
+      console.log('📝 Submitting offer with category:', {
+        category: formData.category,
+        title: formData.title,
+        network: formData.network,
+        type: formData.type
+      });
+
       if (editingOffer) {
         await offersAPI.update(editingOffer._id, formData);
         addNotification('Offer updated successfully', 'success');
       } else {
         await offersAPI.create(formData);
-        addNotification('Offer created successfully', 'success');
+        addNotification('Offer created successfully - Check the category to view it', 'success');
       }
 
       setOfferModalOpen(false);
@@ -133,7 +184,9 @@ const OffersManagement = () => {
       resetForm();
       loadOffers();
     } catch (error) {
-      addNotification(error.response?.data?.error || 'Failed to save offer', 'error');
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to save offer';
+      addNotification(errorMessage, 'error');
+      console.error('Offer submission error:', error.response?.data || error);
     } finally {
       setSubmitting(false);
     }
@@ -146,7 +199,12 @@ const OffersManagement = () => {
       description: offer.description,
       category: offer.category?._id || offer.category || '',
       trackingUrl: offer.trackingUrl,
-      thumbnail: offer.thumbnail || ''
+      thumbnail: offer.thumbnail || '',
+      type: offer.type || 'cpa',
+      network: offer.network || '',
+      commission: offer.commission || 0,
+      commissionType: offer.commissionType || 'fixed',
+      status: offer.status || 'active'
     });
     if (offer.thumbnail) {
       setImagePreview(offer.thumbnail);
@@ -174,7 +232,12 @@ const OffersManagement = () => {
       description: '',
       category: '',
       trackingUrl: '',
-      thumbnail: ''
+      thumbnail: '',
+      type: 'cpa',
+      network: '',
+      commission: 0,
+      commissionType: 'fixed',
+      status: 'active'
     });
     setImagePreview(null);
   };
@@ -315,21 +378,33 @@ const OffersManagement = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Category * <span className="text-xs text-red-500">(Required - Offer must be in a category)</span>
+            </label>
             <select
               name="category"
               value={formData.category}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg font-semibold"
               required
             >
-              <option value="">Select a category</option>
-              {categories.map(cat => (
-                <option key={cat._id} value={cat._id}>
-                  {cat.name}
-                </option>
-              ))}
+              <option value="">-- Select a Category --</option>
+              {categories.length === 0 ? (
+                <option disabled>No offer categories available</option>
+              ) : (
+                categories.map(cat => (
+                  <option key={cat._id} value={cat._id}>
+                    {cat.name}
+                  </option>
+                ))
+              )}
             </select>
+            {categories.length === 0 && (
+              <p className="text-xs text-orange-600 mt-1">⚠️ No offer categories found. Create an offer category first!</p>
+            )}
+            {formData.category && (
+              <p className="text-xs text-green-600 mt-1">✓ Category selected: {categories.find(c => c._id === formData.category)?.name}</p>
+            )}
           </div>
 
           <div>
@@ -355,6 +430,77 @@ const OffersManagement = () => {
               placeholder="https://..."
               required
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Network *</label>
+            <Input
+              type="text"
+              name="network"
+              value={formData.network}
+              onChange={handleInputChange}
+              placeholder="e.g., CJ Affiliate, ShareASale, Impact"
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Offer Type</label>
+              <select
+                name="type"
+                value={formData.type}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              >
+                <option value="cpa">CPA</option>
+                <option value="cpc">CPC</option>
+                <option value="cpm">CPM</option>
+                <option value="cpv">CPV</option>
+                <option value="revenue_share">Revenue Share</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Commission Type</label>
+              <select
+                name="commissionType"
+                value={formData.commissionType}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              >
+                <option value="fixed">Fixed</option>
+                <option value="percentage">Percentage</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Commission Amount</label>
+            <Input
+              type="number"
+              name="commission"
+              value={formData.commission}
+              onChange={handleInputChange}
+              placeholder="0"
+              min="0"
+              step="0.01"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select
+              name="status"
+              value={formData.status}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+            >
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="pending">Pending</option>
+              <option value="expired">Expired</option>
+            </select>
           </div>
 
           <div>

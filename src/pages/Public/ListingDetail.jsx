@@ -20,7 +20,7 @@ import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 import Notification from '../../components/Common/Notification';
 import LoginModal from '../../components/Auth/LoginModal';
 import { Star, Edit3, User, Calendar, CheckCircle, ShoppingCart, ExternalLink, X, Info, Tag, MapPin, Building2 } from 'lucide-react';
-import { extractIdFromSlug, setPageTitle, createSlug } from '../../utils/slugify';
+import { extractIdFromSlug, setPageTitle, createSlug, generateSlug } from '../../utils/slugify';
 import productService from '../../services/productService';
 import trackingService from '../../services/trackingService';
 
@@ -36,7 +36,7 @@ const ListingDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedImage, setSelectedImage] = useState(0);
-  const [quantity, setQuantity] = useState(1);
+  // Quantity removed — always add 1
   const [notification, setNotification] = useState({ show: false, message: '', type: '' });
   
   // Action-specific loading states
@@ -178,7 +178,7 @@ const ListingDetail = () => {
         return;
       }
       
-      const result = await addToCart(listing, quantity);
+      const result = await addToCart(listing, 1);
       
       if (result && (result.success !== false)) {
         setNotification({
@@ -221,7 +221,7 @@ const ListingDetail = () => {
 
     try {
       setIsProcessing(true);
-      const result = await addToCart(listing, quantity);
+      const result = await addToCart(listing, 1);
       
       if (result && (result.success !== false)) {
         setNotification({
@@ -401,18 +401,18 @@ const ListingDetail = () => {
   // ========== LOADING & ERROR STATES ==========
   if (loading || productsLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center">
-        <LoadingSpinner size="large" showBrand={true} brandText="TrendyBreeze" />
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="large" showBrand={true} />
       </div>
     );
   }
 
   if (error || !listing) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen py-8">
         <div className="container mx-auto px-4 text-center">
-          <div className="text-red-600 text-xl mb-4">{error || 'Listing not found'}</div>
-          <Link to="/listings" className="text-black hover:text-gray-700 font-medium">
+          <div className="text-orange-600 text-xl mb-4">{error || 'Listing not found'}</div>
+          <Link to="/listings" className="text-gray-100 hover:text-gray-200 font-medium">
             Back to Listings
           </Link>
         </div>
@@ -422,7 +422,7 @@ const ListingDetail = () => {
 
   // ========== MAIN RENDER ==========
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen py-8">
       <LoginModal
         isOpen={showLoginModal}
         onClose={() => {
@@ -445,8 +445,8 @@ const ListingDetail = () => {
               <>
                 <li><span className="mx-2">/</span></li>
                 <li>
-                  <Link 
-                    to={`/listings?category=${listing.category._id || listing.category}`}
+                  <Link
+                    to={`/category/${encodeURIComponent(generateSlug(listing.category?.name || listing.category || ''))}/listings`}
                     className="hover:text-gray-900"
                   >
                     {listing.category.name || 'Category'}
@@ -471,7 +471,7 @@ const ListingDetail = () => {
         )}
 
         {/* ========== LISTING OVERVIEW (HEADER) ========== */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+        <div className="card-contrast rounded-lg shadow-lg overflow-hidden mb-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-4 sm:p-6 lg:p-8">
             {/* Images */}
             <div>
@@ -532,17 +532,17 @@ const ListingDetail = () => {
                 <div className={`border-2 rounded-lg p-4 ${
                   isJobListing 
                     ? 'bg-blue-50 border-blue-200' 
-                    : 'bg-green-50 border-green-200'
+                    : 'bg-teal-50 border-teal-200'
                 }`}>
                   <div className="flex items-start gap-3">
                     <ExternalLink className={`w-5 h-5 mt-0.5 flex-shrink-0 ${
-                      isJobListing ? 'text-blue-600' : 'text-green-600'
+                      isJobListing ? 'text-blue-600' : 'text-teal-500'
                     }`} />
                     <div>
-                      <p className={`font-medium ${isJobListing ? 'text-blue-900' : 'text-green-900'}`}>
+                      <p className={`font-medium ${isJobListing ? 'text-blue-900' : 'text-teal-900'}`}>
                         {isJobListing ? 'Apply on company website' : 'Visit official website'}
                       </p>
-                      <p className={`text-sm mt-1 ${isJobListing ? 'text-blue-700' : 'text-green-700'}`}>
+                      <p className={`text-sm mt-1 ${isJobListing ? 'text-blue-700' : 'text-teal-700'}`}>
                         {isJobListing 
                           ? 'Click below to apply directly through the company\'s career page.'
                           : 'This is an affiliate link. We may earn a commission at no extra cost to you.'}
@@ -553,7 +553,7 @@ const ListingDetail = () => {
               )}
 
               {/* QUICK INFO - Replaces Price + Stock */}
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <div className="card-contrast rounded-lg p-4 border border-gray-200">
                 <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   <Info className="w-5 h-5" />
                   Quick Info
@@ -594,7 +594,7 @@ const ListingDetail = () => {
                   {isProductListing && !hasExternalLink && (
                     <div className="flex justify-between py-2 border-b border-gray-200">
                       <span className="text-gray-600">Stock</span>
-                      <span className={`font-medium ${listing.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      <span className={`font-medium ${listing.stock > 0 ? 'text-teal-600' : 'text-orange-600'}`}>
                         {listing.stock > 0 ? `${listing.stock} available` : 'Out of Stock'}
                       </span>
                     </div>
@@ -645,20 +645,7 @@ const ListingDetail = () => {
                   /* PRODUCT MODE: Add to Cart + Buy Now */
                   <div className="space-y-4">
                     <div className="flex items-center space-x-4">
-                      <label htmlFor="quantity" className="text-sm font-medium text-gray-700">
-                        Quantity:
-                      </label>
-                      <select
-                        id="quantity"
-                        value={quantity}
-                        onChange={(e) => setQuantity(parseInt(e.target.value))}
-                        className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
-                        disabled={listing.stock === 0}
-                      >
-                        {[...Array(Math.min(listing.stock || 0, 10))].map((_, i) => (
-                          <option key={i + 1} value={i + 1}>{i + 1}</option>
-                        ))}
-                      </select>
+                      <span className="text-sm font-medium text-gray-700">Quantity: 1</span>
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-4">
@@ -737,7 +724,7 @@ const ListingDetail = () => {
                       {listing.tags.map((tag, index) => (
                         <span 
                           key={index}
-                          className="bg-gray-100 text-black px-3 py-2 rounded-lg text-sm font-medium"
+                          className="bg-gray-100 text-gray-900 px-3 py-2 rounded-lg text-sm font-medium"
                         >
                           {tag}
                         </span>
@@ -823,11 +810,11 @@ const ListingDetail = () => {
                     <div className="mt-6 pt-6 border-t border-gray-200">
                       {isAuthenticated ? (
                         hasUserReviewed ? (
-                          <div className="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-3 rounded-lg border border-green-200">
+                          <div className="flex items-center gap-2 text-teal-600 bg-teal-50 px-4 py-3 rounded-lg border border-teal-200">
                             <CheckCircle className="w-5 h-5" />
                             <div>
                               <p className="text-sm font-medium">You've reviewed this</p>
-                              <p className="text-xs text-green-500">Thank you for feedback!</p>
+                              <p className="text-xs text-teal-500">Thank you for feedback!</p>
                             </div>
                           </div>
                         ) : (
@@ -932,7 +919,7 @@ const ListingDetail = () => {
                           <label htmlFor="reviewComment" className="block text-sm font-medium text-gray-700 mb-2">
                             Your Review *
                             <span className={`ml-2 text-sm ${
-                              reviewComment.trim().length < 10 ? 'text-red-500' : 'text-green-500'
+                              reviewComment.trim().length < 10 ? 'text-orange-500' : 'text-teal-500'
                             }`}>
                               ({reviewComment.trim().length}/10+)
                             </span>
@@ -954,7 +941,7 @@ const ListingDetail = () => {
                           <Button
                             type="submit"
                             disabled={isSubmittingReview || reviewRating === 0 || !reviewComment.trim() || reviewComment.trim().length < 10}
-                            className="bg-green-600 hover:bg-green-700"
+                            className="bg-teal-600 hover:bg-teal-700"
                           >
                             {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
                           </Button>

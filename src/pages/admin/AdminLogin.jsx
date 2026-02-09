@@ -49,23 +49,23 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-black flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
-            <span className="text-white font-bold text-xl">A</span>
+          <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full flex items-center justify-center">
+            <span className="text-white font-bold text-xl">T</span>
           </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
           Admin Sign In
         </h2>
         <p className="mt-2 text-center text-sm text-gray-400">
-          Access the admin dashboard
+          Access the TeckySolutions admin dashboard
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-gray-900 py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-blue-500/20">
           {error && (
             <Notification 
               type="error" 
@@ -84,7 +84,7 @@ const AdminLogin = () => {
               required
               autoComplete="email"
               placeholder="Enter admin email"
-              className="bg-gray-700 border-gray-600 text-black"
+              className="bg-gray-800 border-blue-500/30 text-white"
             />
             
             <Input
@@ -96,7 +96,7 @@ const AdminLogin = () => {
               required
               autoComplete="current-password"
               placeholder="Enter admin password"
-              className="bg-gray-700 border-gray-600 text-black"
+              className="bg-gray-800 border-blue-500/30 text-white"
             />
 
             <div>

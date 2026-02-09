@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { TrendingUp, Eye, MousePointer, ShoppingCart, Loader } from 'lucide-react';
+import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 
 const AnalyticsDashboard = () => {
   const [analytics, setAnalytics] = useState(null);
@@ -38,8 +39,8 @@ const AnalyticsDashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader className="w-8 h-8 animate-spin text-blue-600" />
+      <div className="flex-1 flex items-center justify-center">
+        <LoadingSpinner size="large" text="Loading analytics..." />
       </div>
     );
   }

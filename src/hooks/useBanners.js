@@ -2,6 +2,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import bannerService from '../services/bannerService';
 
+// Global cache that persists across component mounts/unmounts
+const globalBannerCache = { data: null, timestamp: 0 };
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes cache lifespan for banners
+
 const useBanners = () => {
   const [banners, setBanners] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -11,10 +15,20 @@ const useBanners = () => {
   // Load all banners
   const loadBanners = useCallback(async () => {
     try {
+      // Check global cache first
+      if (globalBannerCache.data && Date.now() - globalBannerCache.timestamp < CACHE_TTL) {
+        setBanners(globalBannerCache.data);
+        return globalBannerCache.data;
+      }
+      
       setLoading(true);
       setError(null);
       // Loading banners from API
       const bannersData = await bannerService.getBanners();
+      
+      // Cache the result
+      globalBannerCache.data = bannersData || [];
+      globalBannerCache.timestamp = Date.now();
       
       setBanners(bannersData || []);
       return bannersData || [];

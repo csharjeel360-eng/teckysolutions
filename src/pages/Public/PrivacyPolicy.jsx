@@ -24,12 +24,12 @@ const PrivacyPolicy = () => {
           <section className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Introduction</h2>
             <p className="text-gray-700 mb-4">
-              Welcome to <strong>AffiliateHub</strong> ("we," "our," or "us"). We operate an affiliate marketing platform 
-              that allows users to upload, promote, and manage products and services from various merchants and brands.
+              Welcome to <strong>TeckySolutions</strong> ("we," "our," or "us"). We are a curated AI tools, software reviews, and tech resources platform 
+              dedicated to helping users discover, compare, and learn about the best AI tools, productivity software, SaaS platforms, and digital solutions.
             </p>
             <p className="text-gray-700">
               This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use 
-              our platform, including when you upload affiliate products, track performance, and interact with our services.
+              our platform, including when you browse AI tools, read reviews and blogs, save favorites, and interact with our services.
             </p>
           </section>
 
@@ -44,9 +44,9 @@ const PrivacyPolicy = () => {
                   <h3 className="font-semibold text-gray-900 mb-2">Personal Information</h3>
                   <ul className="text-gray-700 list-disc list-inside space-y-1">
                     <li>Name, email address, and contact details</li>
-                    <li>Payment and billing information for affiliate earnings</li>
-                    <li>Tax identification numbers for payment processing</li>
-                    <li>Social media and marketing platform credentials</li>
+                    <li>Account preferences and saved items (watchlist, favorites)</li>
+                    <li>Newsletter subscription preferences</li>
+                    <li>Optional profile information you choose to share</li>
                   </ul>
                 </div>
               </div>
@@ -54,12 +54,12 @@ const PrivacyPolicy = () => {
               <div className="flex items-start space-x-3">
                 <Eye className="w-5 h-5 text-[black] mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Product & Performance Data</h3>
+                  <h3 className="font-semibold text-gray-900 mb-2">Usage & Interaction Data</h3>
                   <ul className="text-gray-700 list-disc list-inside space-y-1">
-                    <li>Affiliate products and services you upload</li>
-                    <li>Product descriptions, images, and promotional materials</li>
-                    <li>Click-through rates, conversion data, and commission earnings</li>
-                    <li>Customer engagement and sales performance metrics</li>
+                    <li>AI tools, software products, and services you browse</li>
+                    <li>Reviews and articles you read or interact with</li>
+                    <li>Tools and products you save or bookmark</li>
+                    <li>Search queries and filtering preferences</li>
                   </ul>
                 </div>
               </div>
@@ -81,16 +81,15 @@ const PrivacyPolicy = () => {
           {/* How We Use Information */}
           <section className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">3. How We Use Your Information</h2>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-              <ul className="text-gray-700 list-disc list-inside space-y-2">
-                <li>Process and track affiliate commissions and payments</li>
-                <li>Manage and display your uploaded products and services</li>
-                <li>Provide performance analytics and reporting tools</li>
-                <li>Facilitate communication between affiliates and merchants</li>
-                <li>Improve our platform features and user experience</li>
-                <li>Comply with legal obligations and prevent fraud</li>
-              </ul>
-            </div>
+            <p className="text-gray-700 mb-4">We use your information for:</p>
+            <ul className="text-gray-700 list-disc list-inside space-y-2">
+              <li>Provide personalized AI tool recommendations and comparisons</li>
+              <li>Deliver curated content and expert tech reviews</li>
+              <li>Send newsletters and updates about new tools and resources</li>
+              <li>Improve our platform features and user experience</li>
+              <li>Analyze user behavior to provide better recommendations</li>
+              <li>Comply with legal obligations and prevent fraud</li>
+            </ul>
           </section>
 
           {/* Data Sharing */}
@@ -100,9 +99,9 @@ const PrivacyPolicy = () => {
               We may share your information with:
             </p>
             <ul className="text-gray-700 list-disc list-inside space-y-2">
-              <li><strong>Merchants & Brands:</strong> Basic affiliate information and performance data for the products you promote</li>
-              <li><strong>Payment Processors:</strong> Necessary information for commission payments</li>
-              <li><strong>Analytics Providers:</strong> Aggregated performance data</li>
+              <li><strong>Analytics Providers:</strong> Aggregated, anonymized data to improve our services</li>
+              <li><strong>Email Service Providers:</strong> Your email for newsletters and notifications</li>
+              <li><strong>SaaS Partners:</strong> Basic information required to deliver affiliate offers</li>
               <li><strong>Legal Authorities:</strong> When required by law or to protect our rights</li>
             </ul>
           </section>
@@ -111,9 +110,9 @@ const PrivacyPolicy = () => {
           <section className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">5. Data Retention</h2>
             <p className="text-gray-700">
-              We retain your personal information for as long as necessary to provide our services, 
-              comply with legal obligations, resolve disputes, and enforce our agreements. Product data 
-              and performance metrics are retained to provide historical analytics and payment records.
+              We retain your personal information for as long as necessary to provide our services and maintain your account. 
+              You can request deletion of your account and associated data at any time. Usage analytics are anonymized and 
+              retained to improve our platform. We comply with data retention laws and delete information when no longer needed.
             </p>
           </section>
 
@@ -155,8 +154,8 @@ const PrivacyPolicy = () => {
               If you have any questions about this Privacy Policy or our data practices, please contact us:
             </p>
             <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-gray-700"><strong>Email:</strong> privacy@affiliatehub.com</p>
-              <p className="text-gray-700"><strong>Address:</strong> 123 Affiliate Street, Digital City, DC 12345</p>
+              <p className="text-gray-700"><strong>Email:</strong> privacy@teckysolutions.com</p>
+              <p className="text-gray-700"><strong>Support:</strong> support@teckysolutions.com</p>
             </div>
           </section>
 

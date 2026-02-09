@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Clock, Heart, Eye, Bookmark, Share2, MoreVertical } from 'lucide-react';
 import { formatRelativeTime, generateExcerpt } from '../../utils/helpers';
 import { useAuth } from '../../context/AuthContext';
@@ -116,6 +116,8 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
     return null;
   }
 
+  const navigate = useNavigate();
+
   return (
     <>
       {notification.show && (
@@ -130,13 +132,13 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
 
       <article 
         className={`
-          bg-white rounded-2xl overflow-hidden 
-          border border-gray-200 shadow-lg hover:shadow-2xl 
+          bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl overflow-hidden 
+          border border-white/10 shadow-lg hover:shadow-2xl 
           transition-all duration-300 ease-out
           group cursor-pointer
           flex flex-col h-full relative
-          ${featured ? 'ring-2 ring-purple-500' : ''}
-          ${isDraft ? 'border-dashed border-gray-400' : ''}
+          ${featured ? 'ring-2 ring-blue-500' : ''}
+          ${isDraft ? 'border-dashed border-gray-600' : ''}
           ${className}
         `}
       >
@@ -144,30 +146,32 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
         <div className="absolute top-3 right-3 z-10 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <button
             onClick={handleBookmark}
-            className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all hover:scale-110"
+            className="w-8 h-8 bg-gray-700/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all hover:scale-110"
           >
             <Bookmark 
-              className={`w-4 h-4 ${isBookmarked ? 'fill-current text-purple-600' : 'text-gray-600'}`} 
+              className={`w-4 h-4 ${isBookmarked ? 'fill-current text-blue-400' : 'text-gray-300'}`} 
             />
           </button>
           <button
             onClick={handleShare}
-            className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all hover:scale-110"
+            className="w-8 h-8 bg-gray-700/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all hover:scale-110"
           >
-            <Share2 className="w-4 h-4 text-gray-600" />
+            <Share2 className="w-4 h-4 text-gray-300" />
           </button>
         </div>
 
-        <Link to={isDraft ? '#' : `/blog/${safeSlug}`} className="block flex-1">
-          {/* Blog Image with Gradient Overlay */}
-          <div className="relative w-full h-48 md:h-56 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-transparent to-pink-500/10 z-0"></div>
+        <Link to={isDraft ? '#' : `/blog/${safeSlug}`} className="block flex-1 flex flex-col">
+          {/* Blog Image with Gradient Overlay - Fixed height matching listing cards */}
+          <div className="relative w-full h-40 overflow-hidden flex-shrink-0">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-transparent to-cyan-500/10 z-0"></div>
             <img
               src={imageUrl}
               alt={title}
               className="absolute inset-0 w-full h-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:rotate-1"
               loading="lazy"
               decoding="async"
+              fetchPriority="low"
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
               onError={(e) => {
                 e.target.src = `https://via.placeholder.com/800x450/8B5CF6/ffffff?text=${encodeURIComponent(title)}`;
               }}
@@ -177,7 +181,7 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             
             {/* Views Counter */}
-            <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm text-gray-800 px-3 py-1.5 rounded-full text-xs font-medium flex items-center space-x-1.5">
+            <div className="absolute bottom-3 left-3 bg-gray-700/90 backdrop-blur-sm text-gray-100 px-3 py-1.5 rounded-full text-xs font-medium flex items-center space-x-1.5">
               <Eye className="w-3.5 h-3.5" />
               <span>{views.toLocaleString()}</span>
             </div>
@@ -186,8 +190,8 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
             {(featured || isDraft) && (
               <div className={`
                 absolute top-3 left-3 px-3 py-1.5 rounded-full text-xs font-semibold
-                ${featured ? 'bg-gradient-to-r from-purple-600 to-pink-500 text-white' : ''}
-                ${isDraft ? 'bg-gray-800 text-white' : ''}
+                ${featured ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white' : ''}
+                ${isDraft ? 'bg-gray-700 text-gray-300' : ''}
               `}>
                 {featured ? '✨ Featured' : '📝 Draft'}
               </div>
@@ -217,16 +221,16 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
                   <img 
                     src={author.avatar} 
                     alt={author.name}
-                    className="w-8 h-8 rounded-full object-cover ring-2 ring-white shadow-sm"
+                    className="w-8 h-8 rounded-full object-cover ring-2 ring-gray-700 shadow-sm"
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 flex items-center justify-center text-white text-xs font-bold">
                     {author?.name?.charAt(0) || 'A'}
                   </div>
                 )}
                 <div>
-                  <span className="text-sm font-medium text-gray-900">{author?.name || 'Anonymous'}</span>
-                  <div className="flex items-center gap-1 text-xs text-gray-500">
+                  <span className="text-sm font-medium text-gray-100">{author?.name || 'Anonymous'}</span>
+                  <div className="flex items-center gap-1 text-xs text-gray-400">
                     <Clock className="w-3 h-3" />
                     <span>{formatRelativeTime(createdAt)}</span>
                     <span className="mx-1">•</span>
@@ -237,17 +241,17 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
             </div>
 
             {/* Title */}
-            <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors duration-200">
+            <h3 className="text-lg font-bold text-gray-100 mb-2 line-clamp-2 group-hover:text-blue-400 transition-colors duration-200">
               {title}
             </h3>
 
             {/* Excerpt */}
-            <p className="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed flex-1">
+            <p className="text-gray-300 text-sm mb-4 line-clamp-3 leading-relaxed flex-1">
               {generateExcerpt(excerpt || `Discover insights about ${title.toLowerCase()}`, 120)}
             </p>
 
             {/* Stats and Actions */}
-            <div className="flex items-center justify-between pt-4 mt-auto border-t border-gray-100">
+            <div className="flex items-center justify-between pt-4 mt-auto border-t border-gray-700">
               <div className="flex items-center gap-4">
                 {/* Like Button */}
                 {!isDraft && (
@@ -258,7 +262,7 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
                       flex items-center gap-1.5 transition-all duration-200
                       ${isLiked 
                         ? 'text-red-500' 
-                        : 'text-gray-500 hover:text-red-500 hover:scale-105'
+                        : 'text-gray-400 hover:text-red-500 hover:scale-105'
                       }
                       ${loading ? 'opacity-50 cursor-not-allowed' : ''}
                     `}
@@ -272,7 +276,7 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
 
                 {/* Comment Count */}
                 {!isDraft && (
-                  <div className="flex items-center gap-1.5 text-gray-500 text-sm">
+                  <div className="flex items-center gap-1.5 text-gray-400 text-sm">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
@@ -289,20 +293,25 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
                     e.stopPropagation();
                     onEdit(blog);
                   }}
-                  className="text-gray-700 hover:text-black text-sm font-medium px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="text-gray-300 hover:text-gray-100 text-sm font-medium px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
                 >
                   Continue Editing →
                 </button>
               ) : (
-                <Link 
-                  to={`/blog/${safeSlug}`}
-                  className="text-purple-600 hover:text-purple-700 text-sm font-semibold px-4 py-2 rounded-lg hover:bg-purple-50 transition-all duration-200 group/link inline-flex items-center gap-1"
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    navigate(`/blog/${safeSlug}`);
+                  }}
+                  className="text-blue-400 hover:text-blue-300 text-sm font-semibold px-4 py-2 rounded-lg hover:bg-blue-500/20 transition-all duration-200 inline-flex items-center gap-1"
                 >
                   Read More
-                  <svg className="w-4 h-4 transform group-hover/link:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 transform translate-x-0 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                   </svg>
-                </Link>
+                </button>
               )}
             </div>
           </div>
@@ -310,7 +319,7 @@ const BlogCard = ({ blog, featured = false, className = '', showDrafts = false, 
 
         {/* Progress Bar for Read Time (Optional) */}
         {!isDraft && (
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-pink-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-cyan-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
         )}
       </article>
     </>

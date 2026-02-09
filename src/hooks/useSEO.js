@@ -54,7 +54,7 @@ export const useSEO = ({ title, description, url, image, schema }) => {
     }
     
     updateMetaTag('og:type', 'website');
-    updateMetaTag('og:site_name', 'TrendyBreeze');
+    updateMetaTag('og:site_name', 'TeckySolutions');
 
     // Update Twitter tags
     const updateTwitterTag = (name, content) => {
