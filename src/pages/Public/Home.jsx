@@ -571,15 +571,20 @@ const Home = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-6">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-100 mb-4">
-              🎁 Exclusive Offers
+              🎁 Exclusive Giveaway
             </h2>
 
             <p className="text-lg text-gray-400 max-w-2xl mx-auto mb-6">
-              Hand-picked deals across listings—software, services, and products. Find limited-time discounts and exclusive partner offers.
+              Win amazing prizes and exclusive rewards! Participate in our giveaways and stand a chance to get premium software, services, and products absolutely free.
             </p>
 
             <Suspense fallback={<LoadingSpinner size="medium" />}>
-              <OfferSection offers={Array.isArray(generalOffers) ? generalOffers.slice(0, 6) : []} showExploreButton={true} />
+              <OfferSection 
+                offers={Array.isArray(generalOffers) ? generalOffers.slice(0, 6) : []} 
+                showExploreButton={true}
+                exploreButtonText="Explore Giveaway"
+                exploreButtonLink="/category/prize-giveaway/listings"
+              />
             </Suspense>
           </div>
         </div>

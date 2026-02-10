@@ -5,8 +5,13 @@ const LoadingSpinner = ({
   color = 'temu-red',
   className = '',
   showBrand = false,
-  brandText = 'teckysolutions'
+  brandText = 'TeckySolutions',
+  brandTitle = null,
+  centerText = null,
+  loadingText = 'Loading amazing deals...'
 }) => {
+  const displayBrandTitle = brandTitle || brandText;
+  const displayCenterText = centerText || (brandText ? brandText.slice(0, 3) : '***');
   const sizeClasses = {
     small: 'w-6 h-6',
     medium: 'w-10 h-10',
@@ -83,38 +88,49 @@ const LoadingSpinner = ({
                 {/* Glowing center */}
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full blur-lg opacity-60 animate-pulse"></div>
                 <div className="absolute inset-2 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-full blur-md opacity-40"></div>
-                {/* Center icon */}
+                {/* Center rotating ring with short brand initials */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-300 to-cyan-300 bg-clip-text text-transparent">✓</div>
+                  <div className="relative flex items-center justify-center">
+                    <svg className="w-20 h-20 md:w-24 md:h-24" viewBox="0 0 100 100">
+                      <defs>
+                        <linearGradient id="outerGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#ff6ec7" />
+                          <stop offset="50%" stopColor="#9b5cff" />
+                          <stop offset="100%" stopColor="#60a5fa" />
+                        </linearGradient>
+                        <linearGradient id="innerGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stopColor="#60a5fa" />
+                          <stop offset="100%" stopColor="#7c3aed" />
+                        </linearGradient>
+                      </defs>
+                      <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="3" />
+                      <circle className="animate-spin" cx="50" cy="50" r="38" fill="none" stroke="url(#outerGrad2)" strokeWidth="3" strokeDasharray="30 70" strokeLinecap="round" style={{ animationDuration: '1.8s' }} />
+                      <circle className="animate-spin spin-reverse" cx="50" cy="50" r="30" fill="none" stroke="url(#innerGrad2)" strokeWidth="3" strokeDasharray="20 60" strokeLinecap="round" style={{ animationDuration: '2.4s' }} />
+                    </svg>
+
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-sm md:text-base font-semibold bg-clip-text text-transparent bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500">
+                        {displayCenterText}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Modern text section */}
-          <div className="text-center space-y-6">
+          <div className="text-center space-y-4">
             <div>
-              <h3 className="text-3xl md:text-4xl font-bold uppercase tracking-wider bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-400 bg-clip-text text-transparent mb-2">
-                {brandText}
+              <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent mb-1">
+                {displayBrandTitle}
               </h3>
-              <div className="h-1 w-24 mx-auto bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"></div>
-            </div>
-            
-            {/* Loading text with animation */}
-            <div className="text-sm md:text-base text-gray-300 font-medium">
-              <span className="inline-block">Loading</span>
-              <span className="inline-flex gap-1 ml-1">
-                <span className="animate-pulse">.</span>
-                <span className="animate-pulse" style={{ animationDelay: '0.2s' }}>.</span>
-                <span className="animate-pulse" style={{ animationDelay: '0.4s' }}>.</span>
-              </span>
+              <div className="h-1 w-20 mx-auto bg-gradient-to-r from-pink-500 to-indigo-500 rounded-full opacity-80"></div>
             </div>
 
-            {/* Progress dots */}
-            <div className="flex gap-3 justify-center pt-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 animate-bounce" style={{ animationDelay: '0s' }}></div>
-              <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 animate-bounce" style={{ animationDelay: '0.15s' }}></div>
-              <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-blue-300 to-cyan-300 animate-bounce" style={{ animationDelay: '0.3s' }}></div>
+            {/* Loading caption */}
+            <div className="text-sm md:text-base text-gray-400 font-medium">
+              {loadingText}
             </div>
           </div>
         </div>
@@ -133,6 +149,21 @@ const LoadingSpinner = ({
           }
           .animation-delay-4000 {
             animation-delay: 4s;
+          }
+
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+
+          .rotate-brand {
+            display: inline-block;
+            animation: spin 3s linear infinite;
+            transform-origin: center center;
+          }
+
+          .spin-reverse {
+            animation-direction: reverse;
           }
         `}</style>
       </div>

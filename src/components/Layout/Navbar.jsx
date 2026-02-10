@@ -169,9 +169,10 @@ const Navbar = () => {
   const TextLogo = () => (
     <div className="flex items-center space-x-2">
       <img 
-        src="logos/Tecky Logo Design (1).png" 
+        src="/logos/Tecky Logo Design (1).png" 
         alt="TeckySolutions Logo" 
         className="h-10 w-auto object-contain"
+        onError={(e) => { e.target.src = '/logos/Tecky Logo Design for browser.jpeg'; }}
       />
       <span className="text-xl font-bold text-white">TeckySolutions</span>
     </div>

@@ -14,9 +14,10 @@ const Footer = () => {
             <div className="flex items-center space-x-3 mb-4">
               {/* Logo */}
               <img 
-                src="logos/Tecky Logo Design (1).png" 
+                src="/logos/Tecky Logo Design (1).png" 
                 alt="TeckySolutions Logo" 
                 className="h-16 w-auto object-contain"
+                onError={(e) => { e.target.src = '/logos/Tecky Logo Design for browser.jpeg'; }}
               />
               <div>
                 <span className="text-2xl font-bold text-white">TeckySolutions</span>

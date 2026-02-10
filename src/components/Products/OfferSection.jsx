@@ -5,7 +5,14 @@ import { ExternalLink, Award } from 'lucide-react';
 import LoadingSpinner from '../../components/Layout/LoadingSpinner';
 import Button from '../UI/Button';
 
-const OfferSection = ({ categoryId, listingId, offers: initialOffers, showExploreButton = false }) => {
+const OfferSection = ({ 
+  categoryId, 
+  listingId, 
+  offers: initialOffers, 
+  showExploreButton = false,
+  exploreButtonText = 'Explore Offers',
+  exploreButtonLink = '/category/offers/listings'
+}) => {
   const [offers, setOffers] = useState(initialOffers || []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -120,9 +127,9 @@ const OfferSection = ({ categoryId, listingId, offers: initialOffers, showExplor
 
       {showExploreButton && (
         <div className="text-center mt-8">
-          <Link to="/category/offers/listings" className="cursor-pointer">
+          <Link to={exploreButtonLink} className="cursor-pointer">
             <Button variant="primary" className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 cursor-pointer transition-all">
-              Explore Offers
+              {exploreButtonText}
             </Button>
           </Link>
         </div>
