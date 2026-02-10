@@ -252,7 +252,7 @@ const Navbar = () => {
 
           {/* Search Bar - Responsive */}
           {!isBlogDetail && !isMenuOpen && (
-            <div className="hidden sm:flex flex-1 max-w-xs md:max-w-xl lg:max-w-2xl xl:max-w-4xl mx-1 sm:mx-2 md:mx-4 overflow-visible" ref={searchRef}>
+            <div className="hidden md:flex flex-1 max-w-xs md:max-w-xl lg:max-w-2xl xl:max-w-4xl mx-1 sm:mx-2 md:mx-4 overflow-visible" ref={searchRef}>
               <form onSubmit={handleSearchSubmit} className="relative w-full overflow-visible">
                 <div className="relative group w-full overflow-visible">
                   <input
@@ -385,7 +385,7 @@ const Navbar = () => {
 
         {/* Mobile Search Bar */}
         {isMenuOpen && (
-          <div className="sm:hidden border-b border-white/10 pb-3 px-2">
+          <div className="md:hidden border-b border-white/10 pb-3 px-2">
             <form onSubmit={handleSearchSubmit} className="relative">
               <div className="relative">
                 <input
@@ -430,7 +430,7 @@ const Navbar = () => {
 
         {/* Mobile Menu - Responsive */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-white/10 pt-2 pb-2 px-2 max-h-[calc(100vh-56px)] overflow-y-auto">
+          <div className="lg:hidden border-t border-white/10 pt-2 pb-2 px-2 max-h-[calc(100vh-56px)] overflow-y-auto">
             <div className="flex flex-col space-y-1">
               <Link
                 to="/"
