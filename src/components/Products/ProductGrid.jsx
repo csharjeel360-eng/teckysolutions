@@ -55,8 +55,8 @@ const ProductGrid = ({
             className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 group block h-full flex flex-col border border-white/10"
             onClick={(e) => handleProductClick(product._id, e)}
           >
-            {/* Thumbnail */}
-            <div className="h-40 bg-gray-700 overflow-hidden flex-shrink-0">
+            {/* Thumbnail - Responsive height: shorter on mobile, taller on desktop */}
+            <div className="h-32 sm:h-40 md:h-48 lg:h-56 bg-gray-700 overflow-hidden flex-shrink-0">
               <img
                 src={product.images?.[0]?.url || '/api/placeholder/300/300'}
                 alt={product.title}
@@ -65,17 +65,12 @@ const ProductGrid = ({
               />
             </div>
 
+            {/* Title only - hide description */}
             <div className="p-4 flex-1 flex flex-col justify-between">
               <div>
                 <h3 className="font-semibold text-gray-100 text-base mb-2 line-clamp-2 group-hover:text-blue-400 transition-colors">
                   {product.title}
                 </h3>
-
-                {showDescription && product.description && (
-                  <p className="text-gray-300 text-sm line-clamp-3">
-                    {product.description}
-                  </p>
-                )}
               </div>
             </div>
           </Link>

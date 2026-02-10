@@ -505,29 +505,29 @@ const Home = () => {
             {servicesData.slice(0, 4).map((service) => (
               <Link key={service.id} to={`/services/${service.slug}`} className="group">
                 <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden h-full flex flex-col hover:scale-105 border border-white/10">
-                  {/* Service Image */}
-                  <div className="flex justify-center items-center bg-gradient-to-br from-gray-700 to-gray-800 p-4 h-56">
+                  {/* Service Image - Responsive height: shorter on mobile, taller on desktop */}
+                  <div className="flex justify-center items-center bg-gradient-to-br from-gray-700 to-gray-800 p-4 h-32 sm:h-40 md:h-48 lg:h-56">
                     <img
                       src={service.image}
                       alt={service.name}
-                      className="max-w-md w-full h-56 object-contain group-hover:scale-105 transition-transform duration-500 rounded-lg"
+                      className="max-w-md w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 rounded-lg"
                     />
                   </div>
 
-                  {/* Content */}
+                  {/* Content - Title only on mobile, full content on sm and up */}
                   <div className="p-4 flex flex-col flex-grow justify-between">
                     <div>
-                      <div className="text-3xl mb-3">{service.icon}</div>
+                      <div className="text-3xl mb-3 hidden sm:block">{service.icon}</div>
                       <h3 className="text-base font-bold text-gray-100 group-hover:text-blue-400 transition-colors mb-2 line-clamp-2">
                         {service.name}
                       </h3>
-                      <p className="text-gray-300 text-sm mb-3 line-clamp-2">
+                      <p className="text-gray-300 text-sm mb-3 line-clamp-2 hidden sm:block">
                         {service.shortDescription}
                       </p>
                     </div>
 
-                    {/* CTA */}
-                    <div className="flex items-center gap-2 text-blue-400 font-semibold text-sm group-hover:gap-3 transition-all">
+                    {/* CTA - Hidden on mobile */}
+                    <div className="flex items-center gap-2 text-blue-400 font-semibold text-sm group-hover:gap-3 transition-all hidden sm:flex">
                       Learn More
                       <span>→</span>
                     </div>
