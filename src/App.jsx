@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Navbar from './components/Layout/Navbar';
 import Footer from './components/Layout/Footer';
 import ScrollToTop from './components/Common/ScrollToTop';
@@ -55,13 +56,14 @@ import TestFirebase from './components/TestFirebase';
 
 function App() {
   return (
-    <AuthProvider>
-      <AppProvider>
-        <Router>
-          <div className="App min-h-screen flex flex-col">
-            <ScrollToTop />
-            <Navbar />
-            <main className="flex-1">
+    <ThemeProvider>
+      <AuthProvider>
+        <AppProvider>
+          <Router>
+            <div className="App min-h-screen flex flex-col">
+              <ScrollToTop />
+              <Navbar />
+              <main className="flex-1">
               <Routes>
                 {/* ===== PUBLIC ROUTES ===== */}
                 <Route path="/" element={<Home />} />
@@ -137,6 +139,7 @@ function App() {
         </Router>
       </AppProvider>
     </AuthProvider>
+    </ThemeProvider>
   );
 }
 
